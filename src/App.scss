@@ -1,0 +1,54 @@
+@font-face {
+  font-family: 'Great Vibes';
+  src: url('./assets/GreatVibes-Regular.ttf');
+}
+
+html, body {
+  font-size: 16px;
+}
+
+.app {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+
+  .nav {
+    position: absolute;
+    list-style: none;
+    padding-inline-start: 1rem;
+    li {
+    
+      button {
+        width: 8rem;
+        margin: .25rem;
+        padding: .5rem;
+        border: none;
+        background: rgba(240, 240, 240, .7);
+        backdrop-filter: blur(.25rem);
+        -webkit-backdrop-filter: blur(.25rem);
+        color: black;
+        cursor: pointer;
+      }
+      
+    }
+  }
+
+  .pageTitle {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    pointer-events: none;
+    font-family: 'Great Vibes';
+    font-size: 3rem;
+    color: white;
+    text-shadow: 2px 4px 1px rgba(0, 0, 0, .3);
+  }
+}
