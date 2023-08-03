@@ -1,53 +1,78 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, PerspectiveCamera } from '@react-three/drei';
+import inobonce from 'inobounce';
 import Corn from './components/Corn';
-import inobonce from 'inobounce'
 import './App.scss';
 
 const App = () => {
   const width = 31;
   const height = 28;
   const canvasRef = useRef();
+  const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width /2), y: Math.round(height / 2) });
+  const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
 
   const handleKeydown = ({ key }) => {
-    switch(key) {
+    let x = 0;
+    let y = 0;
+    switch (key) {
       case 'ArrowLeft':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x > 0 ? prevKernal.x - 1 : width - 1 }));
-      break;
+        x = -1;
+        break;
       case 'ArrowRight':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x < width - 1 ? prevKernal.x + 1 : 0 }));
-      break;
+        x = 1;
+        break;
       case 'ArrowUp':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y > 0 ? prevKernal.y - 1 : height - 1 }));
-      break;
+        y = -1;
+        break;
       case 'ArrowDown':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y < height - 1 ? prevKernal.y + 1 : 0 }));
-      break;
+        y = 1;
+        break;
+      default:
+        break;
     }
+    setMove({ x, y });
   };
 
-  const handleScroll = ({deltaY}) => {
-    console.log(deltaY)
-  }
+  useEffect(() => {
+    let x = currentKernal.x + move.x;
+    let y = currentKernal.y + move.y;
+    if (kernals.find(kernal => kernal.x === x && kernal.y === y && kernal.status === 'chewed')) return;
+    if (x > width - 1) x = 0;
+    if (x < 0) x = width - 1;
+    if (y > height - 1) y = 0;
+    if (y < 0) y = height - 1;
+    const kernal = kernals.find(kernal => kernal.x === x && kernal.y === y);
+    if (kernal) {
+      kernal.status = 'chewed';
+      setKernals(kernals);
+    }
+    // .status = 'chewed';
+    setCurrentKernal({ x, y });
+  }, [move]);
+
 
   useEffect(() => {
     const cols = width;
     const rows = height;
     const _kernals = [];
     let count = 0;
-    for(let col = 0; col < cols; col+=1) {
-      for(let row = 0; row < rows; row += 1) {
-        count+= 1;
-        _kernals.push({id: count, x: col, y: row, status: 'yellow'});
+    for (let col = 0; col < cols; col += 1) {
+      for (let row = 0; row < rows; row += 1) {
+        count += 1;
+        _kernals.push({
+          id: count,
+          x: col,
+          y: row,
+          status: 'normal',
+        });
       }
     }
-    setKernals(_kernals);
+    setKernals(() => _kernals);
     addEventListener('keydown', handleKeydown);
-    return () => { 
-      removeEventListener('keydown', handleKeydown); 
+    return () => {
+      removeEventListener('keydown', handleKeydown);
     };
   }, []);
 
@@ -55,11 +80,11 @@ const App = () => {
     <div className="app">
       <Canvas ref={canvasRef}>
         {/* <OrbitControls /> */}
-        <Corn 
-          kernals={kernals} 
+        <Corn
+          kernals={kernals}
           currentKernal={currentKernal}
           width={width}
-          height={height} 
+          height={height}
         />
         <pointLight position={[0, 10, 10]} />
       </Canvas>

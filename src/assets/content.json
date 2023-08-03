@@ -1,0 +1,10 @@
+{
+  "messages": {
+    "won": [
+      "Corngratulations! You made it to the end of the maze!"
+    ],
+    "lost": [
+      "Aw Shucks... you lost!"
+    ]
+  }
+}
