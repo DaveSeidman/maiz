@@ -6,7 +6,7 @@ import './App.scss';
 
 const App = () => {
   const width = 11;
-  const height = 11;
+  const height = 28;
   const canvasRef = useRef();
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width /2), y: Math.round(height / 2) });
@@ -14,16 +14,16 @@ const App = () => {
   const handleKeydown = ({ key }) => {
     switch(key) {
       case 'ArrowLeft':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x - 1 }));
+        setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x > 0 ? prevKernal.x - 1 : width - 1 }));
       break;
       case 'ArrowRight':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x + 1 }));
+        setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x < width - 1 ? prevKernal.x + 1 : 0 }));
       break;
       case 'ArrowUp':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y + 1 }));
+        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y > 0 ? prevKernal.y - 1 : height - 1 }));
       break;
       case 'ArrowDown':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y - 1 }));
+        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y < height - 1 ? prevKernal.y + 1 : 0 }));
       break;
     }
   };
@@ -48,7 +48,12 @@ const App = () => {
     <div className="app">
       <Canvas ref={canvasRef}>
         <OrbitControls />
-        <Corn kernals={kernals} currentKernal={currentKernal} />
+        <Corn 
+          kernals={kernals} 
+          currentKernal={currentKernal}
+          width={width}
+          height={height} 
+        />
         <pointLight position={[0, 10, 10]} />
       </Canvas>
 
