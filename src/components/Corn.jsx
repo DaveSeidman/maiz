@@ -4,8 +4,6 @@ import { MeshStandardMaterial } from 'three';
 
 const Corn = (props) => {
   const { currentKernal, kernals } = props;
-  console.log(kernals);
-  // const [kernals, setKernals] = useState([])
   const rows = 20;
   const cols = 20;
   const spacing = 0.5; // Adjust this value to set the distance between spheres
@@ -31,28 +29,22 @@ const Corn = (props) => {
   });
 
   return (
-    <group>
+    <group
+      position={[-5, -5, 0]}
+    >
       {
-        kernals.map(kernal => (
-          <Sphere
-            key={kernal.id}
-            args={[0.5, 32, 32]}
-            position={[kernal.x, kernal.y, 0]}
-            material={cornMat}
-          />
-        ))
+        kernals.map((kernal) => {
+          const isCurrent = kernal.x === currentKernal.x && kernal.y === currentKernal.y;
+          return (
+            <Sphere
+              key={kernal.id}
+              args={[0.75, 32, 32]}
+              position={[kernal.x, kernal.y, 0]}
+              material={isCurrent ? selectedCornMat : cornMat}
+            />
+          );
+        })
       }
-      {/* {Array.from({ length: rows }).map((_, row) => Array.from({ length: cols }).map((_, col) => {
-        const [x, y, z] = calculatePosition(row, col);
-        return (
-          <Sphere
-            key={`sphere-${row}-${col}`}
-            args={[0.5, 32, 32]}
-            position={[x, y, z]}
-            material={cornMat}
-          />
-        );
-      }),)} */}
     </group>
   );
 };

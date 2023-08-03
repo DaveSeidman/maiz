@@ -5,9 +5,11 @@ import Corn from './components/Corn';
 import './App.scss';
 
 const App = () => {
+  const width = 11;
+  const height = 11;
   const canvasRef = useRef();
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
+  const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width /2), y: Math.round(height / 2) });
 
   const handleKeydown = ({ key }) => {
     switch(key) {
@@ -18,17 +20,17 @@ const App = () => {
         setCurrentKernal((prevKernal) => ({ ...prevKernal, x: prevKernal.x + 1 }));
       break;
       case 'ArrowUp':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y - 1 }));
+        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y + 1 }));
       break;
       case 'ArrowDown':
-        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y + 1 }));
+        setCurrentKernal((prevKernal) => ({ ...prevKernal, y: prevKernal.y - 1 }));
       break;
     }
   };
 
   useEffect(() => {
-    const cols = 10;
-    const rows = 10;
+    const cols = width;
+    const rows = height;
     const _kernals = [];
     let count = 0;
     for(let col = 0; col < cols; col+=1) {
