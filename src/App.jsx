@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, PerspectiveCamera } from '@react-three/drei';
 import Corn from './components/Corn';
+import inobonce from 'inobounce'
 import './App.scss';
 
 const App = () => {
-  const width = 11;
+  const width = 31;
   const height = 28;
   const canvasRef = useRef();
   const [kernals, setKernals] = useState([]);
@@ -28,6 +29,10 @@ const App = () => {
     }
   };
 
+  const handleScroll = ({deltaY}) => {
+    console.log(deltaY)
+  }
+
   useEffect(() => {
     const cols = width;
     const rows = height;
@@ -41,13 +46,15 @@ const App = () => {
     }
     setKernals(_kernals);
     addEventListener('keydown', handleKeydown);
-    return () => { removeEventListener('keydown', handleKeydown); };
+    return () => { 
+      removeEventListener('keydown', handleKeydown); 
+    };
   }, []);
 
   return (
     <div className="app">
       <Canvas ref={canvasRef}>
-        <OrbitControls />
+        {/* <OrbitControls /> */}
         <Corn 
           kernals={kernals} 
           currentKernal={currentKernal}
