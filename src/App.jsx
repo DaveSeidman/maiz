@@ -6,26 +6,15 @@ import Corn from './components/Corn';
 
 import './index.scss';
 
-import { Backtracking } from './maze';
+import { generateMaze } from './maze';
 
-const width = 10;
-const height = 10;
-const walls = Backtracking(width, height);
+// const width = 10;
+// const height = 10;
+// const walls = Backtracking(width, height);
 
-const maze = Array(height * 2).fill().map(() => Array(width * 2).fill(0));
-
-for (let y = 0; y < height * 2; y += 2) {
-  for (let x = 0; x < width * 2; x += 2) {
-    maze[y][x + 1] = walls[y / 2][x / 2].rightWall ? 1 : 0;
-    maze[y + 1][x] = walls[y / 2][x / 2].downWall ? 1 : 0;
-    maze[y + 1][x + 1] = walls[y / 2][x / 2].rightWall || walls[y / 2][x / 2].downWall ? 1 : 0;
-  }
-}
-
-console.log(maze);
 
 const App = () => {
-  const width = 31;
+  const width = 32;
   const height = 28;
   const canvasRef = useRef();
   const [move, setMove] = useState({ x: 0, y: 0 });
@@ -73,22 +62,22 @@ const App = () => {
 
 
   useEffect(() => {
-    const cols = width;
-    const rows = height;
     const _kernals = [];
+    const maze = generateMaze(height / 2, width / 2);
+    const _kernals2 = Array(height).fill().map(() => Array(width).fill({}));
+
     let count = 0;
-    for (let col = 0; col < cols; col += 1) {
-      for (let row = 0; row < rows; row += 1) {
-        count += 1;
+    maze.forEach((row, rowIndex) => {
+      row.forEach((col, colIndex) => {
         _kernals.push({
           id: count,
-          x: col,
-          y: row,
-          status: Math.random() > 0.2 ? 'normal' : 'wall',
+          y: colIndex,
+          x: rowIndex,
+          status: col === 1 ? 'wall' : 'normal',
         });
-      }
-    }
-
+        count += 1;
+      });
+    });
     setKernals(() => _kernals);
     addEventListener('keydown', handleKeydown);
     return () => {

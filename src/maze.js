@@ -1,50 +1,3 @@
-// const shuffle = (array) => {
-//   const length = array == null ? 0 : array.length;
-//   if (!length) {
-//     return [];
-//   }
-//   let index = -1;
-//   const lastIndex = length - 1;
-//   const result = copyArray(array);
-//   while (++index < length) {
-//     const rand = index + Math.floor(Math.random() * (lastIndex - index + 1));
-//     const value = result[rand];
-//     result[rand] = result[index];
-//     result[index] = value;
-//   }
-//   return result;
-// };
-
-// const isIterateeCall = (value, index, object) => {
-//   if (!isObject(object)) {
-//     return false;
-//   }
-//   const type = typeof index;
-//   if (type == 'number'
-//     ? (isArrayLike(object) && isIndex(index, object.length))
-//     : (type == 'string' && index in object)
-//   ) {
-//     return eq(object[index], value);
-//   }
-//   return false;
-// };
-
-// const range = (start, end, step) => {
-//   if (step && typeof step !== 'number' && isIterateeCall(start, end, step)) {
-//     end = step = undefined;
-//   }
-//   // Ensure the sign of `-0` is preserved.
-//   start = toFinite(start);
-//   if (end === undefined) {
-//     end = start;
-//     start = 0;
-//   } else {
-//     end = toFinite(end);
-//   }
-//   step = step === undefined ? (start < end ? 1 : -1) : toFinite(step);
-//   return baseRange(start, end, step, fromRight);
-// };
-
 const AISLE = 0;
 const WALL = 1;
 const DIRECTIONS = {
@@ -129,7 +82,7 @@ class Block {
 }
 
 
-export const Backtracking = (rows, cols) => {
+export const generateMaze = (rows, cols) => {
   const blocks = [];
   const stack = [];
 
@@ -168,5 +121,16 @@ export const Backtracking = (rows, cols) => {
     }
   }
 
-  return blocks.map(row => row.map(col => col.getBlock()));
+  const walls = blocks.map(row => row.map(col => col.getBlock()));
+  const maze = Array(rows * 2).fill().map(() => Array(cols * 2).fill(0));
+
+
+  for (let y = 0; y < rows * 2; y += 2) {
+    for (let x = 0; x < cols * 2; x += 2) {
+      maze[y][x + 1] = walls[y / 2][x / 2].rightWall ? 1 : 0;
+      maze[y + 1][x] = walls[y / 2][x / 2].downWall ? 1 : 0;
+      maze[y + 1][x + 1] = walls[y / 2][x / 2].rightWall || walls[y / 2][x / 2].downWall ? 1 : 0;
+    }
+  }
+  return maze;
 };
