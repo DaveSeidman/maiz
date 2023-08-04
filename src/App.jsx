@@ -3,14 +3,9 @@ import { Canvas } from '@react-three/fiber';
 import inobonce from 'inobounce'; // eslint-disable-line
 import Controls from './components/Controls';
 import Corn from './components/Corn';
-
-import './index.scss';
-
 import { generateMaze } from './maze';
 
-// const width = 10;
-// const height = 10;
-// const walls = Backtracking(width, height);
+import './index.scss';
 
 
 const App = () => {
@@ -20,7 +15,7 @@ const App = () => {
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
-  const [display, setDisplay] = useState('2d');
+  const [display, setDisplay] = useState('3d');
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -62,9 +57,8 @@ const App = () => {
 
 
   useEffect(() => {
-    const _kernals = [];
     const maze = generateMaze(height / 2, width / 2);
-    const _kernals2 = Array(height).fill().map(() => Array(width).fill({}));
+    const _kernals = [];
 
     let count = 0;
     maze.forEach((row, rowIndex) => {
