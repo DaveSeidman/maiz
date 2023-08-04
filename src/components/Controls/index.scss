@@ -1,0 +1,21 @@
+.controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  button {
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+    border: 2px solid #b3a91b;
+    background: rgb(206, 206, 16);
+    font-weight: bold;
+    border-radius: 50%;
+    margin: 0.5rem;
+    padding: 0;
+    color: white;
+  }
+}

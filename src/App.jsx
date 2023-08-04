@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, PerspectiveCamera } from '@react-three/drei';
 import inobonce from 'inobounce';
+import Controls from './components/Controls';
 import Corn from './components/Corn';
 
-import './App.scss';
+import './index.scss';
 
 const App = () => {
   const width = 31;
@@ -88,7 +89,7 @@ const App = () => {
         />
         <pointLight position={[0, 10, 10]} />
       </Canvas>
-
+      <Controls setMove={setMove} />
     </div>
   );
 };

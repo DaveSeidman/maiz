@@ -60,6 +60,7 @@ const Corn = (props) => {
   const handleTouchMove = (e) => {
     const x = e.changedTouches[0].clientX;
     const y = e.changedTouches[0].clientY;
+    // if (Math.abs(pointer.y - y) > 100) return;
     spin -= (pointer.y - y) / 25;
     pointer.y = y;
   };
@@ -71,7 +72,7 @@ const Corn = (props) => {
     return () => {
       removeEventListener('mousewheel', spinCob);
       removeEventListener('touchstart', handleTouchStart);
-      addEventListener('touchmove', handleTouchMove);
+      removeEventListener('touchmove', handleTouchMove);
     };
   });
 
