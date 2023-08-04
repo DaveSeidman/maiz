@@ -18,7 +18,7 @@ const Controls = (props) => {
       <button type="button" onClick={() => handleClick({ x: 0, y: 1 })}>↓</button>
       <button type="button" onClick={() => handleClick({ x: -1, y: 0 })}>←</button>
       <button type="button" onClick={() => handleClick({ x: 1, y: 0 })}>→</button>
-      <button type="button" onClick={toggleDisplay}>{display}</button>
+      <button type="button" onClick={toggleDisplay}>{display.toUpperCase()}</button>
     </div>
   );
 };

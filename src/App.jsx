@@ -1,11 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, PerspectiveCamera } from '@react-three/drei';
-import inobonce from 'inobounce';
+import { Canvas } from '@react-three/fiber';
+import inobonce from 'inobounce'; // eslint-disable-line
 import Controls from './components/Controls';
 import Corn from './components/Corn';
 
 import './index.scss';
+
+import { Backtracking } from './maze';
+
+const width = 10;
+const height = 10;
+const walls = Backtracking(width, height);
+
+const maze = Array(height * 2).fill().map(() => Array(width * 2).fill(0));
+
+for (let y = 0; y < height * 2; y += 2) {
+  for (let x = 0; x < width * 2; x += 2) {
+    maze[y][x + 1] = walls[y / 2][x / 2].rightWall ? 1 : 0;
+    maze[y + 1][x] = walls[y / 2][x / 2].downWall ? 1 : 0;
+    maze[y + 1][x + 1] = walls[y / 2][x / 2].rightWall || walls[y / 2][x / 2].downWall ? 1 : 0;
+  }
+}
+
+console.log(maze);
 
 const App = () => {
   const width = 31;
@@ -14,7 +31,7 @@ const App = () => {
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
-  const [display, setDisplay] = useState('3d');
+  const [display, setDisplay] = useState('2d');
 
   const handleKeydown = ({ key }) => {
     let x = 0;
