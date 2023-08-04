@@ -8,7 +8,7 @@ let prevTime = 0;
 let spin = 0;
 
 const Corn = (props) => {
-  const { currentKernal, kernals, width, height } = props;
+  const { currentKernal, kernals, width, height, display } = props;
   const pointer = { x: 0, y: 0 };
   const cob = useRef();
   const radius = 5;
@@ -45,7 +45,8 @@ const Corn = (props) => {
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
     spin *= 0.9;
-    cob.current.rotation.x += timeDiff * spin;
+    if (display === '3d') cob.current.rotation.x += timeDiff * spin;
+    else cob.current.rotation.x = Math.PI;
     prevTime = e.clock.elapsedTime;
   });
 
@@ -86,12 +87,18 @@ const Corn = (props) => {
         position={[(height / 2) + 1, 0, 0]}
         geometry={new CylinderGeometry(radius, radius, height, 32, 64)}
         material={cornMat}
+        visible={display === '3d'}
       />
       {
         kernals.map((kernal) => {
           const isCurrent = kernal.x === currentKernal.x && kernal.y === currentKernal.y;
           // wrap to cylindar
-          const position = [
+          const position2D = [
+            kernal.x,
+            kernal.y + height / -2,
+            4,
+          ];
+          const position3D = [
             kernal.x,
             Math.cos(kernal.y / arc) * radius,
             Math.sin(kernal.y / arc) * radius,
@@ -103,7 +110,7 @@ const Corn = (props) => {
               key={kernal.id}
               args={[0.75, 32, 32]}
               scale={kernal.status === 'chewed' ? [0.5, 0.5, 0.5] : [1, 1, 1]}
-              position={position}
+              position={display === '3d' ? position3D : position2D}
               // rotation={Math.PI * 180}
               material={isCurrent ? selectedCornMat : materials[kernal.status]}
             />

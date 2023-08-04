@@ -14,6 +14,7 @@ const App = () => {
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
+  const [display, setDisplay] = useState('3d');
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -86,10 +87,15 @@ const App = () => {
           currentKernal={currentKernal}
           width={width}
           height={height}
+          display={display}
         />
         <pointLight position={[0, 10, 10]} />
       </Canvas>
-      <Controls setMove={setMove} />
+      <Controls
+        setMove={setMove}
+        display={display}
+        setDisplay={setDisplay}
+      />
     </div>
   );
 };
