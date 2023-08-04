@@ -9,22 +9,38 @@ let spin = 0;
 
 const Corn = (props) => {
   const { currentKernal, kernals, width, height } = props;
+  const pointer = { x: 0, y: 0 };
   const cob = useRef();
   const radius = 5;
   const arc = (height / 2) / Math.PI;
 
   const cornMat = new MeshStandardMaterial({
-    color: 0xCCCC00,
-    roughness: 0.5,
-    metalness: 0.001,
-  });
-
-  const selectedCornMat = new MeshStandardMaterial({
-    color: 0xFF9900,
+    color: 0xFFCC00,
     roughness: 0.2,
     metalness: 0.05,
     emissiveIntensity: 1.5,
   });
+
+  const cornWallMat = new MeshStandardMaterial({
+    color: 0x763d13,
+    roughness: 0.7,
+    metalness: 0.05,
+    emissiveIntensity: 1.5,
+  });
+
+  const selectedCornMat = new MeshStandardMaterial({
+    color: 0x0000FF,
+    roughness: 0.2,
+    metalness: 0.05,
+    emissiveIntensity: 1.5,
+  });
+
+  const materials = {
+    normal: cornMat,
+    chewed: cornMat,
+    wall: cornWallMat,
+    selected: selectedCornMat,
+  };
 
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
@@ -37,10 +53,25 @@ const Corn = (props) => {
     spin += -deltaY / 100;
   };
 
+  const handleTouchStart = (e) => {
+    pointer.x = e.changedTouches[0].clientX;
+    pointer.y = e.changedTouches[0].clientY;
+  };
+  const handleTouchMove = (e) => {
+    const x = e.changedTouches[0].clientX;
+    const y = e.changedTouches[0].clientY;
+    spin -= (pointer.y - y) / 25;
+    pointer.y = y;
+  };
+
   useEffect(() => {
     addEventListener('mousewheel', spinCob);
+    addEventListener('touchstart', handleTouchStart);
+    addEventListener('touchmove', handleTouchMove);
     return () => {
       removeEventListener('mousewheel', spinCob);
+      removeEventListener('touchstart', handleTouchStart);
+      addEventListener('touchmove', handleTouchMove);
     };
   });
 
@@ -53,7 +84,7 @@ const Corn = (props) => {
         rotation={[0, 0, Math.PI / 2]}
         position={[(height / 2) + 1, 0, 0]}
         geometry={new CylinderGeometry(radius, radius, height, 32, 64)}
-        material={selectedCornMat}
+        material={cornMat}
       />
       {
         kernals.map((kernal) => {
@@ -70,10 +101,10 @@ const Corn = (props) => {
             <Sphere
               key={kernal.id}
               args={[0.75, 32, 32]}
-              scale={kernal.status === 'normal' ? [1, 1, 1] : [0.5, 0.5, 0.5]}
+              scale={kernal.status === 'chewed' ? [0.5, 0.5, 0.5] : [1, 1, 1]}
               position={position}
               // rotation={Math.PI * 180}
-              material={isCurrent ? selectedCornMat : cornMat}
+              material={isCurrent ? selectedCornMat : materials[kernal.status]}
             />
           );
         })

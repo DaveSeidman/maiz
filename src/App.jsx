@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Environment, PerspectiveCamera } from '@react-three/drei';
 import inobonce from 'inobounce';
 import Corn from './components/Corn';
+
 import './App.scss';
 
 const App = () => {
@@ -38,17 +39,16 @@ const App = () => {
   useEffect(() => {
     let x = currentKernal.x + move.x;
     let y = currentKernal.y + move.y;
-    if (kernals.find(kernal => kernal.x === x && kernal.y === y && kernal.status === 'chewed')) return;
     if (x > width - 1) x = 0;
     if (x < 0) x = width - 1;
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
-    const kernal = kernals.find(kernal => kernal.x === x && kernal.y === y);
+    const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
+      if (kernal.status === 'chewed' || kernal.status === 'wall') return;
       kernal.status = 'chewed';
       setKernals(kernals);
     }
-    // .status = 'chewed';
     setCurrentKernal({ x, y });
   }, [move]);
 
@@ -65,10 +65,11 @@ const App = () => {
           id: count,
           x: col,
           y: row,
-          status: 'normal',
+          status: Math.random() > 0.2 ? 'normal' : 'wall',
         });
       }
     }
+
     setKernals(() => _kernals);
     addEventListener('keydown', handleKeydown);
     return () => {
@@ -79,7 +80,6 @@ const App = () => {
   return (
     <div className="app">
       <Canvas ref={canvasRef}>
-        {/* <OrbitControls /> */}
         <Corn
           kernals={kernals}
           currentKernal={currentKernal}
