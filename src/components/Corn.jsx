@@ -35,7 +35,14 @@ const Corn = (props) => {
     emissiveIntensity: 1.5,
   });
 
+  const blankMat = new MeshStandardMaterial({
+    color: 0xcccccc,
+    roughness: 0.9,
+    metalness: 0.1,
+  });
+
   const materials = {
+    unset: blankMat,
     normal: cornMat,
     chewed: cornMat,
     wall: cornWallMat,
@@ -96,7 +103,7 @@ const Corn = (props) => {
           const position2D = [
             kernal.x,
             kernal.y + height / -2,
-            4,
+            10,
           ];
           const position3D = [
             kernal.x,

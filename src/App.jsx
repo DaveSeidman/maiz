@@ -1,12 +1,15 @@
+// TODO: change 'normal' to 'path'
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import inobonce from 'inobounce'; // eslint-disable-line
+import { OrbitControls } from '@react-three/drei';
 import Controls from './components/Controls';
 import Corn from './components/Corn';
 import { generateMaze } from './maze';
+import Maze from './maze2';
 
 import './index.scss';
-
 
 const App = () => {
   const width = 32;
@@ -15,7 +18,7 @@ const App = () => {
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
-  const [display, setDisplay] = useState('3d');
+  const [display, setDisplay] = useState('2d');
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -48,7 +51,7 @@ const App = () => {
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
-      if (kernal.status === 'chewed' || kernal.status === 'wall') return;
+      if (kernal.status === 'wall') return;
       kernal.status = 'chewed';
       setKernals(kernals);
     }
@@ -57,22 +60,21 @@ const App = () => {
 
 
   useEffect(() => {
-    const maze = generateMaze(height / 2, width / 2);
-    const _kernals = [];
-
-    let count = 0;
-    maze.forEach((row, rowIndex) => {
-      row.forEach((col, colIndex) => {
-        _kernals.push({
-          id: count,
-          y: colIndex,
-          x: rowIndex,
-          status: col === 1 ? 'wall' : 'normal',
+    const { maze } = new Maze(height / 2, width / 2);
+    const nextKernals = [];
+    let id = 0;
+    maze.forEach((row, y) => {
+      row.forEach((col, x) => {
+        nextKernals.push({
+          id,
+          x,
+          y,
+          status: col.indexOf('wall') >= 0 ? 'wall' : 'normal',
         });
-        count += 1;
+        id += 1;
       });
     });
-    setKernals(() => _kernals);
+    setKernals(() => nextKernals);
     addEventListener('keydown', handleKeydown);
     return () => {
       removeEventListener('keydown', handleKeydown);
@@ -90,6 +92,8 @@ const App = () => {
           display={display}
         />
         <pointLight position={[0, 10, 10]} />
+        <OrbitControls />
+
       </Canvas>
       <Controls
         setMove={setMove}

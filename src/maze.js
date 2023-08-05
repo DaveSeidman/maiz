@@ -122,14 +122,15 @@ export const generateMaze = (rows, cols) => {
   }
 
   const walls = blocks.map(row => row.map(col => col.getBlock()));
-  const maze = Array(rows * 2).fill().map(() => Array(cols * 2).fill(0));
-
+  const maze = Array(rows * 2).fill().map(() => Array(cols * 2).fill(1));
 
   for (let y = 0; y < rows * 2; y += 2) {
     for (let x = 0; x < cols * 2; x += 2) {
-      maze[y][x + 1] = walls[y / 2][x / 2].rightWall ? 1 : 0;
-      maze[y + 1][x] = walls[y / 2][x / 2].downWall ? 1 : 0;
-      maze[y + 1][x + 1] = walls[y / 2][x / 2].rightWall || walls[y / 2][x / 2].downWall ? 1 : 0;
+      // maze[y][x] = 1;
+      maze[y][x + 1] = walls[y / 2][x / 2].rightWall ? 0 : 1;
+      maze[y + 1][x] = walls[y / 2][x / 2].downWall ? 0 : 1;
+      maze[y + 1][x + 1] = walls[y / 2][x / 2].rightWall || walls[y / 2][x / 2].downWall ? 0 : 1;
+      // maze[]
     }
   }
   return maze;
