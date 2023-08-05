@@ -17,7 +17,7 @@ const App = () => {
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
-  const [display, setDisplay] = useState('2d');
+  const [display, setDisplay] = useState('3d');
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -50,7 +50,7 @@ const App = () => {
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
-      // if (kernal.status === 'wall') return;
+      if (kernal.status === 'wall') return;
       kernal.status = 'chewed';
       setKernals(kernals);
     }
@@ -82,7 +82,7 @@ const App = () => {
 
   return (
     <div className="app">
-      <Canvas ref={canvasRef}>
+      <Canvas ref={canvasRef} dpr={1}>
         <Corn
           kernals={kernals}
           currentKernal={currentKernal}
