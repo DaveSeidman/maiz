@@ -1,137 +1,161 @@
-const AISLE = 0;
-const WALL = 1;
-const DIRECTIONS = {
-  UP: 1,
-  DOWN: 2,
-  LEFT: 4,
-  RIGHT: 8,
-};
-const DIRECTION_NEXT_X = {
-  UP: -1,
-  DOWN: 1,
-  LEFT: 0,
-  RIGHT: 0,
-};
-const DIRECTION_NEXT_Y = {
-  UP: 0,
-  DOWN: 0,
-  LEFT: -1,
-  RIGHT: 1,
-};
-const DIRECTION_OPP = {
-  UP: 'DOWN',
-  DOWN: 'UP',
-  LEFT: 'RIGHT',
-  RIGHT: 'LEFT',
-};
-
-const range = (start, end) => {
-  const array = [];
-  for (let i = start; i < end; i += 1) {
-    array.push(i);
+const shuffle = (_array) => {
+  const array = _array.slice();
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
 };
 
-const shuffle = (array) => {
-  let currentIndex = array.length;
-  let temporaryValue;
-  let randomIndex;
-  // While there remain elements to shuffle...
-  while (currentIndex !== 0) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
+const rand = (min, max) => min + Math.floor(Math.random() * (1 + max - min));
+
+const posToSpace = x => 2 * (x - 1) + 1;
+
+const posToWall = x => 2 * x;
+
+export default class Maze {
+  // Original JavaScript code by Chirp Internet: www.chirpinternet.eu
+  // Please acknowledge use of this code by including this header.
+
+  constructor(width, height) {
+    this.width = width;
+    this.height = height;
+
+    this.cols = 2 * this.width + 1;
+    this.rows = 2 * this.height + 1;
+
+    this.maze = this.initArray(0);
+
+    /* place initial walls */
+
+    this.maze.forEach((row, r) => {
+      row.forEach((cell, c) => {
+        switch (r) {
+          case 0:
+          case this.rows - 1:
+            this.maze[r][c] = 1;
+            break;
+
+          default:
+            if ((r % 2) === 1) {
+              if ((c === 0) || (c === this.cols - 1)) {
+                this.maze[r][c] = 1;
+              }
+            } else if (c % 2 === 0) {
+              this.maze[r][c] = 1;
+            }
+        }
+      });
+
+      if (r === 0) {
+        /* place exit in top row */
+        const doorPos = posToSpace(rand(1, this.width));
+        this.maze[r][doorPos] = 0;
+      }
+
+      if (r === this.rows - 1) {
+        /* place entrance in bottom row */
+        const doorPos = posToSpace(rand(1, this.width));
+        this.maze[r][doorPos] = 0;
+      }
+    });
+
+    /* start partitioning */
+
+    this.partition(1, this.height - 1, 1, this.width - 1);
   }
-  return array;
-};
 
-class Block {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.visited = false;
-    this.dir = DIRECTIONS.DOWN | DIRECTIONS.UP | DIRECTIONS.LEFT | DIRECTIONS.RIGHT;
-
-    this.addWall = function (direction) {
-      this.dir = this.dir | DIRECTIONS[direction];
-    };
-
-    this.removeWall = function (direction) {
-      this.dir = this.dir & (~DIRECTIONS[direction]);
-    };
-
-    this.setVisited = function () {
-      this.visited = true;
-    };
-
-    this.getBlock = function () {
-      return {
-        x: this.x,
-        y: this.y,
-        dir: this.dir,
-        downWall: (this.dir & DIRECTIONS.DOWN) !== 0,
-        rightWall: (this.dir & DIRECTIONS.RIGHT) !== 0,
-      };
-    };
+  initArray(value) {
+    return new Array(this.rows).fill().map(() => new Array(this.cols).fill(value));
   }
-}
 
-
-export const generateMaze = (rows, cols) => {
-  const blocks = [];
-  const stack = [];
-
-  for (const i of range(0, rows)) {
-    blocks[i] = [];
-    for (const j of range(0, cols)) {
-      blocks[i][j] = new Block(i, j);
+  inBounds(r, c) {
+    if ((typeof this.maze[r] === 'undefined') || (typeof this.maze[r][c] === 'undefined')) {
+      return false; /* out of bounds */
     }
+    return true;
   }
-  let current = blocks[0][0];
-  stack.push(current);
-  current.setVisited();
 
-  while (stack.length > 0) {
-    const dirs = shuffle(Reflect.ownKeys(DIRECTIONS));
-    let found = false;
-    for (const dir of dirs) {
-      const nextX = current.x + DIRECTION_NEXT_X[dir];
-      const nextY = current.y + DIRECTION_NEXT_Y[dir];
+  partition(r1, r2, c1, c2) {
+    /* create partition walls
+       ref: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_division_method */
 
-      if ((nextX >= 0 && nextX < rows) && (nextY >= 0 && nextY < cols)) {
-        const nextBlock = blocks[nextX][nextY];
-        if (!nextBlock.visited) {
-          current.removeWall(dir);
-          nextBlock.removeWall(DIRECTION_OPP[dir]);
-          nextBlock.setVisited();
-          stack.push(nextBlock);
-          current = nextBlock;
-          found = true;
-          break;
+    let horiz; let vert; let x; let y; let start; let
+      end;
+
+    if ((r2 < r1) || (c2 < c1)) {
+      return false;
+    }
+
+    if (r1 === r2) {
+      horiz = r1;
+    } else {
+      x = r1 + 1;
+      y = r2 - 1;
+      start = Math.round(x + (y - x) / 4);
+      end = Math.round(x + 3 * (y - x) / 4);
+      horiz = rand(start, end);
+    }
+
+    if (c1 == c2) {
+      vert = c1;
+    } else {
+      x = c1 + 1;
+      y = c2 - 1;
+      start = Math.round(x + (y - x) / 3);
+      end = Math.round(x + 2 * (y - x) / 3);
+      vert = rand(start, end);
+    }
+
+    for (let i = posToWall(r1) - 1; i <= posToWall(r2) + 1; i += 1) {
+      for (let j = posToWall(c1) - 1; j <= posToWall(c2) + 1; j += 1) {
+        if ((i === posToWall(horiz)) || (j === posToWall(vert))) {
+          this.maze[i][j] = 1;
         }
       }
     }
-    if (!found) {
-      current = stack.pop();
+
+    const gaps = shuffle([true, true, true, false]);
+
+    /* create gaps in partition walls */
+
+    if (gaps[0]) {
+      const gapPosition = rand(c1, vert);
+      this.maze[posToWall(horiz)][posToSpace(gapPosition)] = 0;
     }
+
+    if (gaps[1]) {
+      const gapPosition = rand(vert + 1, c2 + 1);
+      this.maze[posToWall(horiz)][posToSpace(gapPosition)] = 0;
+    }
+
+    if (gaps[2]) {
+      const gapPosition = rand(r1, horiz);
+      this.maze[posToSpace(gapPosition)][posToWall(vert)] = 0;
+    }
+
+    if (gaps[3]) {
+      const gapPosition = rand(horiz + 1, r2 + 1);
+      this.maze[posToSpace(gapPosition)][posToWall(vert)] = 0;
+    }
+
+    /* recursively partition newly created chambers */
+
+    this.partition(r1, horiz - 1, c1, vert - 1);
+    this.partition(horiz + 1, r2, c1, vert - 1);
+    this.partition(r1, horiz - 1, vert + 1, c2);
+    this.partition(horiz + 1, r2, vert + 1, c2);
   }
 
-  const walls = blocks.map(row => row.map(col => col.getBlock()));
-  const maze = Array(rows * 2).fill().map(() => Array(cols * 2).fill(1));
-
-  for (let y = 0; y < rows * 2; y += 2) {
-    for (let x = 0; x < cols * 2; x += 2) {
-      // maze[y][x] = 1;
-      maze[y][x + 1] = walls[y / 2][x / 2].rightWall ? 0 : 1;
-      maze[y + 1][x] = walls[y / 2][x / 2].downWall ? 0 : 1;
-      maze[y + 1][x + 1] = walls[y / 2][x / 2].rightWall || walls[y / 2][x / 2].downWall ? 0 : 1;
-      // maze[]
-    }
+  isGap(...cells) {
+    return cells.every((array) => {
+      const [row, col] = array;
+      if (this.maze[row][col].length > 0) {
+        if (!this.maze[row][col].includes('door')) {
+          return false;
+        }
+      }
+      return true;
+    });
   }
-  return maze;
-};
+}

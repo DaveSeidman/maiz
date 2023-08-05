@@ -6,8 +6,7 @@ import inobonce from 'inobounce'; // eslint-disable-line
 import { OrbitControls } from '@react-three/drei';
 import Controls from './components/Controls';
 import Corn from './components/Corn';
-import { generateMaze } from './maze';
-import Maze from './maze2';
+import Maze from './maze';
 
 import './index.scss';
 
@@ -69,7 +68,7 @@ const App = () => {
           id,
           x,
           y,
-          status: col.indexOf('wall') >= 0 ? 'wall' : 'normal',
+          status: col ? 'wall' : 'normal',
         });
         id += 1;
       });
@@ -92,7 +91,8 @@ const App = () => {
           display={display}
         />
         <pointLight position={[0, 10, 10]} />
-        <OrbitControls />
+        <ambientLight color={0xffdd11} intensity={0.5} />
+        {/* <OrbitControls /> */}
 
       </Canvas>
       <Controls

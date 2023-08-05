@@ -11,7 +11,7 @@ const Corn = (props) => {
   const { currentKernal, kernals, width, height, display } = props;
   const pointer = { x: 0, y: 0 };
   const cob = useRef();
-  const radius = 5;
+  const radius = 6;
   const arc = (height / 2) / Math.PI;
 
   const cornMat = new MeshStandardMaterial({
@@ -19,6 +19,12 @@ const Corn = (props) => {
     roughness: 0.2,
     metalness: 0.05,
     emissiveIntensity: 1.5,
+  });
+
+  const cobMat = new MeshStandardMaterial({
+    color: 0xEEEEEE,
+    roughness: 1,
+    metalness: 0.01,
   });
 
   const cornWallMat = new MeshStandardMaterial({
@@ -93,7 +99,7 @@ const Corn = (props) => {
         rotation={[0, 0, Math.PI / 2]}
         position={[(height / 2) + 1, 0, 0]}
         geometry={new CylinderGeometry(radius, radius, height, 32, 64)}
-        material={cornMat}
+        material={cobMat}
         visible={display === '3d'}
       />
       {
