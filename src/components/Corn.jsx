@@ -45,7 +45,7 @@ const Corn = (props) => {
   });
 
   const selectedCornMat = new MeshStandardMaterial({
-    color: 0x0000FF,
+    color: 0xFF0000,
     roughness: 0.2,
     metalness: 0.05,
     emissiveIntensity: 1.5,

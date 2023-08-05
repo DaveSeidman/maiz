@@ -1,24 +1,44 @@
+$yellow1: rgb(206, 206, 16);
+$yellow2: rgb(179, 169, 27);
 .controls {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  opacity: .5;
 
+  .row {
+    display: flex;
+    justify-content: center;
+
+    button {
+      width: 4rem;
+      height: 4rem;
+      font-size: 1rem;
+      border: 2px solid $yellow2;
+      background: $yellow1;
+      font-weight: bold;
+      border-radius: 50%;
+      margin: 0.5rem;
+      padding: 0;
+      color: white;
+      
+      user-select: none;
+    }
+  }
+}
+
+.options {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  
   button {
-    width: 4rem;
-    height: 4rem;
-    font-size: 2rem;
-    border: 2px solid #b3a91b;
-    background: rgb(206, 206, 16);
+    padding: .5rem;
+    border: 2px solid $yellow2;
+    background: $yellow1;
     font-weight: bold;
-    border-radius: 50%;
-    margin: 0.5rem;
-    padding: 0;
-    color: white;
+    border-radius: .25rem;
+    margin: .25rem;
     outline: 0;
-    user-select: none;
   }
 }
