@@ -1,17 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Sphere, Cylinder } from '@react-three/drei';
+import React, { useRef, useEffect } from 'react';
+import { Sphere } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
+import PropTypes from 'prop-types';
 
 import { CylinderGeometry, MeshStandardMaterial } from 'three';
 
 let prevTime = 0;
 let spin = 0;
-
+// const previousSelected = { x: 0, y: 0 };
+const radToDeg = rad => rad * (180 / Math.PI);
 const Corn = (props) => {
   const { currentKernal, kernals, width, height, display } = props;
   const pointer = { x: 0, y: 0 };
   const cob = useRef();
-  const radius = 6;
+  const radius = 5;
   const arc = (height / 2) / Math.PI;
 
   const cornMat = new MeshStandardMaterial({
@@ -55,11 +57,20 @@ const Corn = (props) => {
     selected: selectedCornMat,
   };
 
+  useEffect(() => {
+    console.log(currentKernal.y, arc, radToDeg(Math.cos(currentKernal.y / arc)));
+    cob.current.rotation.x = -Math.cos(currentKernal.y / arc);
+    // console.log('adjust camera to', previousSelected, currentKernal);
+    // spin += previousSelected.y - currentKernal.y;
+    // previousSelected.x = currentKernal.x;
+    // previousSelected.y = currentKernal.y;
+  }, [currentKernal]);
+
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
     spin *= 0.9;
     if (display === '3d') cob.current.rotation.x += timeDiff * spin;
-    else cob.current.rotation.x = Math.PI;
+    else cob.current.rotation.x = Math.PI; // TODO: no need to set on every frame
     prevTime = e.clock.elapsedTime;
   });
 
@@ -134,3 +145,19 @@ const Corn = (props) => {
   );
 };
 export default Corn;
+
+Corn.propTypes = {
+  currentKernal: PropTypes.any,
+  kernals: PropTypes.array,
+  width: PropTypes.number,
+  height: PropTypes.number,
+  display: PropTypes.string,
+};
+
+Corn.defaultProps = {
+  currentKernal: { x: 0, y: 0 },
+  kernals: [],
+  width: 0,
+  height: 0,
+  display: '3d',
+};

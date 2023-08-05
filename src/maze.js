@@ -8,26 +8,20 @@ const shuffle = (_array) => {
 };
 
 const rand = (min, max) => min + Math.floor(Math.random() * (1 + max - min));
-
 const posToSpace = x => 2 * (x - 1) + 1;
-
 const posToWall = x => 2 * x;
 
 export default class Maze {
   // Original JavaScript code by Chirp Internet: www.chirpinternet.eu
   // Please acknowledge use of this code by including this header.
-
   constructor(width, height) {
     this.width = width;
     this.height = height;
-
     this.cols = 2 * this.width + 1;
     this.rows = 2 * this.height + 1;
-
     this.maze = this.initArray(0);
 
     /* place initial walls */
-
     this.maze.forEach((row, r) => {
       row.forEach((cell, c) => {
         switch (r) {
@@ -47,21 +41,18 @@ export default class Maze {
         }
       });
 
-      if (r === 0) {
-        /* place exit in top row */
+      if (r === 0) { // place exit in top row
         const doorPos = posToSpace(rand(1, this.width));
         this.maze[r][doorPos] = 0;
       }
 
-      if (r === this.rows - 1) {
-        /* place entrance in bottom row */
+      if (r === this.rows - 1) { // place entrance in bottom row
         const doorPos = posToSpace(rand(1, this.width));
         this.maze[r][doorPos] = 0;
       }
     });
 
-    /* start partitioning */
-
+    // start partitioning
     this.partition(1, this.height - 1, 1, this.width - 1);
   }
 
@@ -77,11 +68,13 @@ export default class Maze {
   }
 
   partition(r1, r2, c1, c2) {
-    /* create partition walls
-       ref: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_division_method */
-
-    let horiz; let vert; let x; let y; let start; let
-      end;
+    // create partition walls, ref: https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_division_method */
+    let horiz;
+    let vert;
+    let x;
+    let y;
+    let start;
+    let end;
 
     if ((r2 < r1) || (c2 < c1)) {
       return false;
@@ -97,7 +90,7 @@ export default class Maze {
       horiz = rand(start, end);
     }
 
-    if (c1 == c2) {
+    if (c1 === c2) {
       vert = c1;
     } else {
       x = c1 + 1;
@@ -115,10 +108,8 @@ export default class Maze {
       }
     }
 
-    const gaps = shuffle([true, true, true, false]);
-
+    const gaps = shuffle([true, false, true, true]);
     /* create gaps in partition walls */
-
     if (gaps[0]) {
       const gapPosition = rand(c1, vert);
       this.maze[posToWall(horiz)][posToSpace(gapPosition)] = 0;
@@ -139,23 +130,10 @@ export default class Maze {
       this.maze[posToSpace(gapPosition)][posToWall(vert)] = 0;
     }
 
-    /* recursively partition newly created chambers */
-
+    // recursively partition newly created chambers
     this.partition(r1, horiz - 1, c1, vert - 1);
     this.partition(horiz + 1, r2, c1, vert - 1);
     this.partition(r1, horiz - 1, vert + 1, c2);
     this.partition(horiz + 1, r2, vert + 1, c2);
-  }
-
-  isGap(...cells) {
-    return cells.every((array) => {
-      const [row, col] = array;
-      if (this.maze[row][col].length > 0) {
-        if (!this.maze[row][col].includes('door')) {
-          return false;
-        }
-      }
-      return true;
-    });
   }
 }

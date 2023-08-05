@@ -11,7 +11,7 @@ import Maze from './maze';
 import './index.scss';
 
 const App = () => {
-  const width = 32;
+  const width = 28;
   const height = 28;
   const canvasRef = useRef();
   const [move, setMove] = useState({ x: 0, y: 0 });
@@ -50,7 +50,7 @@ const App = () => {
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
-      if (kernal.status === 'wall') return;
+      // if (kernal.status === 'wall') return;
       kernal.status = 'chewed';
       setKernals(kernals);
     }
