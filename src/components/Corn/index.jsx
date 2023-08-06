@@ -5,14 +5,16 @@ import { Sphere } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { CylinderGeometry, MeshStandardMaterial } from 'three';
+import { CylinderGeometry } from 'three';
+import materials from '../../materials';
+
+console.log(materials);
 
 let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
-// const previousSelected = { x: 0, y: 0 };
-// const radToDeg = rad => rad * (180 / Math.PI);
+
 
 const Corn = (props) => {
   const { currentKernal, kernals, width, height, display } = props;
@@ -24,46 +26,6 @@ const Corn = (props) => {
   const radius = 5;
   const arc = (height / 2) / Math.PI;
 
-  const cornMat = new MeshStandardMaterial({
-    color: 0xFFCC00,
-    roughness: 0.2,
-    metalness: 0.05,
-    emissiveIntensity: 1.5,
-  });
-
-  const cobMat = new MeshStandardMaterial({
-    color: 0xEEEEEE,
-    roughness: 1,
-    metalness: 0.01,
-  });
-
-  const cornWallMat = new MeshStandardMaterial({
-    color: 0x763d13,
-    roughness: 0.7,
-    metalness: 0.05,
-    emissiveIntensity: 1.5,
-  });
-
-  const selectedCornMat = new MeshStandardMaterial({
-    color: 0xFF0000,
-    roughness: 0.2,
-    metalness: 0.05,
-    emissiveIntensity: 1.5,
-  });
-
-  const blankMat = new MeshStandardMaterial({
-    color: 0xcccccc,
-    roughness: 0.9,
-    metalness: 0.1,
-  });
-
-  const materials = {
-    unset: blankMat,
-    normal: cornMat,
-    chewed: cornMat,
-    wall: cornWallMat,
-    selected: selectedCornMat,
-  };
 
   useEffect(() => {
     targetPosition = (currentKernal.x / width) * -25;
@@ -126,7 +88,7 @@ const Corn = (props) => {
         rotation={[0, 0, Math.PI / 2]}
         position={[(height / 2) + 1, 0, 0]}
         geometry={new CylinderGeometry(radius, radius, height, 32, 64)}
-        material={cobMat}
+        material={materials.cobMat}
         visible={display === '3d'}
       />
       {
@@ -152,7 +114,7 @@ const Corn = (props) => {
               scale={kernal.status === 'chewed' ? [0.25, 0.25, 0.25] : [1, 1, 1]}
               position={display === '3d' ? position3D : position2D}
               // rotation={Math.PI * 180}
-              material={isCurrent ? selectedCornMat : materials[kernal.status]}
+              material={isCurrent ? materials.selectedCornMat : materials[kernal.status]}
             />
           );
         })

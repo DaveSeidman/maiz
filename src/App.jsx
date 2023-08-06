@@ -12,13 +12,13 @@ import Maze from './maze';
 import './index.scss';
 
 const App = () => {
-  const width = 28;
+  const width = 34;
   const height = 28;
   const canvasRef = useRef();
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
-  const [display, setDisplay] = useState('3d');
+  const [display, setDisplay] = useState('2d');
   const [mode, setMode] = useState('normal');
 
   const handleKeydown = ({ key }) => {

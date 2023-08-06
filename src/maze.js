@@ -14,7 +14,7 @@ const posToWall = x => 2 * x;
 export default class Maze {
   // Original JavaScript code by Chirp Internet: www.chirpinternet.eu
   // Please acknowledge use of this code by including this header.
-  constructor(width, height) {
+  constructor(height, width) {
     this.width = width;
     this.height = height;
     this.cols = 2 * this.width + 1;
@@ -40,20 +40,21 @@ export default class Maze {
             }
         }
       });
-
-      if (r === 0) { // place exit in top row
-        const doorPos = posToSpace(rand(1, this.width));
-        this.maze[r][doorPos] = 0;
-      }
-
-      if (r === this.rows - 1) { // place entrance in bottom row
-        const doorPos = posToSpace(rand(1, this.width));
-        this.maze[r][doorPos] = 0;
-      }
     });
 
     // start partitioning
     this.partition(1, this.height - 1, 1, this.width - 1);
+
+    // pick random start and end kernals
+    this.start = 0;
+    this.end = 0;
+    const firstCol = 1;
+    const lastCol = this.width * 2 - 1;
+    const randomYPosition = () => Math.floor(Math.random() * ((this.height * 2) - 1)) + 1;
+    while (this.maze[this.start][firstCol]) this.start = randomYPosition();
+    while (this.maze[this.end][lastCol]) this.end = randomYPosition();
+    this.maze[this.start][0] = 0;
+    this.maze[this.end][this.width * 2] = 0;
   }
 
   initArray(value) {

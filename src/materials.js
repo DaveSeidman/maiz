@@ -1,34 +1,47 @@
-import { MeshStandardMaterial } from 'three';
+import { MeshStandardMaterial, Color } from 'three';
 
-export const cornMat = new MeshStandardMaterial({
+
+const cornMat = new MeshStandardMaterial({
   color: 0xFFCC00,
   roughness: 0.2,
   metalness: 0.05,
   emissiveIntensity: 1.5,
 });
 
-export const cobMat = new MeshStandardMaterial({
-  color: 0xEEEEEE,
+const cobMat = new MeshStandardMaterial({
+  color: 0x794e25,
   roughness: 1,
   metalness: 0.01,
 });
 
-export const cornWallMat = new MeshStandardMaterial({
-  color: 0x763d13,
+const cornWallMat = new MeshStandardMaterial({
+  color: 0x763d14,
   roughness: 0.7,
   metalness: 0.05,
   emissiveIntensity: 1.5,
 });
 
-export const selectedCornMat = new MeshStandardMaterial({
-  color: 0x0000FF,
+const selectedCornMat = new MeshStandardMaterial({
+  color: 0xFF0000,
   roughness: 0.2,
-  metalness: 0.05,
+  metalness: 0.5,
   emissiveIntensity: 1.5,
 });
 
-export const blankMat = new MeshStandardMaterial({
+const blankMat = new MeshStandardMaterial({
   color: 0xcccccc,
   roughness: 0.9,
   metalness: 0.1,
 });
+
+const materials = {
+  unset: blankMat,
+  normal: cornMat,
+  chewed: blankMat,
+  wall: cornWallMat,
+  selected: selectedCornMat,
+  selectedCornMat,
+  cobMat,
+};
+
+export default materials;
