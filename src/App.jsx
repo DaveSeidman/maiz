@@ -61,7 +61,7 @@ const App = () => {
 
 
   useEffect(() => {
-    const { start, cells } = new Maze(height / 2, width / 2);
+    const { start, end, cells, passages } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {
@@ -76,7 +76,6 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
-    // console.log(maze.start);
     setCurrentKernal({ x: 0, y: start });
     addEventListener('keydown', handleKeydown);
     return () => {

@@ -3,9 +3,7 @@ import './index.scss';
 
 const Footer = () => (
   <div className="footer">
-    <p>A Digital Stunt by
-      <a href="http://daveseidman.com" target="_blank" rel="noreferrer">Dave Seidman</a>
-    </p>
+    <p>A Digital Stunt by <a href="http://daveseidman.com" target="_blank" rel="noreferrer">Dave Seidman</a>  </p>
   </div>
 );
 

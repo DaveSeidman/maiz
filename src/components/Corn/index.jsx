@@ -97,7 +97,7 @@ const Corn = (props) => {
           // wrap to cylindar
           const position2D = [
             kernal.x,
-            kernal.y + height / -2,
+            kernal.y + height / -2 - 2,
             10,
           ];
           const position3D = [
@@ -115,6 +115,7 @@ const Corn = (props) => {
               position={display === '3d' ? position3D : position2D}
               // rotation={Math.PI * 180}
               material={isCurrent ? materials.selectedCornMat : materials[kernal.status]}
+              visible={!kernal.hidden}
             />
           );
         })
