@@ -99,7 +99,6 @@ const Corn = (props) => {
     addEventListener('pointerup', dragEnd);
     addEventListener('touchmove', drag);
     addEventListener('keydown', debugArc);
-    // TODO: listen to pointer events here for mousedrags
     return () => {
       removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
