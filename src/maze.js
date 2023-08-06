@@ -65,13 +65,18 @@ export default class Maze {
 
     // cut random paths through top/bottom
     // TODO: prevent two paths next to each other horizontally
-    for (let passages = 0; passages < this.width / 4; passages += 1) {
+    const passages = [];
+    const adjacentPassageExists = passage => passages.indexOf(passage - 1) >= 0 || passages.indexOf(passage) >= 0 || passages.indexOf(passage + 1) >= 0;
+    const doesNotConnect = randomCol => this.cells[afterFirstRow][randomCol] || this.cells[nextToLastRow][randomCol];
+    const addPassage = () => {
       let randomCol = 0;
-      while (this.cells[afterFirstRow][randomCol] || this.cells[nextToLastRow][randomCol]) randomCol = randomXPosition();
-      console.log(randomCol);
+      while (doesNotConnect(randomCol) || adjacentPassageExists(randomCol)) randomCol = randomXPosition();
       this.cells[firstRow][randomCol] = 0;
       this.cells[lastRow][randomCol] = 0;
-    }
+      passages.push(randomCol);
+    };
+
+    while (passages.length < this.width / 5) addPassage();
   }
 
   initArray(value) {

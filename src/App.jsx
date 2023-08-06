@@ -12,7 +12,7 @@ import Maze from './maze';
 import './index.scss';
 
 const App = () => {
-  const width = 34;
+  const width = 44;
   const height = 28;
   const canvasRef = useRef();
   const [move, setMove] = useState({ x: 0, y: 0 });
