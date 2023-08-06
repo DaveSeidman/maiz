@@ -13,7 +13,11 @@ console.log(materials);
 let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
+const rotations = 0;
 let targetPosition = 0;
+let prevKernalY = 0;
+
+const radToDeg = rad => rad * (180 / Math.PI);
 
 
 const Corn = (props) => {
@@ -30,7 +34,16 @@ const Corn = (props) => {
   useEffect(() => {
     targetPosition = (currentKernal.x / width) * -25;
     targetRotation = (currentKernal.y / height) * Math.PI * -2 + (Math.PI / 2);
+    if (currentKernal.y === height - 1) {
+    // console.log(prevKernalY);
+      targetRotation += (Math.PI * 2);
+      console.log('adding 360 degrees to target rotation');
+    }
+
+    // console.log(currentKernal.y, targetRotation, rotations);
+    console.log(currentKernal.y, height, Math.round(radToDeg(targetRotation)));
     setUseSpin(false);
+    prevKernalY = currentKernal.y;
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -41,7 +54,8 @@ const Corn = (props) => {
       if (useSpin) cob.current.rotation.x += timeDiff * spin;
       else {
         // TODO: fix this for wrapping, ie: calculate how far we'd have to rotate in either direction and pick the shorter one
-        cob.current.rotation.x += (targetRotation - cob.current.rotation.x) / 20;
+        // console.log(Math.abs(targetRotation - cob.current.rotation.x));
+        cob.current.rotation.x += ((targetRotation + (rotations * Math.PI)) - cob.current.rotation.x) / 20;
       }
       // }
     } else cob.current.rotation.x = Math.PI; // TODO: no need to set on every frame
@@ -67,10 +81,16 @@ const Corn = (props) => {
     pointer.y = y;
   };
 
+  const debugRotation = (e) => {
+    if (e.key === 'r') targetRotation += Math.PI / 2;
+    if (e.key === 'e') targetRotation -= Math.PI / 2;
+  };
+
   useEffect(() => {
     addEventListener('mousewheel', spinCob);
     addEventListener('touchstart', dragStart);
     addEventListener('touchmove', drag);
+    addEventListener('keydown', debugRotation);
     // TODO: listen to pointer events here for mousedrags
     return () => {
       removeEventListener('mousewheel', spinCob);
@@ -115,7 +135,7 @@ const Corn = (props) => {
               position={display === '3d' ? position3D : position2D}
               // rotation={Math.PI * 180}
               material={isCurrent ? materials.selectedCornMat : materials[kernal.status]}
-              visible={!kernal.hidden}
+              // visible={!kernal.end}
             />
           );
         })
