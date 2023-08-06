@@ -15,6 +15,7 @@ let targetRotation = 0;
 let targetPosition = 0;
 let prevKernalY = 0;
 const radius = 5;
+const kernalWidth = 1;
 
 const radToDeg = rad => rad * (180 / Math.PI);
 
@@ -24,7 +25,7 @@ const Corn = (props) => {
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
-  const pointer = { x: null, y: null };
+  const pointer = { x: null, y: null, down: false };
   const cob = useRef();
 
   useEffect(() => {
@@ -61,20 +62,29 @@ const Corn = (props) => {
   };
 
   const dragStart = (e) => {
-    pointer.x = e.changedTouches[0].clientX;
-    pointer.y = e.changedTouches[0].clientY;
+    pointer.down = true;
+    pointer.x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    pointer.y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
   };
 
+
   const drag = (e) => {
+    if (!pointer.down) return;
     setUseSpin(true);
-    const x = e.changedTouches[0].clientX;
-    const y = e.changedTouches[0].clientY;
-    // if (Math.abs(pointer.y - y) > 100) return;
+    const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
     if (pointer.x) targetPosition += (pointer.x - x) / -25;
+    if (targetPosition > 0) targetPosition = 0;
+    if (targetPosition < -width) targetPosition = -width;
     if (pointer.y) spin -= (pointer.y - y) / 25;
     pointer.x = x;
     pointer.y = y;
   };
+
+  const dragEnd = () => {
+    pointer.down = false;
+  };
+
 
   const debugArc = (e) => {
     if (e.key === 'r') setArc(arc + 1);
@@ -84,6 +94,9 @@ const Corn = (props) => {
   useEffect(() => {
     addEventListener('mousewheel', moveCob);
     addEventListener('touchstart', dragStart);
+    addEventListener('pointerdown', dragStart);
+    addEventListener('pointermove', drag);
+    addEventListener('pointerup', dragEnd);
     addEventListener('touchmove', drag);
     addEventListener('keydown', debugArc);
     // TODO: listen to pointer events here for mousedrags
@@ -91,6 +104,9 @@ const Corn = (props) => {
       removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
       removeEventListener('touchmove', drag);
+      removeEventListener('pointerdown', dragStart);
+      removeEventListener('pointermove', drag);
+      removeEventListener('pointerup', dragEnd);
       removeEventListener('keydown', debugArc);
     };
   });
@@ -98,13 +114,13 @@ const Corn = (props) => {
   return (
     <group
       ref={cob}
-      position={[-width / 2, 0, -10]}
+      position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
     >
       <mesh
         rotation={[0, 0, Math.PI / 2]}
         position={[(width / 2), 0, 0]}
         geometry={new CylinderGeometry(radius, radius, 1, 32, 64)}
-        scale={[1, width, 1]}
+        scale={[1, width + kernalWidth, 1]}
         material={materials.cobMat}
         visible={display === '3d'}
       />
