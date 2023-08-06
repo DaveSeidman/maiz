@@ -3,18 +3,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import inobonce from 'inobounce'; // eslint-disable-line
-import { OrbitControls } from '@react-three/drei';
 import Controls from './components/Controls';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Maze from './maze';
-
+import Instructions from './components/Instructions';
 import './index.scss';
 
 const App = () => {
   const width = 40;
   const height = 26;
   const canvasRef = useRef();
+  const [instructions, setInstructions] = useState(true);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
@@ -98,8 +98,6 @@ const App = () => {
         />
         <pointLight position={[0, 10, 10]} />
         <ambientLight color={0xffdd11} intensity={0.5} />
-        {/* <OrbitControls /> */}
-
       </Canvas>
       <Controls
         setMove={setMove}
@@ -109,6 +107,7 @@ const App = () => {
         setMode={setMode}
       />
       <Footer />
+      {instructions && (<Instructions setInstructions={setInstructions} />)}
     </div>
   );
 };

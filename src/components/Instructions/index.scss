@@ -1,0 +1,24 @@
+.instructions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &-content {
+    position: absolute;
+    width: 50%;
+    background: rgba(240, 240, 150, .5);
+    backdrop-filter: blur(1rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: .5rem solid rgba(160, 130, 40, .8);
+    border-radius: 1rem;
+  }
+
+  .close {
+    position: absolute;
+  }
+}
