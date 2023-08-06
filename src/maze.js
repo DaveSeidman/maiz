@@ -19,24 +19,24 @@ export default class Maze {
     this.height = height;
     this.cols = 2 * this.width + 1;
     this.rows = 2 * this.height + 1;
-    this.maze = this.initArray(0);
+    this.cells = this.initArray(0);
 
     /* place initial walls */
-    this.maze.forEach((row, r) => {
+    this.cells.forEach((row, r) => {
       row.forEach((cell, c) => {
         switch (r) {
           case 0:
           case this.rows - 1:
-            this.maze[r][c] = 1;
+            this.cells[r][c] = 1;
             break;
 
           default:
             if ((r % 2) === 1) {
               if ((c === 0) || (c === this.cols - 1)) {
-                this.maze[r][c] = 1;
+                this.cells[r][c] = 1;
               }
             } else if (c % 2 === 0) {
-              this.maze[r][c] = 1;
+              this.cells[r][c] = 1;
             }
         }
       });
@@ -46,15 +46,32 @@ export default class Maze {
     this.partition(1, this.height - 1, 1, this.width - 1);
 
     // pick random start and end kernals
+    const randomYPosition = () => Math.floor(Math.random() * ((this.height * 2) - 1)) + 1;
+    const randomXPosition = () => Math.floor(Math.random() * ((this.width * 2) - 1)) + 1;
     this.start = 0;
     this.end = 0;
-    const firstCol = 1;
-    const lastCol = this.width * 2 - 1;
-    const randomYPosition = () => Math.floor(Math.random() * ((this.height * 2) - 1)) + 1;
-    while (this.maze[this.start][firstCol]) this.start = randomYPosition();
-    while (this.maze[this.end][lastCol]) this.end = randomYPosition();
-    this.maze[this.start][0] = 0;
-    this.maze[this.end][this.width * 2] = 0;
+    const firstCol = 0;
+    const afterFirstCol = firstCol + 1;
+    const lastCol = this.width * 2;
+    const nextToLastCol = lastCol - 1;
+    const firstRow = 0;
+    const afterFirstRow = firstRow + 1;
+    const lastRow = this.height * 2;
+    const nextToLastRow = lastRow - 1;
+    while (this.cells[this.start][afterFirstCol]) this.start = randomYPosition();
+    while (this.cells[this.end][nextToLastCol]) this.end = randomYPosition();
+    this.cells[this.start][firstCol] = 0;
+    this.cells[this.end][lastCol] = 0;
+
+    // cut random paths through top/bottom
+    // TODO: prevent two paths next to each other horizontally
+    for (let passages = 0; passages < this.width / 4; passages += 1) {
+      let randomCol = 0;
+      while (this.cells[afterFirstRow][randomCol] || this.cells[nextToLastRow][randomCol]) randomCol = randomXPosition();
+      console.log(randomCol);
+      this.cells[firstRow][randomCol] = 0;
+      this.cells[lastRow][randomCol] = 0;
+    }
   }
 
   initArray(value) {
@@ -62,7 +79,7 @@ export default class Maze {
   }
 
   inBounds(r, c) {
-    if ((typeof this.maze[r] === 'undefined') || (typeof this.maze[r][c] === 'undefined')) {
+    if ((typeof this.cells[r] === 'undefined') || (typeof this.cells[r][c] === 'undefined')) {
       return false; /* out of bounds */
     }
     return true;
@@ -104,7 +121,7 @@ export default class Maze {
     for (let i = posToWall(r1) - 1; i <= posToWall(r2) + 1; i += 1) {
       for (let j = posToWall(c1) - 1; j <= posToWall(c2) + 1; j += 1) {
         if ((i === posToWall(horiz)) || (j === posToWall(vert))) {
-          this.maze[i][j] = 1;
+          this.cells[i][j] = 1;
         }
       }
     }
@@ -113,22 +130,22 @@ export default class Maze {
     /* create gaps in partition walls */
     if (gaps[0]) {
       const gapPosition = rand(c1, vert);
-      this.maze[posToWall(horiz)][posToSpace(gapPosition)] = 0;
+      this.cells[posToWall(horiz)][posToSpace(gapPosition)] = 0;
     }
 
     if (gaps[1]) {
       const gapPosition = rand(vert + 1, c2 + 1);
-      this.maze[posToWall(horiz)][posToSpace(gapPosition)] = 0;
+      this.cells[posToWall(horiz)][posToSpace(gapPosition)] = 0;
     }
 
     if (gaps[2]) {
       const gapPosition = rand(r1, horiz);
-      this.maze[posToSpace(gapPosition)][posToWall(vert)] = 0;
+      this.cells[posToSpace(gapPosition)][posToWall(vert)] = 0;
     }
 
     if (gaps[3]) {
       const gapPosition = rand(horiz + 1, r2 + 1);
-      this.maze[posToSpace(gapPosition)][posToWall(vert)] = 0;
+      this.cells[posToSpace(gapPosition)][posToWall(vert)] = 0;
     }
 
     // recursively partition newly created chambers

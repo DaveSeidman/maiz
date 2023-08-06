@@ -17,7 +17,7 @@ const App = () => {
   const canvasRef = useRef();
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: Math.round(width / 2), y: Math.round(height / 4) });
+  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
   const [display, setDisplay] = useState('2d');
   const [mode, setMode] = useState('normal');
 
@@ -61,10 +61,10 @@ const App = () => {
 
 
   useEffect(() => {
-    const { maze } = new Maze(height / 2, width / 2);
+    const { start, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
-    maze.forEach((row, y) => {
+    cells.forEach((row, y) => {
       row.forEach((col, x) => {
         nextKernals.push({
           id,
@@ -76,6 +76,8 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
+    // console.log(maze.start);
+    setCurrentKernal({ x: 0, y: start });
     addEventListener('keydown', handleKeydown);
     return () => {
       removeEventListener('keydown', handleKeydown);
