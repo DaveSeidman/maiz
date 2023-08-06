@@ -5,17 +5,16 @@ import { Sphere } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { CylinderGeometry } from 'three';
+import { CylinderGeometry, ZeroCurvatureEnding } from 'three';
+import { degToRad } from 'three/src/math/MathUtils';
 import materials from '../../materials';
-
-console.log(materials);
 
 let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
-const rotations = 0;
 let targetPosition = 0;
 let prevKernalY = 0;
+const radius = 5;
 
 const radToDeg = rad => rad * (180 / Math.PI);
 
@@ -23,25 +22,18 @@ const radToDeg = rad => rad * (180 / Math.PI);
 const Corn = (props) => {
   const { currentKernal, kernals, width, height, display } = props;
   const [useSpin, setUseSpin] = useState(false);
-
-  // targetPosition = -width / 2;
+  const [rotations, setRotations] = useState(0);
+  const [arc, setArc] = useState((height / 2) / Math.PI);
   const pointer = { x: 0, y: 0 };
   const cob = useRef();
-  const radius = 5;
-  const arc = (height / 2) / Math.PI;
-
 
   useEffect(() => {
     targetPosition = (currentKernal.x / width) * -25;
-    targetRotation = (currentKernal.y / height) * Math.PI * -2 + (Math.PI / 2);
-    if (currentKernal.y === height - 1) {
-    // console.log(prevKernalY);
-      targetRotation += (Math.PI * 2);
-      console.log('adding 360 degrees to target rotation');
-    }
-
-    // console.log(currentKernal.y, targetRotation, rotations);
-    console.log(currentKernal.y, height, Math.round(radToDeg(targetRotation)));
+    targetRotation = (currentKernal.y / height) * Math.PI * -2;
+    // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
+    // this will set a rotations counter to be added to the targetRotations to preven that jump
+    if (currentKernal.y === height - 1 && prevKernalY === 0) setRotations(rotations - 1);
+    if (currentKernal.y === 0 && prevKernalY === height - 1) setRotations(rotations + 1);
     setUseSpin(false);
     prevKernalY = currentKernal.y;
   }, [currentKernal]);
@@ -53,17 +45,17 @@ const Corn = (props) => {
       cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
       if (useSpin) cob.current.rotation.x += timeDiff * spin;
       else {
-        // TODO: fix this for wrapping, ie: calculate how far we'd have to rotate in either direction and pick the shorter one
-        // console.log(Math.abs(targetRotation - cob.current.rotation.x));
-        cob.current.rotation.x += ((targetRotation + (rotations * Math.PI)) - cob.current.rotation.x) / 20;
+        cob.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cob.current.rotation.x) / 30;
       }
-      // }
     } else cob.current.rotation.x = Math.PI; // TODO: no need to set on every frame
     prevTime = e.clock.elapsedTime;
   });
 
-  const spinCob = ({ deltaY }) => {
+  const moveCob = ({ deltaX, deltaY }) => {
     setUseSpin(true);
+    targetPosition += -deltaX / 100;
+    if (targetPosition > 0) targetPosition = 0;
+    if (targetPosition < -width) targetPosition = -width;
     spin += -deltaY / 100;
   };
 
@@ -81,21 +73,22 @@ const Corn = (props) => {
     pointer.y = y;
   };
 
-  const debugRotation = (e) => {
-    if (e.key === 'r') targetRotation += Math.PI / 2;
-    if (e.key === 'e') targetRotation -= Math.PI / 2;
+  const debugArc = (e) => {
+    if (e.key === 'r') setArc(arc + 1);
+    if (e.key === 'e') setArc(arc - 1);
   };
 
   useEffect(() => {
-    addEventListener('mousewheel', spinCob);
+    addEventListener('mousewheel', moveCob);
     addEventListener('touchstart', dragStart);
     addEventListener('touchmove', drag);
-    addEventListener('keydown', debugRotation);
+    addEventListener('keydown', debugArc);
     // TODO: listen to pointer events here for mousedrags
     return () => {
-      removeEventListener('mousewheel', spinCob);
+      removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
       removeEventListener('touchmove', drag);
+      removeEventListener('keydown', debugArc);
     };
   });
 
@@ -106,8 +99,9 @@ const Corn = (props) => {
     >
       <mesh
         rotation={[0, 0, Math.PI / 2]}
-        position={[(height / 2) + 1, 0, 0]}
-        geometry={new CylinderGeometry(radius, radius, height, 32, 64)}
+        position={[(width / 2), 0, 0]}
+        geometry={new CylinderGeometry(radius, radius, 1, 32, 64)}
+        scale={[1, width, 1]}
         material={materials.cobMat}
         visible={display === '3d'}
       />
@@ -120,6 +114,7 @@ const Corn = (props) => {
             kernal.y + height / -2 - 2,
             10,
           ];
+          // 2d view
           const position3D = [
             kernal.x,
             Math.cos(kernal.y / arc) * radius,

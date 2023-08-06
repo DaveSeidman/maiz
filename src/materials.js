@@ -2,10 +2,11 @@ import { MeshStandardMaterial, Color } from 'three';
 
 
 const cornMat = new MeshStandardMaterial({
+  // transparent: true,
+  // opacity: 0.25,
   color: 0xFFCC00,
   roughness: 0.2,
   metalness: 0.05,
-  emissiveIntensity: 1.5,
 });
 
 const cobMat = new MeshStandardMaterial({
@@ -15,17 +16,17 @@ const cobMat = new MeshStandardMaterial({
 });
 
 const cornWallMat = new MeshStandardMaterial({
+  // transparent: true,
+  // opacity: 0.25,
   color: 0x763d14,
   roughness: 0.7,
   metalness: 0.05,
-  emissiveIntensity: 1.5,
 });
 
 const selectedCornMat = new MeshStandardMaterial({
   color: 0xFF0000,
   roughness: 0.2,
   metalness: 0.5,
-  emissiveIntensity: 1.5,
 });
 
 const blankMat = new MeshStandardMaterial({
