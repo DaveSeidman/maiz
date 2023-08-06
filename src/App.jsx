@@ -46,8 +46,7 @@ const App = () => {
   useEffect(() => {
     const x = currentKernal.x + move.x;
     let y = currentKernal.y + move.y;
-    // if (x > width) x = 0;
-    // if (x < 0) x = width - 1;
+    if (x < 0 || x > width) return;
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);

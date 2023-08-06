@@ -24,11 +24,12 @@ const Corn = (props) => {
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
-  const pointer = { x: 0, y: 0 };
+  const pointer = { x: null, y: null };
   const cob = useRef();
 
   useEffect(() => {
-    targetPosition = (currentKernal.x / width) * -25;
+    // targetPosition = (currentKernal.x / width) * -;
+    targetPosition = -currentKernal.x;
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
     // this will set a rotations counter to be added to the targetRotations to preven that jump
@@ -69,7 +70,9 @@ const Corn = (props) => {
     const x = e.changedTouches[0].clientX;
     const y = e.changedTouches[0].clientY;
     // if (Math.abs(pointer.y - y) > 100) return;
-    spin -= (pointer.y - y) / 25;
+    if (pointer.x) targetPosition += (pointer.x - x) / -25;
+    if (pointer.y) spin -= (pointer.y - y) / 25;
+    pointer.x = x;
     pointer.y = y;
   };
 
