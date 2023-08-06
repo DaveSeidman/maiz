@@ -2,7 +2,7 @@ $yellow1: rgb(206, 206, 16);
 $yellow2: rgb(179, 169, 27);
 .controls {
   position: absolute;
-  bottom: 0;
+  bottom: 4rem;
   left: 0;
   width: 100%;
 
@@ -13,14 +13,15 @@ $yellow2: rgb(179, 169, 27);
     button {
       width: 4rem;
       height: 4rem;
-      font-size: 1rem;
+      font-size: 2rem;
       border: 2px solid $yellow2;
       background: $yellow1;
       font-weight: bold;
       border-radius: 50%;
-      margin: 0.5rem;
+      margin: -0.5rem;
       padding: 0;
       color: white;
+      mix-blend-mode: lighten;
       
       user-select: none;
     }
@@ -31,7 +32,7 @@ $yellow2: rgb(179, 169, 27);
   position: absolute;
   bottom: 0;
   right: 0;
-  
+
   button {
     padding: .5rem;
     border: 2px solid $yellow2;

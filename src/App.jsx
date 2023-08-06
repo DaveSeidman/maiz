@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import inobonce from 'inobounce'; // eslint-disable-line
 import { OrbitControls } from '@react-three/drei';
 import Controls from './components/Controls';
+import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Maze from './maze';
 
@@ -103,6 +104,7 @@ const App = () => {
         mode={mode}
         setMode={setMode}
       />
+      <Footer />
     </div>
   );
 };
