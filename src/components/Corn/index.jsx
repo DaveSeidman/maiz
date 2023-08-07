@@ -26,6 +26,19 @@ const Corn = (props) => {
     metalness: 0.05,
   });
 
+  const normal_0 = new MeshStandardMaterial({
+    color: 0xf2bb00,
+    roughness: 0.2,
+    metalness: 0.05,
+  });
+
+  const normal_1 = new MeshStandardMaterial({
+    color: 0xf9ee00,
+    roughness: 0.2,
+    metalness: 0.05,
+  });
+
+
   const cobMat = new MeshStandardMaterial({
     color: 0xe2cd7e,
     roughness: 1,
@@ -66,6 +79,16 @@ const Corn = (props) => {
     metalness: 0.1,
   });
 
+  const glowMat = new MeshStandardMaterial({
+    color: 0xff0000,
+    roughness: 0.1,
+    metalness: 0.8,
+    transparent: true,
+    opacity: 0.75,
+    emissive: 0xff5566,
+    emissiveIntensity: 2,
+  });
+
   const materials = {
     unset: blankMat,
     normal: cornMat,
@@ -74,9 +97,12 @@ const Corn = (props) => {
     wall_0: cornWallMat_0,
     wall_1: cornWallMat_1,
     wall_2: cornWallMat_2,
+    normal_0,
+    normal_1,
     selected: selectedCornMat,
     selectedCornMat,
     cobMat,
+    glowMat,
   };
 
   const { currentKernal, kernals, width, height, display } = props;
@@ -187,6 +213,7 @@ const Corn = (props) => {
           const selectMesh = model.children.find(mesh => mesh.name === 'Select');
           const cutout = model.children.find(mesh => mesh.name === 'Cutout');
           rootMesh.material = materials.cobMat;
+          selectMesh.material = materials.glowMat;
           cutout.visible = false;
           kernalMesh.material = isCurrent ? materials.selectedCornMat : materials[kernal.material]; // isCurrent ? materials.selectedCornMat : materials[kernal.status];
           kernalMesh.visible = kernal.status !== 'chewed';
@@ -196,7 +223,6 @@ const Corn = (props) => {
               key={kernal.id}
               args={[0.75, 32, 32]}
               rotation={[rotation, 0, 0]}
-              // scale={kernal.status === 'chewed' ? [0.25, 0.25, 0.25] : [1, 1, 1]}
               position={display === '3d' ? position3D : position2D}
             >
               <primitive object={model} />
