@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
 import { Environment, CameraShake } from '@react-three/drei';
+import { Camera, PCFSoftShadowMap } from 'three';
 import Controls from './components/Controls';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
@@ -89,6 +90,7 @@ const App = () => {
     });
     setKernals(() => nextKernals);
     setCurrentKernal({ x: 0, y: start });
+    setMove({ x: 0, y: 0 });
     addEventListener('keydown', handleKeydown);
     return () => {
       removeEventListener('keydown', handleKeydown);
@@ -110,9 +112,14 @@ const App = () => {
 
   return (
     <div className="app">
-      <Canvas ref={canvasRef} dpr={1}>
+      <Canvas
+        ref={canvasRef}
+        shadows={{ type: PCFSoftShadowMap }}
+        camera={{ fov: 80 }}
+        dpr={0.5}
+      >
 
-        <CameraShake {...config} />
+        {display === '3d' && (<CameraShake {...config} />)}
         <EffectComposer>
           <Corn
             kernals={kernals}
@@ -121,14 +128,28 @@ const App = () => {
             height={height}
             display={display}
           />
-          <pointLight position={[5, 10, 10]} />
-          {/* <ambientLight color={0xffdd11} intensity={0.5} /> */}
-          <ChromaticAberration offset={[0.0008, 0.0008]} />
-          <DepthOfField focusDistance={0.25} focalLength={display === '3d' ? 0.04 : 1} bokehScale={2} height={1024} />
-          <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.9} height={100} />
+          {/* <pointLight
+            position={[5, 10, 10]}
+            intensity={2}
+            castShadow
+            shadow-mapSize={512}
+            shadow-bias={0.00001}
+          /> */}
+          <directionalLight
+            intensity={2}
+            position={[5, -10, 0]}
+            target-position={[-5, 0, 0]}
+            castShadow
+            shadow-mapSize={1024}
+            shadow-bias={0.00001}
+          />
+          {/* <ambientLight color={0xffdd11} intensity={-0.5} /> */}
+          <ChromaticAberration offset={[0.002, 0.002]} />
+          {/* <DepthOfField focusDistance={0.25} focalLength={display === '3d' ? 0.04 : 1} bokehScale={2} height={1024} /> */}
+          <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
           <Noise opacity={0.05} intensity={0.002} />
           <Vignette eskil={false} offset={0} darkness={0.8} />
-          <Environment files={envMap} background blur={0.3} exposure={1} />
+          <Environment files={envMap} background blur={0.3} exposure={0.5} />
         </EffectComposer>
       </Canvas>
       <Controls

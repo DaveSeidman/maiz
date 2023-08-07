@@ -192,6 +192,7 @@ const Corn = (props) => {
     <group
       ref={cob}
       position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
+      scale={[1, 1, display === '3d' ? 1 : 0.3]}
     >
       {
         kernals.map((kernal) => {
@@ -199,7 +200,7 @@ const Corn = (props) => {
           const position2D = [ // wrap to cylindar
             kernal.x,
             kernal.y + height / -2 - 2,
-            10,
+            50,
           ];
           const position3D = [ // 2d view
             kernal.x,
@@ -212,6 +213,10 @@ const Corn = (props) => {
           const kernalMesh = model.children.find(mesh => mesh.name === 'Kernal');
           const selectMesh = model.children.find(mesh => mesh.name === 'Select');
           const cutout = model.children.find(mesh => mesh.name === 'Cutout');
+          rootMesh.receiveShadow = true;
+          kernalMesh.castShadow = true;
+          kernalMesh.receiveShadow = true;
+          selectMesh.castShadow = true;
           rootMesh.material = materials.cobMat;
           selectMesh.material = materials.glowMat;
           cutout.visible = false;
@@ -225,7 +230,10 @@ const Corn = (props) => {
               rotation={[rotation, 0, 0]}
               position={display === '3d' ? position3D : position2D}
             >
-              <primitive object={model} />
+              <primitive
+                object={model}
+                scale={display === '3d' ? [1, 1, 1] : [0.75, 0.75, 0.75]}
+              />
             </group>
           );
         })
