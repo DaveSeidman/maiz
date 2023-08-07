@@ -3,6 +3,7 @@ import './index.scss';
 
 const Instructions = (props) => {
   const { setInstructions } = props;
+  const { start } = props;
   // console.log('instructions page');
   return (
     <div className="instructions">
@@ -19,13 +20,12 @@ const Instructions = (props) => {
           <label for="normal">free</label>
           <input type="radio" name="mode" value="free" />
         </div>
-        <div className="option">
-          <p>View:</p>
-          <label for="normal">2D</label>
-          <input type="radio" name="view" value="2D" />
-          <label for="normal">3D</label>
-          <input type="radio" name="view" value="3D" />
-        </div>
+
+        <button
+          type="button"
+          onClick={start}
+        >Start!
+        </button>
       </div>
       {/* </div> */}
       <button

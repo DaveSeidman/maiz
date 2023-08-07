@@ -97,16 +97,22 @@ const App = () => {
     setCurrentKernal({ x: 0, y: start });
     setMove({ x: 0, y: 0 });
     addEventListener('keydown', handleKeydown);
-    const interval = setInterval(() => {
-      const { elapsed } = timer;
-      console.log(elapsed);
-      setTimer({ elapsed: elapsed + 1 });
-    }, 1000);
+
     return () => {
       removeEventListener('keydown', handleKeydown);
-      clearInterval(interval);
+      // clearInterval(interval);
     };
   }, []);
+
+  const start = () => {
+    setInstructions(false);
+    const interval = setInterval(() => {
+      const { elapsed } = timer;
+      const newTime = elapsed + 1;
+      console.log(elapsed);
+      setTimer({ elapsed: newTime });
+    }, 1000);
+  };
 
   const config = {
     maxYaw: 0.005, // Max amount camera can yaw in either direction
@@ -182,8 +188,17 @@ const App = () => {
         ?
       </button>
       <Footer />
-      {instructions && (<Instructions setInstructions={setInstructions} />)}
-      {results && (<Results />)}
+      {instructions && (
+      <Instructions
+        start={start}
+        setInstructions={setInstructions}
+      />
+      )}
+      {results && (
+      <Results
+        result="won"
+      />
+      )}
     </div>
   );
 };

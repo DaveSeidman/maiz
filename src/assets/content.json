@@ -1,10 +1,13 @@
 {
   "messages": {
     "won": [
-      "Corngratulations! You made it to the end of the maze!"
+      "Corngratulations! You made it to the end of the maze!",
+      "A-Maze-Ing work... You Won!",
+      "Way to Play it By Ear!"
     ],
     "lost": [
-      "Aw Shucks... you lost!"
+      "Aw Shucks... you lost!",
+      "You failed but try again!"
     ]
   }
 }

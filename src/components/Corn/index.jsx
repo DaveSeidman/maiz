@@ -148,8 +148,8 @@ const Corn = (props) => {
           ];
           const position3D = [ // 2d view
             kernal.x,
-            Math.cos(kernal.y / arc) * radius,
-            Math.sin(kernal.y / arc) * radius,
+            Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1),
+            Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1),
           ];
           // TODO: would be nice to animate this but currently not performant
           // TODO: look into instancing
