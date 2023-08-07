@@ -6,19 +6,25 @@
   align-items: center;
   background: rgba(255, 255, 255, .4);
   backdrop-filter: blur(.25rem);
+  -webkit-backdrop-filter: blur(.25rem);
 
   &-content {
     position: absolute;
-    width: 50%;
-    background: rgba(240, 240, 150, .5);
+    width: calc(100vw - 6rem);
+    max-width: 36rem;
+    color: white;
+    background: rgba(194, 194, 22, .6);
     backdrop-filter: blur(2rem);
+    -webkit-backdrop-filter: blur(2rem);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border: .5rem solid rgba(160, 130, 40, .8);
+    border: .5rem solid rgba(235, 235, 171, 0.8);
     border-radius: 1rem;
     padding: .5rem 1rem;
+    font-size: .75rem;
+    box-shadow: 0 .5rem .25rem rgba(81, 23, 8, 0.2);
   }
 
   .close {

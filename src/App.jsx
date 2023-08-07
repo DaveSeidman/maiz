@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
+import Score from './components/Score';
 import envMap from './assets/limpopo_golf_course_2k.hdr';
 import Maze from './maze';
 import inobonce from 'inobounce'; // eslint-disable-line
@@ -27,6 +28,8 @@ const App = () => {
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
   const [results, setResults] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [kernalsEaten, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -63,6 +66,8 @@ const App = () => {
         return;
       }
       setResults(kernal.end);
+      if (kernal.status !== 'chewed') setKernalsEaten(kernalsEaten + 1);
+
       kernal.status = 'chewed';
       setKernals(kernals);
     }
@@ -158,6 +163,10 @@ const App = () => {
         setDisplay={setDisplay}
         mode={mode}
         setMode={setMode}
+      />
+      <Score
+        timer={timer}
+        kernalsEaten={kernalsEaten}
       />
       <button
         className="instructionsToggle"

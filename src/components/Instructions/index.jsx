@@ -9,6 +9,7 @@ const Instructions = (props) => {
       <div className="instructions-content">
         <h2>Instructions</h2>
         <p>Use the arrow keys to make your way to the right end of the cob and escape the "maíz"!</p>
+        <p>In regular mode, you can only move to yellow kernals, brown kernals are walls.</p>
       </div>
       <button
         type="button"

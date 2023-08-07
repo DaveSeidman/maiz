@@ -7,6 +7,11 @@ $blue: rgb(14, 176, 179);
   font-family: 'Kanit';
   src: url('./assets/Kanit-Regular.ttf');
 }
+@font-face {
+  font-family: 'Corn';
+  src: url('./assets/CornDemo-Regular.ttf');
+}
+
 
 html, body {
   font-size: 16px;
@@ -14,7 +19,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   margin: 0;
-  font-family: 'Kanit';
+  font-family: 'Corn';
   overscroll-behavior-x: none;
 }
 
@@ -27,6 +32,12 @@ html, body {
 
   h1, h2, p { 
     margin: 0;
+    padding: .25rem .5rem;
+    line-height: 1.5rem;
+  }
+
+  h2 {
+    padding: 1rem;
   }
 
   .instructionsToggle {
