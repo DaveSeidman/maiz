@@ -1,13 +1,13 @@
 // TODO: currently the targetRotation and useSpin and fighting,
 // create a "rotationFrom" property that gets set based on which user interaction was most recent... a scroll/drag or a kernal move
 import React, { useRef, useEffect, useState } from 'react';
-import { Sphere } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
-import { MeshStandardMaterial, CylinderGeometry, Color } from 'three';
 
+import { MeshStandardMaterial, CylinderGeometry, Color } from 'three';
 import { degToRad } from 'three/src/math/MathUtils';
-// import materials from '../../materials';
+import kernalModel from '../../assets/kernal.glb';
 
 let prevTime = 0;
 let spin = 0;
@@ -18,26 +18,42 @@ const radius = 5;
 const kernalWidth = 1;
 
 const Corn = (props) => {
+  const gltf = useGLTF(kernalModel);
+
   const cornMat = new MeshStandardMaterial({
-    color: 0xFFCC00,
+    color: 0xf2bb00,
     roughness: 0.2,
     metalness: 0.05,
   });
 
   const cobMat = new MeshStandardMaterial({
-    color: 0x794e25,
+    color: 0xe2cd7e,
     roughness: 1,
     metalness: 0.01,
   });
 
   const cornWallMat = new MeshStandardMaterial({
-    // transparent: true,
-    // opacity: 0.25,
     color: 0x763d15,
     roughness: 0.7,
     metalness: 0.05,
   });
 
+  const cornWallMat_0 = new MeshStandardMaterial({
+    color: 0x450605,
+    roughness: 0.2,
+    metalness: 0.05,
+  });
+
+  const cornWallMat_1 = new MeshStandardMaterial({
+    color: 0x401811,
+    roughness: 0.1,
+    metalness: 0.05,
+  });
+  const cornWallMat_2 = new MeshStandardMaterial({
+    color: 0x2a0911,
+    roughness: 0.25,
+    metalness: 0.05,
+  });
   const selectedCornMat = new MeshStandardMaterial({
     color: new Color(14 / 255, 176 / 255, 179 / 255),
     roughness: 0.2,
@@ -55,6 +71,9 @@ const Corn = (props) => {
     normal: cornMat,
     chewed: blankMat,
     wall: cornWallMat,
+    wall_0: cornWallMat_0,
+    wall_1: cornWallMat_1,
+    wall_2: cornWallMat_2,
     selected: selectedCornMat,
     selectedCornMat,
     cobMat,
@@ -68,7 +87,6 @@ const Corn = (props) => {
   const cob = useRef();
 
   useEffect(() => {
-    // targetPosition = (currentKernal.x / width) * -;
     targetPosition = -currentKernal.x;
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
@@ -149,41 +167,40 @@ const Corn = (props) => {
       ref={cob}
       position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
     >
-      <mesh
-        rotation={[0, 0, Math.PI / 2]}
-        position={[(width / 2), 0, 0]}
-        geometry={new CylinderGeometry(radius, radius, 1, 32, 64)}
-        scale={[1, width + kernalWidth, 1]}
-        material={materials.cobMat}
-        visible={display === '3d'}
-      />
       {
         kernals.map((kernal) => {
           const isCurrent = kernal.x === currentKernal.x && kernal.y === currentKernal.y;
-          // wrap to cylindar
-          const position2D = [
+          const position2D = [ // wrap to cylindar
             kernal.x,
             kernal.y + height / -2 - 2,
             10,
           ];
-          // 2d view
-          const position3D = [
+          const position3D = [ // 2d view
             kernal.x,
             Math.cos(kernal.y / arc) * radius,
             Math.sin(kernal.y / arc) * radius,
           ];
-          // const rotation = Math.Pi(kernal.y / arc);
-
+          const rotation = display === '3d' ? (kernal.y / height) * (Math.PI * 2) : (Math.PI / -2);
+          const model = gltf.scene.clone(true);
+          const rootMesh = model.children.find(mesh => mesh.name === 'Root');
+          const kernalMesh = model.children.find(mesh => mesh.name === 'Kernal');
+          const selectMesh = model.children.find(mesh => mesh.name === 'Select');
+          const cutout = model.children.find(mesh => mesh.name === 'Cutout');
+          rootMesh.material = materials.cobMat;
+          cutout.visible = false;
+          kernalMesh.material = isCurrent ? materials.selectedCornMat : materials[kernal.material]; // isCurrent ? materials.selectedCornMat : materials[kernal.status];
+          kernalMesh.visible = kernal.status !== 'chewed';
+          selectMesh.visible = isCurrent;
           return (
-            <Sphere
+            <group
               key={kernal.id}
               args={[0.75, 32, 32]}
-              scale={kernal.status === 'chewed' ? [0.25, 0.25, 0.25] : [1, 1, 1]}
+              rotation={[rotation, 0, 0]}
+              // scale={kernal.status === 'chewed' ? [0.25, 0.25, 0.25] : [1, 1, 1]}
               position={display === '3d' ? position3D : position2D}
-              // rotation={Math.PI * 180}
-              material={isCurrent ? materials.selectedCornMat : materials[kernal.status]}
-              // visible={!kernal.end}
-            />
+            >
+              <primitive object={model} />
+            </group>
           );
         })
       }

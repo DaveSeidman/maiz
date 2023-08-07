@@ -14,18 +14,17 @@ $blue: rgb(14, 176, 179);
     justify-content: center;
 
     button {
-      width: 3rem;
-      height: 3rem;
+      width: 4rem;
+      height: 4rem;
       font-size: 1.5rem;
       border: 2px solid $yellow2;
       background: $yellow1;
       font-weight: bold;
-      border-radius: 1rem;
+      border-radius: 1.5rem;
       margin: -0.25rem;
       padding: 0;
       color: white;
       mix-blend-mode: lighten;
-      
       user-select: none;
     }
   }

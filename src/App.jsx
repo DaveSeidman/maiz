@@ -10,14 +10,13 @@ import Corn from './components/Corn';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
 import envMap from './assets/limpopo_golf_course_2k.hdr';
-
 import Maze from './maze';
 import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
 
 const App = () => {
-  const width = 40;
+  const width = 20;
   const height = 26;
   const canvasRef = useRef();
   const [instructions, setInstructions] = useState(true);
@@ -71,7 +70,7 @@ const App = () => {
 
 
   useEffect(() => {
-    const { start, end, cells, passages } = new Maze(height / 2, width / 2);
+    const { start, end, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {
@@ -80,6 +79,7 @@ const App = () => {
           id,
           x,
           y,
+          material: col ? `wall_${Math.floor(Math.random() * 3)}` : 'normal',
           status: col ? 'wall' : 'normal',
           highlight: x === 2 && y === 0,
           end: x === width && y === end,
