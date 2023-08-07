@@ -17,6 +17,7 @@ let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
+const pointer = { x: null, y: null, down: true };
 
 const Corn = (props) => {
   const gltf = useGLTF(kernalModel);
@@ -49,7 +50,6 @@ const Corn = (props) => {
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
-  const pointer = { x: null, y: null, down: true };
   const cob = useRef();
 
   useEffect(() => {
