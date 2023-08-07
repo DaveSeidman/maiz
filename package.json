@@ -10,7 +10,7 @@
     "@react-spring/three": "^9.7.2",
     "@react-three/drei": "^9.66.1",
     "@react-three/fiber": "^8.13.6",
-    "@react-three/postprocessing": "^2.8.3",
+    "@react-three/postprocessing": "^2.15.0",
     "auto-bind": "^5.0.1",
     "inobounce": "^0.2.1",
     "prop-types": "^15.8.1",

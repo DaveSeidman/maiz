@@ -1,3 +1,8 @@
+$yellow1: rgb(206, 206, 16);
+$yellow2: rgb(179, 169, 27);
+$blue: rgb(14, 176, 179);
+
+
 @font-face {
   font-family: 'Kanit';
   src: url('./assets/Kanit-Regular.ttf');
@@ -22,5 +27,19 @@ html, body {
 
   h1, h2, p { 
     margin: 0;
+  }
+
+  .instructionsToggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 1rem;
+    border-radius: 50%;
+    border: 3px solid $yellow2;
+    background: $yellow1;
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    font-size: 2rem;
   }
 }

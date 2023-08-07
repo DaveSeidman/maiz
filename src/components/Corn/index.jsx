@@ -125,28 +125,22 @@ const Corn = (props) => {
     pointer.down = false;
   };
 
-
-  const debugArc = (e) => {
-    if (e.key === 'r') setArc(arc + 1);
-    if (e.key === 'e') setArc(arc - 1);
-  };
-
   useEffect(() => {
     addEventListener('mousewheel', moveCob);
     addEventListener('touchstart', dragStart);
     addEventListener('pointerdown', dragStart);
     addEventListener('pointermove', drag);
-    addEventListener('pointerup', dragEnd);
     addEventListener('touchmove', drag);
-    addEventListener('keydown', debugArc);
+    addEventListener('pointerup', dragEnd);
+    addEventListener('pointerleave', dragEnd);
     return () => {
       removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
       removeEventListener('touchmove', drag);
-      removeEventListener('pointerdown', dragStart);
       removeEventListener('pointermove', drag);
+      removeEventListener('pointerdown', dragStart);
       removeEventListener('pointerup', dragEnd);
-      removeEventListener('keydown', debugArc);
+      removeEventListener('pointerleave', dragEnd);
     };
   });
 

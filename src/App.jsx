@@ -2,11 +2,15 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
+import { Environment } from '@react-three/drei';
 import Controls from './components/Controls';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
+import envMap from './assets/limpopo_golf_course_2k.hdr';
+
 import Maze from './maze';
 import inobonce from 'inobounce'; // eslint-disable-line
 
@@ -94,15 +98,28 @@ const App = () => {
   return (
     <div className="app">
       <Canvas ref={canvasRef} dpr={1}>
-        <Corn
-          kernals={kernals}
-          currentKernal={currentKernal}
-          width={width}
-          height={height}
-          display={display}
-        />
-        <pointLight position={[0, 10, 10]} />
-        <ambientLight color={0xffdd11} intensity={0.5} />
+        <EffectComposer>
+          <Corn
+            kernals={kernals}
+            currentKernal={currentKernal}
+            width={width}
+            height={height}
+            display={display}
+          />
+          <pointLight position={[5, 10, 10]} />
+          {/* <ambientLight color={0xffdd11} intensity={0.5} /> */}
+          <ChromaticAberration offset={[0.0008, 0.0008]} />
+          <DepthOfField focusDistance={0.04} focalLength={0.15} bokehScale={8} height={512} />
+          <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.9} height={100} />
+          {/* <Noise opacity={0.5} intensity={0.002} /> */}
+          <Vignette eskil={false} offset={0} darkness={0.5} />
+          <Environment
+            files={envMap}
+            background
+            blur={0.3}
+            exposure={1}
+          />
+        </EffectComposer>
       </Canvas>
       <Controls
         setMove={setMove}
@@ -111,6 +128,13 @@ const App = () => {
         mode={mode}
         setMode={setMode}
       />
+      <button
+        className="instructionsToggle"
+        type="button"
+        onClick={() => { setInstructions(true); }}
+      >
+        ?
+      </button>
       <Footer />
       {instructions && (<Instructions setInstructions={setInstructions} />)}
       {results && (<Results />)}
