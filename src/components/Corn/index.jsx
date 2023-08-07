@@ -4,10 +4,10 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Sphere } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
+import { MeshStandardMaterial, CylinderGeometry, Color } from 'three';
 
-import { CylinderGeometry, ZeroCurvatureEnding } from 'three';
 import { degToRad } from 'three/src/math/MathUtils';
-import materials from '../../materials';
+// import materials from '../../materials';
 
 let prevTime = 0;
 let spin = 0;
@@ -17,10 +17,49 @@ let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
 
-// const radToDeg = rad => rad * (180 / Math.PI);
-
-
 const Corn = (props) => {
+  const cornMat = new MeshStandardMaterial({
+    color: 0xFFCC00,
+    roughness: 0.2,
+    metalness: 0.05,
+  });
+
+  const cobMat = new MeshStandardMaterial({
+    color: 0x794e25,
+    roughness: 1,
+    metalness: 0.01,
+  });
+
+  const cornWallMat = new MeshStandardMaterial({
+    // transparent: true,
+    // opacity: 0.25,
+    color: 0x763d15,
+    roughness: 0.7,
+    metalness: 0.05,
+  });
+
+  const selectedCornMat = new MeshStandardMaterial({
+    color: new Color(14 / 255, 176 / 255, 179 / 255),
+    roughness: 0.2,
+    metalness: 0.5,
+  });
+
+  const blankMat = new MeshStandardMaterial({
+    color: 0xcccccc,
+    roughness: 0.9,
+    metalness: 0.1,
+  });
+
+  const materials = {
+    unset: blankMat,
+    normal: cornMat,
+    chewed: blankMat,
+    wall: cornWallMat,
+    selected: selectedCornMat,
+    selectedCornMat,
+    cobMat,
+  };
+
   const { currentKernal, kernals, width, height, display } = props;
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);

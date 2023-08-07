@@ -54,7 +54,10 @@ const App = () => {
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
-      if (mode === 'normal' && kernal.status === 'wall') return;
+      if (mode === 'normal' && kernal.status === 'wall') {
+        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y });
+        return;
+      }
       setResults(kernal.end);
       kernal.status = 'chewed';
       setKernals(kernals);
@@ -65,7 +68,6 @@ const App = () => {
 
   useEffect(() => {
     const { start, end, cells, passages } = new Maze(height / 2, width / 2);
-    console.log(end, height);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {

@@ -3,7 +3,7 @@ import './index.scss';
 
 const Instructions = (props) => {
   const { setInstructions } = props;
-  console.log('instructions page');
+  // console.log('instructions page');
   return (
     <div className="instructions">
       <div className="instructions-content">
