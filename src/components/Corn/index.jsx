@@ -5,14 +5,15 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, CylinderGeometry, Color } from 'three';
-import { degToRad } from 'three/src/math/MathUtils';
+import { MeshStandardMaterial, Color } from 'three';
+import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
 let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
+let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
@@ -20,79 +21,18 @@ const kernalWidth = 1;
 const Corn = (props) => {
   const gltf = useGLTF(kernalModel);
 
-  const cornMat = new MeshStandardMaterial({
-    color: 0xf2bb00,
-    roughness: 0.2,
-    metalness: 0.05,
-  });
+  const normal_0 = new MeshStandardMaterial({ color: 0xf2bb00, roughness: 0.2, metalness: 0.05 });
+  const normal_1 = new MeshStandardMaterial({ color: 0xf9ee00, roughness: 0.2, metalness: 0.05 });
+  const cobMat = new MeshStandardMaterial({ color: 0xe2cd7e, roughness: 1, metalness: 0.01 });
+  const cornWallMat = new MeshStandardMaterial({ color: 0x763d15, roughness: 0.7, metalness: 0.05 });
+  const cornWallMat_0 = new MeshStandardMaterial({ color: 0x450605, roughness: 0.2, metalness: 0.05 });
+  const cornWallMat_1 = new MeshStandardMaterial({ color: 0x401811, roughness: 0.1, metalness: 0.05 });
+  const cornWallMat_2 = new MeshStandardMaterial({ color: 0x2a0911, roughness: 0.25, metalness: 0.05 });
+  const selectedCornMat = new MeshStandardMaterial({ color: new Color(14 / 255, 176 / 255, 179 / 255), roughness: 0.2, metalness: 0.5 });
 
-  const normal_0 = new MeshStandardMaterial({
-    color: 0xf2bb00,
-    roughness: 0.2,
-    metalness: 0.05,
-  });
-
-  const normal_1 = new MeshStandardMaterial({
-    color: 0xf9ee00,
-    roughness: 0.2,
-    metalness: 0.05,
-  });
-
-
-  const cobMat = new MeshStandardMaterial({
-    color: 0xe2cd7e,
-    roughness: 1,
-    metalness: 0.01,
-  });
-
-  const cornWallMat = new MeshStandardMaterial({
-    color: 0x763d15,
-    roughness: 0.7,
-    metalness: 0.05,
-  });
-
-  const cornWallMat_0 = new MeshStandardMaterial({
-    color: 0x450605,
-    roughness: 0.2,
-    metalness: 0.05,
-  });
-
-  const cornWallMat_1 = new MeshStandardMaterial({
-    color: 0x401811,
-    roughness: 0.1,
-    metalness: 0.05,
-  });
-  const cornWallMat_2 = new MeshStandardMaterial({
-    color: 0x2a0911,
-    roughness: 0.25,
-    metalness: 0.05,
-  });
-  const selectedCornMat = new MeshStandardMaterial({
-    color: new Color(14 / 255, 176 / 255, 179 / 255),
-    roughness: 0.2,
-    metalness: 0.5,
-  });
-
-  const blankMat = new MeshStandardMaterial({
-    color: 0xcccccc,
-    roughness: 0.9,
-    metalness: 0.1,
-  });
-
-  const glowMat = new MeshStandardMaterial({
-    color: 0xff0000,
-    roughness: 0.1,
-    metalness: 0.8,
-    transparent: true,
-    opacity: 0.75,
-    emissive: 0xff5566,
-    emissiveIntensity: 2,
-  });
+  const glowMat = new MeshStandardMaterial({ color: 0x0000ff, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, emissive: 0x0200ff, emissiveIntensity: 2 });
 
   const materials = {
-    unset: blankMat,
-    normal: cornMat,
-    chewed: blankMat,
     wall: cornWallMat,
     wall_0: cornWallMat_0,
     wall_1: cornWallMat_1,
@@ -126,14 +66,19 @@ const Corn = (props) => {
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
     spin *= 0.9;
-    cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
+    lerpAmount += ((display === '3d' ? 1 : 0) - lerpAmount) / 100;
 
     if (display === '3d') {
+      cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
+
       if (useSpin) cob.current.rotation.x += timeDiff * spin;
       else {
         cob.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cob.current.rotation.x) / 30;
       }
-    } else cob.current.rotation.x = Math.PI; // TODO: no need to set on every frame
+    } else {
+      cob.current.rotation.x = Math.PI; // TODO: no need to set on every frame
+      cob.current.position.x = -width / 2;
+    }
     prevTime = e.clock.elapsedTime;
   });
 
@@ -150,7 +95,6 @@ const Corn = (props) => {
     pointer.x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
     pointer.y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
   };
-
 
   const drag = (e) => {
     if (!pointer.down) return;
@@ -192,21 +136,30 @@ const Corn = (props) => {
     <group
       ref={cob}
       position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
-      scale={[1, 1, display === '3d' ? 1 : 0.3]}
+      scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
     >
       {
         kernals.map((kernal) => {
           const isCurrent = kernal.x === currentKernal.x && kernal.y === currentKernal.y;
           const position2D = [ // wrap to cylindar
             kernal.x,
-            kernal.y + height / -2 - 2,
-            50,
+            kernal.y + height / -2,
+            5,
           ];
           const position3D = [ // 2d view
             kernal.x,
             Math.cos(kernal.y / arc) * radius,
             Math.sin(kernal.y / arc) * radius,
           ];
+          // TODO: would be nice to animate this but currently not performant
+          // TODO: look into instancing
+          const position = display === '3d' ? position3D : position2D;
+          // const position = [
+          //   lerp(position2D[0], position3D[0], lerpAmount),
+          //   lerp(position2D[1], position3D[1], lerpAmount),
+          //   lerp(position2D[2], position3D[2], lerpAmount),
+          // ];
+
           const rotation = display === '3d' ? (kernal.y / height) * (Math.PI * 2) : (Math.PI / -2);
           const model = gltf.scene.clone(true);
           const rootMesh = model.children.find(mesh => mesh.name === 'Root');
@@ -226,9 +179,9 @@ const Corn = (props) => {
           return (
             <group
               key={kernal.id}
-              args={[0.75, 32, 32]}
               rotation={[rotation, 0, 0]}
-              position={display === '3d' ? position3D : position2D}
+              // position={display === '3d' ? position3D : position2D}
+              position={position}
             >
               <primitive
                 object={model}

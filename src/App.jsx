@@ -28,7 +28,7 @@ const App = () => {
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
   const [results, setResults] = useState(false);
-  const [timer, setTimer] = useState(0);
+  const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
@@ -97,8 +97,14 @@ const App = () => {
     setCurrentKernal({ x: 0, y: start });
     setMove({ x: 0, y: 0 });
     addEventListener('keydown', handleKeydown);
+    const interval = setInterval(() => {
+      const { elapsed } = timer;
+      console.log(elapsed);
+      setTimer({ elapsed: elapsed + 1 });
+    }, 1000);
     return () => {
       removeEventListener('keydown', handleKeydown);
+      clearInterval(interval);
     };
   }, []);
 

@@ -13,18 +13,27 @@
     width: calc(100vw - 6rem);
     max-width: 36rem;
     color: white;
-    background: rgba(194, 194, 22, .6);
+    background: rgba(182, 104, 7, .6);
     backdrop-filter: blur(2rem);
     -webkit-backdrop-filter: blur(2rem);
     display: flex;
     flex-direction: column;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    border: .5rem solid rgba(235, 235, 171, 0.8);
+    border: .5rem solid rgba(88, 13, 38, .7);
     border-radius: 1rem;
     padding: .5rem 1rem;
     font-size: .75rem;
     box-shadow: 0 .5rem .25rem rgba(81, 23, 8, 0.2);
+
+    .option {
+      display: flex;
+      align-items: center;
+      p {
+        text-shadow: 1px 0px white;
+      }
+    }
   }
 
   .close {
