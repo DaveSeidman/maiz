@@ -17,7 +17,7 @@ let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
 
-const radToDeg = rad => rad * (180 / Math.PI);
+// const radToDeg = rad => rad * (180 / Math.PI);
 
 
 const Corn = (props) => {
@@ -25,7 +25,7 @@ const Corn = (props) => {
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
-  const pointer = { x: null, y: null, down: false };
+  const pointer = { x: null, y: null, down: true };
   const cob = useRef();
 
   useEffect(() => {
@@ -43,8 +43,9 @@ const Corn = (props) => {
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
     spin *= 0.9;
+    cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
+
     if (display === '3d') {
-      cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
       if (useSpin) cob.current.rotation.x += timeDiff * spin;
       else {
         cob.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cob.current.rotation.x) / 30;

@@ -2,12 +2,14 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import inobonce from 'inobounce'; // eslint-disable-line
 import Controls from './components/Controls';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
-import Maze from './maze';
 import Instructions from './components/Instructions';
+import Results from './components/Results';
+import Maze from './maze';
+import inobonce from 'inobounce'; // eslint-disable-line
+
 import './index.scss';
 
 const App = () => {
@@ -20,6 +22,7 @@ const App = () => {
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
+  const [results, setResults] = useState(false);
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -52,7 +55,7 @@ const App = () => {
     const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
       if (mode === 'normal' && kernal.status === 'wall') return;
-      if (kernal.end) console.log('you win!');
+      setResults(kernal.end);
       kernal.status = 'chewed';
       setKernals(kernals);
     }
@@ -108,6 +111,7 @@ const App = () => {
       />
       <Footer />
       {instructions && (<Instructions setInstructions={setInstructions} />)}
+      {results && (<Results />)}
     </div>
   );
 };

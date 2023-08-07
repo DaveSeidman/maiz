@@ -4,21 +4,34 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background: rgba(255, 255, 255, .4);
+  backdrop-filter: blur(.25rem);
 
   &-content {
     position: absolute;
     width: 50%;
     background: rgba(240, 240, 150, .5);
-    backdrop-filter: blur(1rem);
+    backdrop-filter: blur(2rem);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border: .5rem solid rgba(160, 130, 40, .8);
     border-radius: 1rem;
+    padding: .5rem 1rem;
   }
 
   .close {
     position: absolute;
+    top: 0;
+    right: 0;
+    margin: 2rem;
+    width: 3rem;
+    height: 3rem;
+    color: black;
+    font-size: 2rem;
+    border: .25rem solid rgba(160, 130, 40, .8);
+    background: rgba(240, 240, 150, .5);
+    border-radius: 50%;
   }
 }
