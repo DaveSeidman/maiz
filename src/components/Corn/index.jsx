@@ -1,5 +1,4 @@
-// TODO: currently the targetRotation and useSpin and fighting,
-// create a "rotationFrom" property that gets set based on which user interaction was most recent... a scroll/drag or a kernal move
+// TODO: increase and decrease rotations with dragging as well
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';

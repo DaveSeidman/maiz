@@ -27,6 +27,11 @@
     font-size: .75rem;
     box-shadow: 0 .5rem .25rem rgba(81, 23, 8, 0.2);
 
+    &-title {
+      letter-spacing: .5rem;
+      text-shadow: 1px 0px white;
+    }
+
     .graphic {
       position: absolute;
       width: 10rem;

@@ -17,19 +17,19 @@ import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
 
-let count = 0;
+const count = 0;
 
 const App = () => {
   const width = 34;
   const height = 26;
   const canvasRef = useRef();
-  const [instructions, setInstructions] = useState(true);
+  const [instructions, setInstructions] = useState(false);
+  const [results, setResults] = useState(true);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
-  const [results, setResults] = useState(false);
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
 
@@ -112,8 +112,8 @@ const App = () => {
     const interval = setInterval(() => {
       // const { elapsed } = timer;
       // const newTime = elapsed + 1;
-      count += 1;
-      console.log(count);
+      // count += 1;
+      // console.log(count);
       // setTimer({ elapsed: newTime });
     }, 1000);
   };
@@ -177,6 +177,7 @@ const App = () => {
         setMove={setMove}
         display={display}
         setDisplay={setDisplay}
+        setResults={setResults}
         mode={mode}
         setMode={setMode}
       />

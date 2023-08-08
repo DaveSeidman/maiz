@@ -9,8 +9,8 @@ const Instructions = (props) => {
   return (
     <div className="instructions">
       <div className="instructions-content">
-        <h2 className="instructions-content-title">Maíz</h2>
-        <p>Use the arrow keys to make your way to the right end of the cob and escape the "maíz"!</p>
+        <h1 className="instructions-content-title">- MAIZ- </h1>
+        <p>Use the arrow keys to make your way to the right end of the cob and escape the maiz!</p>
         <p>In regular mode, you can only move to yellow kernals, brown kernals are walls.</p>
         {/* <div className="options"> */}
         <h3>Options</h3>
@@ -20,9 +20,8 @@ const Instructions = (props) => {
           <input type="radio" name="mode" value="normal" />
           <label for="normal">free</label>
           <input type="radio" name="mode" value="free" />
-          <img className="graphic" src={cornImage} alt="corn" />
         </div> */}
-
+        <img className="graphic" src={cornImage} alt="corn" />
         <button
           type="button"
           onClick={start}

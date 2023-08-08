@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.scss';
+import { EmailShareButton, FacebookShareButton, LinkedinShareButton, RedditShareButton, TwitterShareButton } from 'react-share';
 import { messages } from '../../assets/content.json';
 
 const Results = (props) => {
@@ -12,6 +13,14 @@ const Results = (props) => {
     <div className="results">
       <div className="results-content">
         <h2>{message}</h2>
+        {/* <a href="share">Share Your Results!</a> */}
+        <TwitterShareButton
+          url="http://daveseidman.com"
+          title="try your luck!"
+          caption="a corn maze"
+          hashtags={['webgl', 'corn']}
+        >share me
+        </TwitterShareButton>
       </div>
     </div>
   );

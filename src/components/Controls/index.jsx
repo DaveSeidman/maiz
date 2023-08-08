@@ -2,7 +2,7 @@ import React from 'react';
 import './index.scss';
 
 const Controls = (props) => {
-  const { setMove, display, setDisplay, mode, setMode } = props;
+  const { setMove, display, setDisplay, setResults, mode, setMode } = props;
 
   const handleClick = (move) => {
     setMove(move);
@@ -32,6 +32,7 @@ const Controls = (props) => {
       <div className="options">
         <button type="button" onClick={toggleDisplay}>{display.toUpperCase()}</button>
         <button type="button" onClick={toggleMode}>{mode}</button>
+        <button type="button" onClick={() => { setResults(true); }}>show results</button>
       </div>
     </div>
   );
