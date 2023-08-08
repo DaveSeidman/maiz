@@ -9,4 +9,11 @@ export default defineConfig({
     host: true,
   },
   base: '/cornmaze/',
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[ext]', // This line retains original filenames
+      },
+    },
+  },
 });
