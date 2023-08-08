@@ -5,6 +5,8 @@ import { Canvas } from '@react-three/fiber';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
 import { Environment, CameraShake } from '@react-three/drei';
 import { Camera, PCFSoftShadowMap } from 'three';
+import Analytics from 'analytics';
+import googleAnalytics from '@analytics/google-analytics';
 import Controls from './components/Controls';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
@@ -13,9 +15,19 @@ import Results from './components/Results';
 import Score from './components/Score';
 import envMap from './assets/limpopo_golf_course_2k.hdr';
 import Maze from './maze';
+
 import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
+
+const analytics = Analytics({
+  app: 'website data',
+  plugins: [
+    googleAnalytics({
+      measurementIds: ['G-33LFT6EBGE'],
+    }),
+  ],
+});
 
 const count = 0;
 
@@ -110,6 +122,7 @@ const App = () => {
   const start = () => {
     setInstructions(false);
     setMove({ x: 0, y: 0 });
+    analytics.track('start', { difficulty: 'medium' });
     const interval = setInterval(() => {
       // const { elapsed } = timer;
       // const newTime = elapsed + 1;
@@ -138,7 +151,7 @@ const App = () => {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 80 }}
-        dpr={0.25}
+        dpr={0.5}
       >
 
         {display === '3d' && (<CameraShake {...config} />)}
