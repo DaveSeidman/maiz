@@ -144,12 +144,15 @@ const Corn = (props) => {
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
   useEffect(() => {
     const temp = new Object3D();
-    // for (let i = 0; i < kernals.length; i += 1) {
     kernals.forEach((kernal, index) => {
       const { x } = kernal;
       const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
       const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
+      const rotation = (kernal.y / height) * (Math.PI * 2);
+      const scale = Math.random();
       temp.position.set(x, y, z);
+      temp.rotation.set(rotation, 0, 0);
+      temp.scale.set(scale, scale, scale);
       temp.updateMatrix();
       mesh.current.setMatrixAt(index, temp.matrix);
     });
