@@ -138,7 +138,7 @@ const App = () => {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 80 }}
-        dpr={0.5}
+        dpr={0.25}
       >
 
         {display === '3d' && (<CameraShake {...config} />)}
@@ -146,6 +146,7 @@ const App = () => {
           <Corn
             kernals={kernals}
             currentKernal={currentKernal}
+            setMove={setMove}
             width={width}
             height={height}
             display={display}

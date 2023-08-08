@@ -1,10 +1,10 @@
 // TODO: increase and decrease rotations with dragging as well
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Color } from 'three';
+import { MeshStandardMaterial, Color, Raycaster, Vector3, Vector2 } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
@@ -19,8 +19,8 @@ const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false };
 
 const Corn = (props) => {
+  const { setMove } = props;
   const gltf = useGLTF(kernalModel);
-
   const normal_0 = new MeshStandardMaterial({ color: 0xf2bb00, roughness: 0.2, metalness: 0.05 });
   const normal_1 = new MeshStandardMaterial({ color: 0xf9ee00, roughness: 0.2, metalness: 0.05 });
   const cobMat = new MeshStandardMaterial({ color: 0xe2cd7e, roughness: 1, metalness: 0.01 });
@@ -29,27 +29,16 @@ const Corn = (props) => {
   const cornWallMat_1 = new MeshStandardMaterial({ color: 0x401811, roughness: 0.1, metalness: 0.05 });
   const cornWallMat_2 = new MeshStandardMaterial({ color: 0x2a0911, roughness: 0.25, metalness: 0.05 });
   const selectedCornMat = new MeshStandardMaterial({ color: new Color(14 / 255, 176 / 255, 179 / 255), roughness: 0.2, metalness: 0.5 });
-
   const glowMat = new MeshStandardMaterial({ color: 0x0000ff, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, emissive: 0x0200ff, emissiveIntensity: 2 });
-
-  const materials = {
-    wall: cornWallMat,
-    wall_0: cornWallMat_0,
-    wall_1: cornWallMat_1,
-    wall_2: cornWallMat_2,
-    normal_0,
-    normal_1,
-    selected: selectedCornMat,
-    selectedCornMat,
-    cobMat,
-    glowMat,
-  };
+  const materials = { wall: cornWallMat, wall_0: cornWallMat_0, wall_1: cornWallMat_1, wall_2: cornWallMat_2, normal_0, normal_1, selected: selectedCornMat, selectedCornMat, cobMat, glowMat };
 
   const { currentKernal, kernals, width, height, display } = props;
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
   const cob = useRef();
+
+  const { camera } = useThree();
 
   useEffect(() => {
     targetPosition = -currentKernal.x;
@@ -112,6 +101,24 @@ const Corn = (props) => {
     pointer.down = false;
   };
 
+  const clickToMove = (e) => {
+    const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
+    const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
+    const currentKernalMesh = cob.current.children.find(kernal => kernal.name === `${currentKernal.x}-${currentKernal.y}`);
+    const kernalScreenPosition = new Vector3();
+    kernalScreenPosition.setFromMatrixPosition(currentKernalMesh.matrixWorld);
+    kernalScreenPosition.project(camera);
+    const moveX = clickX - kernalScreenPosition.x;
+    const moveY = clickY - kernalScreenPosition.y;
+    const move = { x: 0, y: 0 };
+    if (Math.abs(moveX) > Math.abs(moveY)) {
+      move.x = moveX > 0 ? 1 : -1;
+    } else {
+      move.y = moveY > 0 ? -1 : 1;
+    }
+    setMove(move);
+  };
+
   useEffect(() => {
     addEventListener('mousewheel', moveCob);
     addEventListener('touchstart', dragStart);
@@ -120,6 +127,7 @@ const Corn = (props) => {
     addEventListener('touchmove', drag);
     addEventListener('pointerup', dragEnd);
     addEventListener('pointerleave', dragEnd);
+    addEventListener('click', clickToMove);
     return () => {
       removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
@@ -128,6 +136,7 @@ const Corn = (props) => {
       removeEventListener('pointerdown', dragStart);
       removeEventListener('pointerup', dragEnd);
       removeEventListener('pointerleave', dragEnd);
+      removeEventListener('click', clickToMove);
     };
   });
 
@@ -178,6 +187,7 @@ const Corn = (props) => {
           return (
             <group
               key={kernal.id}
+              name={`${kernal.x}-${kernal.y}`}
               rotation={[rotation, 0, 0]}
               // position={display === '3d' ? position3D : position2D}
               position={position}
