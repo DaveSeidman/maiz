@@ -15,7 +15,7 @@ const Results = (props) => {
         <h2>{message}</h2>
         {/* <a href="share">Share Your Results!</a> */}
         <TwitterShareButton
-          url="http://daveseidman.com"
+          url="https://daveseidman.gitlab.io/cornmaze"
           title="try your luck!"
           caption="a corn maze"
           hashtags={['webgl', 'corn']}

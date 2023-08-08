@@ -23,8 +23,8 @@ const App = () => {
   const width = 34;
   const height = 26;
   const canvasRef = useRef();
-  const [instructions, setInstructions] = useState(false);
-  const [results, setResults] = useState(true);
+  const [instructions, setInstructions] = useState(true);
+  const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
@@ -53,6 +53,7 @@ const App = () => {
         break;
     }
     setMove({ x, y });
+    if (key === 'r') setTimeout(() => { setResults(true); });
   };
 
   useEffect(() => {

@@ -13,7 +13,7 @@ const Instructions = (props) => {
         <p>Use the arrow keys to make your way to the right end of the cob and escape the maiz!</p>
         <p>In regular mode, you can only move to yellow kernals, brown kernals are walls.</p>
         {/* <div className="options"> */}
-        <h3>Options</h3>
+        {/* <h3>Options</h3> */}
         {/* <div className="option">
           <p>Mode:</p>
           <label for="normal">normal</label>
