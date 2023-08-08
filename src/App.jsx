@@ -10,6 +10,7 @@ import googleAnalytics from '@analytics/google-analytics';
 import Controls from './components/Controls';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
+import CornInstanced from './components/CornInstanced';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
 import Score from './components/Score';
@@ -30,6 +31,7 @@ const analytics = Analytics({
 });
 
 const count = 0;
+// let interval = null;
 
 const App = () => {
   const width = 34;
@@ -44,6 +46,7 @@ const App = () => {
   const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
+  const [instanced, setInstanced] = useState(false);
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -80,7 +83,10 @@ const App = () => {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y });
         return;
       }
-      setResults(kernal.end);
+      if (kernal.end) {
+        setResults(true);
+        analytics.track('end', { difficulty: 'medium' });
+      }
       if (kernal.status !== 'chewed') setKernalsEaten(kernalsEaten + 1);
 
       kernal.status = 'chewed';
@@ -123,13 +129,11 @@ const App = () => {
     setInstructions(false);
     setMove({ x: 0, y: 0 });
     analytics.track('start', { difficulty: 'medium' });
-    const interval = setInterval(() => {
-      // const { elapsed } = timer;
-      // const newTime = elapsed + 1;
-      // count += 1;
-      // console.log(count);
-      // setTimer({ elapsed: newTime });
-    }, 1000);
+    // console.log('set interval');
+    // interval = setInterval(() => {
+    //   count += 1;
+    //   setTimer({ elapsed: count });
+    // }, 1000);
   };
 
   const config = {
@@ -156,21 +160,28 @@ const App = () => {
 
         {display === '3d' && (<CameraShake {...config} />)}
         <EffectComposer>
-          <Corn
-            kernals={kernals}
-            currentKernal={currentKernal}
-            setMove={setMove}
-            width={width}
-            height={height}
-            display={display}
-          />
-          {/* <pointLight
-            position={[5, 10, 10]}
-            intensity={2}
-            castShadow
-            shadow-mapSize={512}
-            shadow-bias={0.00001}
-          /> */}
+          {instanced
+            ? (
+              <CornInstanced
+                kernals={kernals}
+                currentKernal={currentKernal}
+                setMove={setMove}
+                width={width}
+                height={height}
+                display={display}
+              />
+            )
+            : (
+              <Corn
+                kernals={kernals}
+                currentKernal={currentKernal}
+                setMove={setMove}
+                width={width}
+                height={height}
+                display={display}
+              />
+            )
+          }
           <directionalLight
             intensity={2}
             position={[5, -10, 0]}
@@ -203,9 +214,18 @@ const App = () => {
       <button
         className="instructionsToggle"
         type="button"
-        onClick={() => { setInstructions(true); }}
+        onClick={() => {
+          setInstructions(true);
+          // clearInterval(interval);
+        }}
       >
         ?
+      </button>
+      <button
+        type="button"
+        className="instanceToggle"
+        onClick={() => { setInstanced(!instanced); }}
+      >Instanced
       </button>
       <Footer />
       {instructions && (

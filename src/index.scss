@@ -52,6 +52,12 @@ html, body {
     font-size: 2rem;
   }
 
+  .instanceToggle {
+    position: absolute;
+    left: 0;
+    bottom: 4rem;
+  }
+
   $dark-orange: #f56425;
 
   button {
