@@ -4,13 +4,23 @@
       "Welcome to Maiz!"
     ],
     "won": [
-      "Corngratulations! You made it to the end of the maze!",
-      "A-Maze-Ing work... You Won!",
+      "Corn-gratulations! You escaped the Maiz!",
+      "A-Maiz-Ing work... You Won!",
       "Way to Play it By Ear!"
     ],
     "lost": [
       "Aw Shucks... you lost!",
       "You failed but try again!"
-    ]
+    ],
+    "share": {
+      "titles": [
+        "The free webgame that \"Big Corn\" doesn't want you to know about!",
+        "It's okay to be corny!",
+        "Checkout this A-Maiz-Ing game I just found!"
+      ],
+      "hashtags": [
+        "webgl", "reactthreefiber", "r3f"
+      ]
+    }
   }
 }
