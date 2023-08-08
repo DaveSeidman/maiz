@@ -188,14 +188,14 @@ const App = () => {
           <Environment files={envMap} background blur={0.3} exposure={0.5} />
         </EffectComposer>
       </Canvas>
-      <Controls
+      {/* <Controls
         setMove={setMove}
         display={display}
         setDisplay={setDisplay}
         setResults={setResults}
         mode={mode}
         setMode={setMode}
-      />
+      /> */}
       <Score
         timer={timer}
         kernalsEaten={kernalsEaten}
