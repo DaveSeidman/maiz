@@ -17,6 +17,8 @@ import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
 
+let count = 0;
+
 const App = () => {
   const width = 34;
   const height = 26;
@@ -106,11 +108,13 @@ const App = () => {
 
   const start = () => {
     setInstructions(false);
+    setMove({ x: 0, y: 0 });
     const interval = setInterval(() => {
-      const { elapsed } = timer;
-      const newTime = elapsed + 1;
-      console.log(elapsed);
-      setTimer({ elapsed: newTime });
+      // const { elapsed } = timer;
+      // const newTime = elapsed + 1;
+      count += 1;
+      console.log(count);
+      // setTimer({ elapsed: newTime });
     }, 1000);
   };
 

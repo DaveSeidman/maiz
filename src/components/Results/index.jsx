@@ -2,8 +2,6 @@ import React from 'react';
 import './index.scss';
 import { messages } from '../../assets/content.json';
 
-console.log(messages);
-
 const Results = (props) => {
   const { result } = props;
   // console.log('results');

@@ -1,5 +1,8 @@
 {
   "messages": {
+    "welcome": [
+      "Welcome to Maiz!"
+    ],
     "won": [
       "Corngratulations! You made it to the end of the maze!",
       "A-Maze-Ing work... You Won!",

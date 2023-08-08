@@ -17,7 +17,7 @@ let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
-const pointer = { x: null, y: null, down: true };
+const pointer = { x: null, y: null, down: false };
 
 const Corn = (props) => {
   const gltf = useGLTF(kernalModel);
