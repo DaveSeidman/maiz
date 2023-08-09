@@ -4,12 +4,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
 import { Environment, CameraShake } from '@react-three/drei';
-import { Camera, PCFSoftShadowMap } from 'three';
+import { Color, PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
-import Controls from './components/Controls';
+// import Controls from './components/Controls';
 import Footer from './components/Footer';
-import Corn from './components/Corn';
+// import Corn from './components/Corn';
 import CornInstanced from './components/CornInstanced';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
@@ -70,7 +70,7 @@ const App = () => {
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
     if (kernal) {
-      if (mode === 'normal' && kernal.status === 'wall') {
+      if (mode === 'normal' && kernal.type === 'wall') {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y });
         return;
       }
@@ -78,26 +78,42 @@ const App = () => {
         setResults(true);
         analytics.track('end', { difficulty: 'medium' });
       }
-      if (kernal.status !== 'chewed') setKernalsEaten(kernalsEaten + 1);
+      if (kernal.type !== 'chewed') setKernalsEaten(kernalsEaten + 1);
 
-      kernal.status = 'chewed';
+      kernal.type = 'chewed';
       setKernals(kernals);
     }
     setCurrentKernal({ x, y });
   }, [move]);
+
+  const colors = {
+    yellows: [
+      new Color('rgb(251, 225, 14)'),
+      new Color('rgb(214, 196, 18)'),
+      new Color('rgb(247, 229, 48)'),
+    ],
+    browns: [
+      new Color('rgb(109, 55, 13)'),
+      new Color('rgb(94, 17, 55)'),
+      new Color('rgb(56, 35, 4)'),
+    ],
+  };
+
+  const randomColor = base => colors[base][Math.floor(Math.random() * colors[base].length)];
 
   useEffect(() => {
     const { start, end, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {
-      row.forEach((col, x) => {
+      row.forEach((kernal, x) => {
         nextKernals.push({
           id,
           x,
           y,
-          material: col ? `wall_${Math.floor(Math.random() * 3)}` : `normal_${Math.floor(Math.random() * 2)}`,
-          status: col ? 'wall' : 'normal',
+          // material: col ? `wall_${Math.floor(Math.random() * 3)}` : `normal_${Math.floor(Math.random() * 2)}`,
+          color: randomColor(kernal ? 'browns' : 'yellows'),
+          type: kernal ? 'wall' : 'normal',
           highlight: x === 2 && y === 0,
           end: x === width && y === end,
         });
@@ -150,28 +166,16 @@ const App = () => {
 
         {display === '3d' && (<CameraShake {...config} />)}
         <EffectComposer>
-          {instanced
-            ? (
-              <CornInstanced
-                kernals={kernals}
-                currentKernal={currentKernal}
-                setMove={setMove}
-                width={width}
-                height={height}
-                display={display}
-              />
-            )
-            : (
-              <Corn
-                kernals={kernals}
-                currentKernal={currentKernal}
-                setMove={setMove}
-                width={width}
-                height={height}
-                display={display}
-              />
-            )
-          }
+
+          <CornInstanced
+            kernals={kernals}
+            currentKernal={currentKernal}
+            setMove={setMove}
+            width={width}
+            height={height}
+            display={display}
+          />
+
           <directionalLight
             intensity={2}
             position={[5, -10, 0]}
@@ -184,7 +188,7 @@ const App = () => {
           <ChromaticAberration offset={[0.002, 0.002]} />
           {/* <DepthOfField focusDistance={0.25} focalLength={display === '3d' ? 0.04 : 1} bokehScale={2} height={1024} /> */}
           <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
-          <Noise opacity={0.05} intensity={0.002} />
+          {/* <Noise opacity={0.05} intensity={0.002} /> */}
           <Vignette eskil={false} offset={0} darkness={0.8} />
           <Environment files={envMap} background blur={0.3} exposure={0.5} />
         </EffectComposer>

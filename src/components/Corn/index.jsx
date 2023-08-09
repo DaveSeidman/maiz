@@ -111,11 +111,11 @@ const Corn = (props) => {
     const moveX = clickX - kernalScreenPosition.x;
     const moveY = clickY - kernalScreenPosition.y;
     const move = { x: 0, y: 0 };
-    if (Math.abs(moveX) > Math.abs(moveY)) {
-      move.x = moveX > 0 ? 1 : -1;
-    } else {
-      move.y = moveY > 0 ? -1 : 1;
-    }
+    // if (Math.abs(moveX) > Math.abs(moveY)) {
+    move.x = moveX > 0 ? 1 : -1;
+    // } else {
+    move.y = moveY > 0 ? -1 : 1;
+    // }
     setMove(move);
   };
 
@@ -181,8 +181,8 @@ const Corn = (props) => {
           rootMesh.material = materials.cobMat;
           selectMesh.material = materials.glowMat;
           cutout.visible = false;
-          kernalMesh.material = isCurrent ? materials.selectedCornMat : materials[kernal.material]; // isCurrent ? materials.selectedCornMat : materials[kernal.status];
-          kernalMesh.visible = kernal.status !== 'chewed';
+          kernalMesh.material = isCurrent ? materials.selectedCornMat : materials[kernal.material]; // isCurrent ? materials.selectedCornMat : materials[kernal.type];
+          kernalMesh.visible = kernal.type !== 'chewed';
           selectMesh.visible = isCurrent;
           return (
             <group

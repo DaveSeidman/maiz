@@ -22,17 +22,6 @@ const pointer = { x: null, y: null, down: false };
 const Corn = (props) => {
   const { setMove } = props;
   const gltf = useGLTF(kernalModel);
-  const normal_0 = new MeshStandardMaterial({ color: 0xf2bb00, roughness: 0.2, metalness: 0.05 });
-  const normal_1 = new MeshStandardMaterial({ color: 0xf9ee00, roughness: 0.2, metalness: 0.05 });
-  const cobMat = new MeshStandardMaterial({ color: 0xe2cd7e, roughness: 1, metalness: 0.01 });
-  const cornWallMat = new MeshStandardMaterial({ color: 0x763d15, roughness: 0.7, metalness: 0.05 });
-  const cornWallMat_0 = new MeshStandardMaterial({ color: 0x450605, roughness: 0.2, metalness: 0.05 });
-  const cornWallMat_1 = new MeshStandardMaterial({ color: 0x401811, roughness: 0.1, metalness: 0.05 });
-  const cornWallMat_2 = new MeshStandardMaterial({ color: 0x2a0911, roughness: 0.25, metalness: 0.05 });
-  const selectedCornMat = new MeshStandardMaterial({ color: new Color(14 / 255, 176 / 255, 179 / 255), roughness: 0.2, metalness: 0.5 });
-  const glowMat = new MeshStandardMaterial({ color: 0x0000ff, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, emissive: 0x0200ff, emissiveIntensity: 2 });
-  const materials = { wall: cornWallMat, wall_0: cornWallMat_0, wall_1: cornWallMat_1, wall_2: cornWallMat_2, normal_0, normal_1, selected: selectedCornMat, selectedCornMat, cobMat, glowMat };
-
   const { currentKernal, kernals, width, height, display } = props;
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
@@ -41,7 +30,7 @@ const Corn = (props) => {
   const mesh = useRef();
 
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
-  const kernalMat = new MeshStandardMaterial({ roughness: 0.5, metalness: 0.2 });
+  const kernalMat = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.2 });
   const colors = {
     normal: new Color(0x00ff00),
     wall: new Color(0xff0000),
@@ -171,7 +160,7 @@ const Corn = (props) => {
       temp.rotation.set(rotation, 0, 0);
       temp.updateMatrix();
       mesh.current.setMatrixAt(index, temp.matrix);
-      mesh.current.setColorAt(index, colors[kernal.status]);
+      mesh.current.setColorAt(index, kernal.color);
     });
   }, [kernals]);
 
