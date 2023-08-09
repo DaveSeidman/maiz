@@ -4,7 +4,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Color, SphereGeometry, Object3D, Raycaster, Vector3, Vector2, MeshNormalMaterial, InstancedBufferAttribute } from 'three';
+import { MeshStandardMaterial, Color, SphereGeometry, Object3D, Raycaster, Vector3, Vector2, Matrix4, MeshNormalMaterial, InstancedBufferAttribute } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
@@ -37,6 +37,15 @@ const Corn = (props) => {
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
   const cob = useRef();
+  const mesh = useRef();
+
+  const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
+  const kernalMat = new MeshStandardMaterial({ roughness: 0.5, metalness: 0.2 });
+  const colors = {
+    normal: new Color(0x00ff00),
+    wall: new Color(0xff0000),
+    chewed: new Color(0x0000ff),
+  };
 
   const { camera } = useThree();
 
@@ -49,6 +58,20 @@ const Corn = (props) => {
     if (currentKernal.y === 0 && prevKernalY === height - 1) setRotations(rotations + 1);
     setUseSpin(false);
     prevKernalY = currentKernal.y;
+
+    const index = (currentKernal.y * (width + 1)) + currentKernal.x;
+    console.log(currentKernal.y, height, currentKernal.x, width, index);
+    mesh.current.setColorAt(index, colors.chewed);
+    // const temp = new Matrix4();
+    // mesh.current.getMatrixAt(index, temp);
+    // const scaleMatrix = new Matrix4().makeScale(0.5, 0.5, 0.5);
+    // temp.multiply(scaleMatrix);
+    // temp.makeScale(0.5, 0.5, 0.5);
+    // console.log(currentKernal, index, temp);
+    // mesh.current.updateMatrixWorld();
+    // mesh.current.setMatrixAt(index, temp);
+    mesh.current.instanceColor.needsUpdate = true;
+    // mesh.current.needsUpdate = true;
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -127,7 +150,7 @@ const Corn = (props) => {
     addEventListener('touchmove', drag);
     addEventListener('pointerup', dragEnd);
     addEventListener('pointerleave', dragEnd);
-    addEventListener('click', clickToMove);
+    // addEventListener('click', clickToMove);
     return () => {
       removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
@@ -136,12 +159,11 @@ const Corn = (props) => {
       removeEventListener('pointerdown', dragStart);
       removeEventListener('pointerup', dragEnd);
       removeEventListener('pointerleave', dragEnd);
-      removeEventListener('click', clickToMove);
+      // removeEventListener('click', clickToMove);
     };
   });
 
-  const mesh = useRef();
-  const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
+
   useEffect(() => {
     const temp = new Object3D();
     kernals.forEach((kernal, index) => {
@@ -149,15 +171,14 @@ const Corn = (props) => {
       const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
       const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
       const rotation = (kernal.y / height) * (Math.PI * 2);
-      const scale = Math.random();
       temp.position.set(x, y, z);
       temp.rotation.set(rotation, 0, 0);
-      temp.scale.set(scale, scale, scale);
       temp.updateMatrix();
       mesh.current.setMatrixAt(index, temp.matrix);
+      mesh.current.setColorAt(index, colors[kernal.status]);
     });
-    // }
   }, [kernals]);
+
   return (
     <group
       ref={cob}
@@ -167,13 +188,13 @@ const Corn = (props) => {
       <instancedMesh
         ref={mesh}
         geometry={kernalMesh.geometry}
-        // material={normalMat}
+        material={kernalMat}
         // instanceMatrix={matrix}
         // count={count}
         args={[null, null, kernals.length]}
       >
         {/* <boxGeometry args={[0.5, 0.5, 0.5]} /> */}
-        <meshNormalMaterial />
+        {/* <meshNormalMaterial /> */}
       </instancedMesh>
     </group>
   );

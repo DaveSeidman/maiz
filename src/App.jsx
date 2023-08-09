@@ -43,10 +43,10 @@ const App = () => {
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
   const [display, setDisplay] = useState('3d');
-  const [mode, setMode] = useState('normal');
+  const [mode, setMode] = useState('free');
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
-  const [instanced, setInstanced] = useState(false);
+  const [instanced, setInstanced] = useState(true);
 
   const handleKeydown = ({ key }) => {
     let x = 0;
