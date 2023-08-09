@@ -8,6 +8,7 @@ import { MeshStandardMaterial, Color, SphereGeometry, Object3D, Raycaster, Vecto
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
+const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
@@ -60,18 +61,13 @@ const Corn = (props) => {
     prevKernalY = currentKernal.y;
 
     const index = (currentKernal.y * (width + 1)) + currentKernal.x;
-    console.log(currentKernal.y, height, currentKernal.x, width, index);
+    const temp = new Matrix4();
+    mesh.current.getMatrixAt(index, temp);
+    temp.multiply(scaleZero);
     mesh.current.setColorAt(index, colors.chewed);
-    // const temp = new Matrix4();
-    // mesh.current.getMatrixAt(index, temp);
-    // const scaleMatrix = new Matrix4().makeScale(0.5, 0.5, 0.5);
-    // temp.multiply(scaleMatrix);
-    // temp.makeScale(0.5, 0.5, 0.5);
-    // console.log(currentKernal, index, temp);
-    // mesh.current.updateMatrixWorld();
-    // mesh.current.setMatrixAt(index, temp);
+    mesh.current.setMatrixAt(index, temp);
     mesh.current.instanceColor.needsUpdate = true;
-    // mesh.current.needsUpdate = true;
+    mesh.current.instanceMatrix.needsUpdate = true;
   }, [currentKernal]);
 
   useFrame((e) => {

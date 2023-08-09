@@ -43,29 +43,20 @@ const App = () => {
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
   const [display, setDisplay] = useState('3d');
-  const [mode, setMode] = useState('free');
+  const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
-  const [instanced, setInstanced] = useState(true);
+  const [instanced, setInstanced] = useState(false);
 
   const handleKeydown = ({ key }) => {
     let x = 0;
     let y = 0;
     switch (key) {
-      case 'ArrowLeft':
-        x = -1;
-        break;
-      case 'ArrowRight':
-        x = 1;
-        break;
-      case 'ArrowUp':
-        y = -1;
-        break;
-      case 'ArrowDown':
-        y = 1;
-        break;
-      default:
-        break;
+      case 'ArrowLeft': x = -1; break;
+      case 'ArrowRight': x = 1; break;
+      case 'ArrowUp': y = -1; break;
+      case 'ArrowDown': y = 1; break;
+      default: break;
     }
     setMove({ x, y });
     if (key === 'r') setTimeout(() => { setResults(true); });
@@ -94,7 +85,6 @@ const App = () => {
     }
     setCurrentKernal({ x, y });
   }, [move]);
-
 
   useEffect(() => {
     const { start, end, cells } = new Maze(height / 2, width / 2);
@@ -199,14 +189,6 @@ const App = () => {
           <Environment files={envMap} background blur={0.3} exposure={0.5} />
         </EffectComposer>
       </Canvas>
-      {/* <Controls
-        setMove={setMove}
-        display={display}
-        setDisplay={setDisplay}
-        setResults={setResults}
-        mode={mode}
-        setMode={setMode}
-      /> */}
       <Score
         timer={timer}
         kernalsEaten={kernalsEaten}
