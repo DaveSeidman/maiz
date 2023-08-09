@@ -19,27 +19,32 @@ const radius = 5;
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
 const pointerMovementThreshold = 10;
+const kernalLifeThreshold = 30;
+const poppedKernals = [];
 
 const Corn = (props) => {
-  const { setMove } = props;
+  const { setMove, currentKernal, kernals, width, height, display } = props;
 
   const gltf = useGLTF(kernalModel);
-  const { currentKernal, kernals, width, height, display } = props;
+  const { camera } = useThree();
+
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
-  const cob = useRef();
+
+  const cobRef = useRef();
   const kernalsRef = useRef();
   const basesRef = useRef();
   const cursorRef = useRef();
-  const lightRef = useRef();
+
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
   const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
+  const poppedMeshes = gltf.scene.children.filter(child => child.name.indexOf('Popped') >= 0);
+
   const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.33 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
-  const { camera } = useThree();
 
   useEffect(() => {
     // adjust cob position / rotation
@@ -64,13 +69,18 @@ const Corn = (props) => {
     const { x } = currentKernal;
     const y = Math.cos(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
     const z = Math.sin(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
-    const y2 = Math.cos(currentKernal.y / arc) * ((radius + 5) + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
-    const z2 = Math.sin(currentKernal.y / arc) * ((radius + 5) + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
-
     const rotation = (currentKernal.y / height) * (Math.PI * 2);
     cursorRef.current.position.set(x, y, z);
     cursorRef.current.rotation.set(rotation, 0, 0);
-    lightRef.current.position.set(x, y2, z2);
+
+    // pop a kernal!
+    // TODO: determine if this kernal was already "popped"
+    const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
+    // console.log(poppedKernal);
+    poppedKernal.position.set(x, y, z);
+    poppedKernal.rotation.set(rotation, 0, 0);
+    cobRef.current.add(poppedKernal);
+    poppedKernals.push({ mesh: poppedKernal, life: 0, velocity: new Vector3(0, y, z).normalize().multiplyScalar(0.1) });
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -79,15 +89,25 @@ const Corn = (props) => {
     lerpAmount += ((display === '3d' ? 1 : 0) - lerpAmount) / 100;
     // console.log(lerpAmount);
     if (display === '3d') {
-      cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
+      cobRef.current.position.x += (targetPosition - cobRef.current.position.x) / 20;
 
-      if (useSpin) cob.current.rotation.x += timeDiff * spin;
+      if (useSpin) cobRef.current.rotation.x += timeDiff * spin;
       else {
-        cob.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cob.current.rotation.x) / 30;
+        cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
       }
+
+      poppedKernals.forEach((kernal, index) => {
+        // console.log(kernal);
+        kernal.life += 1;
+        kernal.mesh.position.add(kernal.velocity);
+        if (kernal.life >= kernalLifeThreshold) {
+          cobRef.current.remove(kernal.mesh);
+          poppedKernals.splice(index, 1);
+        }
+      });
     } else {
-      cob.current.rotation.x = Math.PI; // TODO: no need to set on every frame
-      cob.current.position.x = -width / 2;
+      cobRef.current.rotation.x = Math.PI; // TODO: no need to set on every frame
+      cobRef.current.position.x = -width / 2;
     }
     prevTime = e.clock.elapsedTime;
   });
@@ -189,7 +209,7 @@ const Corn = (props) => {
 
   return (
     <group
-      ref={cob}
+      ref={cobRef}
       position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
       scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
     >
@@ -212,14 +232,6 @@ const Corn = (props) => {
         ref={cursorRef}
         geometry={cursorMesh.geometry}
         material={cursorMaterial}
-      />
-      <pointLight
-        key="light"
-        ref={lightRef}
-        castShadow
-        intensity={1}
-        shadow-mapSize={1024}
-        shadow-bias={0.00001}
       />
     </group>
   );

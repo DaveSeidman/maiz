@@ -159,7 +159,7 @@ const App = () => {
       <Canvas
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
-        camera={{ fov: 80 }}
+        camera={{ fov: 60 }}
         dpr={0.75}
       >
         {display === '3d' && (<CameraShake {...config} />)}
@@ -182,7 +182,7 @@ const App = () => {
           />
           {/* <ChromaticAberration offset={[0.002, 0.002]} /> */}
           {/* <DepthOfField focusDistance={0.05} focalLength={display === '3d' ? 0.1 : 1} bokehScale={2} height={1024} /> */}
-          {/* <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} /> */}
+          <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
           <Noise opacity={0.05} intensity={0.002} />
           <Vignette eskil={false} offset={0} darkness={0.8} />
           <Environment files={envMap} background blur={0.3} exposure={0.5} />
