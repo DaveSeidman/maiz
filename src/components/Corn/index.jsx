@@ -32,6 +32,7 @@ const Corn = (props) => {
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
 
+  const groupRef = useRef();
   const cobRef = useRef();
   const kernalsRef = useRef();
   const basesRef = useRef();
@@ -80,6 +81,12 @@ const Corn = (props) => {
     poppedKernal.position.set(x, y, z);
     poppedKernal.rotation.set(rotation, 0, 0);
     cobRef.current.add(poppedKernal);
+    poppedKernal.updateMatrix();
+    const worldPos = new Vector3();
+    poppedKernal.getWorldPosition(worldPos);
+    console.log(worldPos);
+    groupRef.current.add(poppedKernal);
+    poppedKernal.position.set(worldPos.x, worldPos.y, worldPos.z);
     poppedKernals.push({ mesh: poppedKernal, life: 0, velocity: new Vector3(0, y, z).normalize().multiplyScalar(0.1) });
   }, [currentKernal]);
 
@@ -101,7 +108,7 @@ const Corn = (props) => {
         kernal.life += 1;
         kernal.mesh.position.add(kernal.velocity);
         if (kernal.life >= kernalLifeThreshold) {
-          cobRef.current.remove(kernal.mesh);
+          groupRef.current.remove(kernal.mesh);
           poppedKernals.splice(index, 1);
         }
       });
@@ -209,30 +216,34 @@ const Corn = (props) => {
 
   return (
     <group
-      ref={cobRef}
-      position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
-      scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
+      ref={groupRef}
     >
-      <instancedMesh
-        key="roots"
-        ref={basesRef}
-        geometry={baseMesh.geometry}
-        material={baseMaterial}
-        args={[null, null, kernals.length]}
-      />
-      <instancedMesh
-        key="kernals"
-        ref={kernalsRef}
-        geometry={kernalMesh.geometry}
-        material={kernalMaterial}
-        args={[null, null, kernals.length]}
-      />
-      <mesh
-        key="cursor"
-        ref={cursorRef}
-        geometry={cursorMesh.geometry}
-        material={cursorMaterial}
-      />
+      <group
+        ref={cobRef}
+        position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
+        scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
+      >
+        <instancedMesh
+          key="roots"
+          ref={basesRef}
+          geometry={baseMesh.geometry}
+          material={baseMaterial}
+          args={[null, null, kernals.length]}
+        />
+        <instancedMesh
+          key="kernals"
+          ref={kernalsRef}
+          geometry={kernalMesh.geometry}
+          material={kernalMaterial}
+          args={[null, null, kernals.length]}
+        />
+        <mesh
+          key="cursor"
+          ref={cursorRef}
+          geometry={cursorMesh.geometry}
+          material={cursorMaterial}
+        />
+      </group>
     </group>
   );
 };
