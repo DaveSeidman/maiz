@@ -7,10 +7,8 @@ import { Environment, CameraShake } from '@react-three/drei';
 import { Color, PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
-// import Controls from './components/Controls';
 import Footer from './components/Footer';
-// import Corn from './components/Corn';
-import CornInstanced from './components/CornInstanced';
+import Corn from './components/Corn';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
 import Score from './components/Score';
@@ -166,7 +164,7 @@ const App = () => {
       >
         {display === '3d' && (<CameraShake {...config} />)}
         <EffectComposer>
-          <CornInstanced
+          <Corn
             kernals={kernals}
             currentKernal={currentKernal}
             setMove={setMove}

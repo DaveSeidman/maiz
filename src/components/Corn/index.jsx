@@ -4,10 +4,11 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Color, Raycaster, Vector3, Vector2 } from 'three';
+import { MeshStandardMaterial, Color, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
+const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
@@ -16,31 +17,32 @@ let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
-const pointer = { x: null, y: null, down: false };
+const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
+const pointerMovementThreshold = 10;
 
 const Corn = (props) => {
   const { setMove } = props;
-  const gltf = useGLTF(kernalModel);
-  const normal_0 = new MeshStandardMaterial({ color: 0xf2bb00, roughness: 0.2, metalness: 0.05 });
-  const normal_1 = new MeshStandardMaterial({ color: 0xf9ee00, roughness: 0.2, metalness: 0.05 });
-  const cobMat = new MeshStandardMaterial({ color: 0xe2cd7e, roughness: 1, metalness: 0.01 });
-  const cornWallMat = new MeshStandardMaterial({ color: 0x763d15, roughness: 0.7, metalness: 0.05 });
-  const cornWallMat_0 = new MeshStandardMaterial({ color: 0x450605, roughness: 0.2, metalness: 0.05 });
-  const cornWallMat_1 = new MeshStandardMaterial({ color: 0x401811, roughness: 0.1, metalness: 0.05 });
-  const cornWallMat_2 = new MeshStandardMaterial({ color: 0x2a0911, roughness: 0.25, metalness: 0.05 });
-  const selectedCornMat = new MeshStandardMaterial({ color: new Color(14 / 255, 176 / 255, 179 / 255), roughness: 0.2, metalness: 0.5 });
-  const glowMat = new MeshStandardMaterial({ color: 0x0000ff, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.9, emissive: 0x0200ff, emissiveIntensity: 2 });
-  const materials = { wall: cornWallMat, wall_0: cornWallMat_0, wall_1: cornWallMat_1, wall_2: cornWallMat_2, normal_0, normal_1, selected: selectedCornMat, selectedCornMat, cobMat, glowMat };
 
+  const gltf = useGLTF(kernalModel);
   const { currentKernal, kernals, width, height, display } = props;
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
   const cob = useRef();
-
+  const kernalsRef = useRef();
+  const basesRef = useRef();
+  const cursorRef = useRef();
+  const lightRef = useRef();
+  const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
+  const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
+  const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
+  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.33 });
+  const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
+  const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
   const { camera } = useThree();
 
   useEffect(() => {
+    // adjust cob position / rotation
     targetPosition = -currentKernal.x;
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
@@ -49,13 +51,33 @@ const Corn = (props) => {
     if (currentKernal.y === 0 && prevKernalY === height - 1) setRotations(rotations + 1);
     setUseSpin(false);
     prevKernalY = currentKernal.y;
+
+    // remove chewed kernals
+    const index = (currentKernal.y * (width + 1)) + currentKernal.x;
+    const temp = new Matrix4();
+    kernalsRef.current.getMatrixAt(index, temp);
+    temp.multiply(scaleZero);
+    kernalsRef.current.setMatrixAt(index, temp);
+    kernalsRef.current.instanceMatrix.needsUpdate = true;
+
+    // set cursor position
+    const { x } = currentKernal;
+    const y = Math.cos(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+    const z = Math.sin(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+    const y2 = Math.cos(currentKernal.y / arc) * ((radius + 5) + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+    const z2 = Math.sin(currentKernal.y / arc) * ((radius + 5) + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+
+    const rotation = (currentKernal.y / height) * (Math.PI * 2);
+    cursorRef.current.position.set(x, y, z);
+    cursorRef.current.rotation.set(rotation, 0, 0);
+    lightRef.current.position.set(x, y2, z2);
   }, [currentKernal]);
 
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
     spin *= 0.9;
     lerpAmount += ((display === '3d' ? 1 : 0) - lerpAmount) / 100;
-
+    // console.log(lerpAmount);
     if (display === '3d') {
       cob.current.position.x += (targetPosition - cob.current.position.x) / 20;
 
@@ -82,6 +104,8 @@ const Corn = (props) => {
     pointer.down = true;
     pointer.x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
     pointer.y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    pointer.startX = pointer.x;
+    pointer.startY = pointer.y;
   };
 
   const drag = (e) => {
@@ -102,21 +126,26 @@ const Corn = (props) => {
   };
 
   const clickToMove = (e) => {
-    const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
-    const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
-    const currentKernalMesh = cob.current.children.find(kernal => kernal.name === `${currentKernal.x}-${currentKernal.y}`);
-    const kernalScreenPosition = new Vector3();
-    kernalScreenPosition.setFromMatrixPosition(currentKernalMesh.matrixWorld);
-    kernalScreenPosition.project(camera);
-    const moveX = clickX - kernalScreenPosition.x;
-    const moveY = clickY - kernalScreenPosition.y;
-    const move = { x: 0, y: 0 };
-    // if (Math.abs(moveX) > Math.abs(moveY)) {
-    move.x = moveX > 0 ? 1 : -1;
-    // } else {
-    move.y = moveY > 0 ? -1 : 1;
-    // }
-    setMove(move);
+    const pointerMovement = Math.sqrt(Math.pow(pointer.startX - pointer.x, 2) + Math.pow(pointer.startY - pointer.y, 2));
+    console.log('click to move', pointerMovement);
+    if (pointerMovement < pointerMovementThreshold) {
+      // TODO: check these multipliers
+      const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
+      const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
+
+      const kernalScreenPosition = new Vector3();
+      kernalScreenPosition.setFromMatrixPosition(cursorRef.current.matrixWorld);
+      kernalScreenPosition.project(camera);
+      const moveX = clickX - kernalScreenPosition.x;
+      const moveY = clickY - kernalScreenPosition.y;
+      const move = { x: 0, y: 0 };
+      if (Math.abs(moveX) > Math.abs(moveY)) {
+        move.x = moveX > 0 ? 1 : -1;
+      } else {
+        move.y = moveY > 0 ? -1 : 1;
+      }
+      setMove(move);
+    }
   };
 
   useEffect(() => {
@@ -140,66 +169,58 @@ const Corn = (props) => {
     };
   });
 
+
+  useEffect(() => {
+    const temp = new Object3D();
+    kernals.forEach((kernal, index) => {
+      const { x } = kernal;
+      const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
+      const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
+      const rotation = (kernal.y / height) * (Math.PI * 2);
+      temp.position.set(x, y, z);
+      temp.rotation.set(rotation, 0, 0);
+      temp.updateMatrix();
+      kernalsRef.current.setMatrixAt(index, temp.matrix);
+      kernalsRef.current.setColorAt(index, kernal.color);
+      basesRef.current.setMatrixAt(index, temp.matrix);
+    });
+  }, [kernals]);
+
+
   return (
     <group
       ref={cob}
       position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
       scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
     >
-      {
-        kernals.map((kernal) => {
-          const isCurrent = kernal.x === currentKernal.x && kernal.y === currentKernal.y;
-          const position2D = [ // wrap to cylindar
-            kernal.x,
-            kernal.y + height / -2,
-            5,
-          ];
-          const position3D = [ // 2d view
-            kernal.x,
-            Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1),
-            Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1),
-          ];
-          // TODO: would be nice to animate this but currently not performant
-          // TODO: look into instancing
-          const position = display === '3d' ? position3D : position2D;
-          // const position = [
-          //   lerp(position2D[0], position3D[0], lerpAmount),
-          //   lerp(position2D[1], position3D[1], lerpAmount),
-          //   lerp(position2D[2], position3D[2], lerpAmount),
-          // ];
-
-          const rotation = display === '3d' ? (kernal.y / height) * (Math.PI * 2) : (Math.PI / -2);
-          const model = gltf.scene.clone(true);
-          const rootMesh = model.children.find(mesh => mesh.name === 'Root');
-          const kernalMesh = model.children.find(mesh => mesh.name === 'Kernal');
-          const selectMesh = model.children.find(mesh => mesh.name === 'Select');
-          const cutout = model.children.find(mesh => mesh.name === 'Cutout');
-          rootMesh.receiveShadow = true;
-          kernalMesh.castShadow = true;
-          kernalMesh.receiveShadow = true;
-          selectMesh.castShadow = true;
-          rootMesh.material = materials.cobMat;
-          selectMesh.material = materials.glowMat;
-          cutout.visible = false;
-          kernalMesh.material = isCurrent ? materials.selectedCornMat : materials[kernal.material]; // isCurrent ? materials.selectedCornMat : materials[kernal.type];
-          kernalMesh.visible = kernal.type !== 'chewed';
-          selectMesh.visible = isCurrent;
-          return (
-            <group
-              key={kernal.id}
-              name={`${kernal.x}-${kernal.y}`}
-              rotation={[rotation, 0, 0]}
-              // position={display === '3d' ? position3D : position2D}
-              position={position}
-            >
-              <primitive
-                object={model}
-                scale={display === '3d' ? [1, 1, 1] : [0.75, 0.75, 0.75]}
-              />
-            </group>
-          );
-        })
-      }
+      <instancedMesh
+        key="roots"
+        ref={basesRef}
+        geometry={baseMesh.geometry}
+        material={baseMaterial}
+        args={[null, null, kernals.length]}
+      />
+      <instancedMesh
+        key="kernals"
+        ref={kernalsRef}
+        geometry={kernalMesh.geometry}
+        material={kernalMaterial}
+        args={[null, null, kernals.length]}
+      />
+      <mesh
+        key="cursor"
+        ref={cursorRef}
+        geometry={cursorMesh.geometry}
+        material={cursorMaterial}
+      />
+      <pointLight
+        key="light"
+        ref={lightRef}
+        castShadow
+        intensity={1}
+        shadow-mapSize={1024}
+        shadow-bias={0.00001}
+      />
     </group>
   );
 };
