@@ -8,7 +8,7 @@ export default defineConfig({
     port: 8080,
     host: true,
   },
-  base: '/maiz/',
+  // base: '/maiz/',
   build: {
     rollupOptions: {
       output: {
