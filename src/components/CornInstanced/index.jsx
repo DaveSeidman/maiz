@@ -4,7 +4,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Color, SphereGeometry, Object3D, Raycaster, Vector3, Vector2, Matrix4, MeshNormalMaterial, InstancedBufferAttribute } from 'three';
+import { MeshStandardMaterial, Color, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
@@ -17,29 +17,32 @@ let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
-const pointer = { x: null, y: null, down: false };
+const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
+const pointerMovementThreshold = 10;
 
 const Corn = (props) => {
   const { setMove } = props;
+
   const gltf = useGLTF(kernalModel);
   const { currentKernal, kernals, width, height, display } = props;
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [arc, setArc] = useState((height / 2) / Math.PI);
   const cob = useRef();
-  const mesh = useRef();
-
+  const kernalsRef = useRef();
+  const basesRef = useRef();
+  const cursorRef = useRef();
+  const lightRef = useRef();
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
-  const kernalMat = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.2 });
-  const colors = {
-    normal: new Color(0x00ff00),
-    wall: new Color(0xff0000),
-    chewed: new Color(0x0000ff),
-  };
-
+  const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
+  const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
+  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.33 });
+  const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
+  const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
   const { camera } = useThree();
 
   useEffect(() => {
+    // adjust cob position / rotation
     targetPosition = -currentKernal.x;
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
@@ -49,14 +52,25 @@ const Corn = (props) => {
     setUseSpin(false);
     prevKernalY = currentKernal.y;
 
+    // remove chewed kernals
     const index = (currentKernal.y * (width + 1)) + currentKernal.x;
     const temp = new Matrix4();
-    mesh.current.getMatrixAt(index, temp);
+    kernalsRef.current.getMatrixAt(index, temp);
     temp.multiply(scaleZero);
-    mesh.current.setColorAt(index, colors.chewed);
-    mesh.current.setMatrixAt(index, temp);
-    mesh.current.instanceColor.needsUpdate = true;
-    mesh.current.instanceMatrix.needsUpdate = true;
+    kernalsRef.current.setMatrixAt(index, temp);
+    kernalsRef.current.instanceMatrix.needsUpdate = true;
+
+    // set cursor position
+    const { x } = currentKernal;
+    const y = Math.cos(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+    const z = Math.sin(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+    const y2 = Math.cos(currentKernal.y / arc) * ((radius + 5) + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+    const z2 = Math.sin(currentKernal.y / arc) * ((radius + 5) + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
+
+    const rotation = (currentKernal.y / height) * (Math.PI * 2);
+    cursorRef.current.position.set(x, y, z);
+    cursorRef.current.rotation.set(rotation, 0, 0);
+    lightRef.current.position.set(x, y2, z2);
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -90,6 +104,8 @@ const Corn = (props) => {
     pointer.down = true;
     pointer.x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
     pointer.y = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+    pointer.startX = pointer.x;
+    pointer.startY = pointer.y;
   };
 
   const drag = (e) => {
@@ -110,21 +126,26 @@ const Corn = (props) => {
   };
 
   const clickToMove = (e) => {
-    const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
-    const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
-    const currentKernalMesh = cob.current.children.find(kernal => kernal.name === `${currentKernal.x}-${currentKernal.y}`);
-    const kernalScreenPosition = new Vector3();
-    kernalScreenPosition.setFromMatrixPosition(currentKernalMesh.matrixWorld);
-    kernalScreenPosition.project(camera);
-    const moveX = clickX - kernalScreenPosition.x;
-    const moveY = clickY - kernalScreenPosition.y;
-    const move = { x: 0, y: 0 };
-    if (Math.abs(moveX) > Math.abs(moveY)) {
-      move.x = moveX > 0 ? 1 : -1;
-    } else {
-      move.y = moveY > 0 ? -1 : 1;
+    const pointerMovement = Math.sqrt(Math.pow(pointer.startX - pointer.x, 2) + Math.pow(pointer.startY - pointer.y, 2));
+    console.log('click to move', pointerMovement);
+    if (pointerMovement < pointerMovementThreshold) {
+      // TODO: check these multipliers
+      const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
+      const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
+
+      const kernalScreenPosition = new Vector3();
+      kernalScreenPosition.setFromMatrixPosition(cursorRef.current.matrixWorld);
+      kernalScreenPosition.project(camera);
+      const moveX = clickX - kernalScreenPosition.x;
+      const moveY = clickY - kernalScreenPosition.y;
+      const move = { x: 0, y: 0 };
+      if (Math.abs(moveX) > Math.abs(moveY)) {
+        move.x = moveX > 0 ? 1 : -1;
+      } else {
+        move.y = moveY > 0 ? -1 : 1;
+      }
+      setMove(move);
     }
-    setMove(move);
   };
 
   useEffect(() => {
@@ -135,7 +156,7 @@ const Corn = (props) => {
     addEventListener('touchmove', drag);
     addEventListener('pointerup', dragEnd);
     addEventListener('pointerleave', dragEnd);
-    // addEventListener('click', clickToMove);
+    addEventListener('click', clickToMove);
     return () => {
       removeEventListener('mousewheel', moveCob);
       removeEventListener('touchstart', dragStart);
@@ -144,12 +165,13 @@ const Corn = (props) => {
       removeEventListener('pointerdown', dragStart);
       removeEventListener('pointerup', dragEnd);
       removeEventListener('pointerleave', dragEnd);
-      // removeEventListener('click', clickToMove);
+      removeEventListener('click', clickToMove);
     };
   });
 
 
   useEffect(() => {
+    console.log('setting kernal positions');
     const temp = new Object3D();
     kernals.forEach((kernal, index) => {
       const { x } = kernal;
@@ -159,8 +181,9 @@ const Corn = (props) => {
       temp.position.set(x, y, z);
       temp.rotation.set(rotation, 0, 0);
       temp.updateMatrix();
-      mesh.current.setMatrixAt(index, temp.matrix);
-      mesh.current.setColorAt(index, kernal.color);
+      kernalsRef.current.setMatrixAt(index, temp.matrix);
+      kernalsRef.current.setColorAt(index, kernal.color);
+      basesRef.current.setMatrixAt(index, temp.matrix);
     });
   }, [kernals]);
 
@@ -171,16 +194,33 @@ const Corn = (props) => {
       scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
     >
       <instancedMesh
-        ref={mesh}
-        geometry={kernalMesh.geometry}
-        material={kernalMat}
-        // instanceMatrix={matrix}
-        // count={count}
+        key="roots"
+        ref={basesRef}
+        geometry={baseMesh.geometry}
+        material={baseMaterial}
         args={[null, null, kernals.length]}
-      >
-        {/* <boxGeometry args={[0.5, 0.5, 0.5]} /> */}
-        {/* <meshNormalMaterial /> */}
-      </instancedMesh>
+      />
+      <instancedMesh
+        key="kernals"
+        ref={kernalsRef}
+        geometry={kernalMesh.geometry}
+        material={kernalMaterial}
+        args={[null, null, kernals.length]}
+      />
+      <mesh
+        key="cursor"
+        ref={cursorRef}
+        geometry={cursorMesh.geometry}
+        material={cursorMaterial}
+      />
+      <pointLight
+        key="light"
+        ref={lightRef}
+        castShadow
+        intensity={1}
+        shadow-mapSize={1024}
+        shadow-bias={0.00001}
+      />
     </group>
   );
 };

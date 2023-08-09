@@ -46,7 +46,6 @@ const App = () => {
   const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
-  const [instanced, setInstanced] = useState(false);
 
   const handleKeydown = ({ key }) => {
     let x = 0;
@@ -60,6 +59,8 @@ const App = () => {
     }
     setMove({ x, y });
     if (key === 'r') setTimeout(() => { setResults(true); });
+    if (key === 'e') setTimeout(() => { setResults(false); });
+    if (key === 'Escape') setInstructions(false);
   };
 
   useEffect(() => {
@@ -93,9 +94,9 @@ const App = () => {
       new Color('rgb(247, 229, 48)'),
     ],
     browns: [
-      new Color('rgb(109, 55, 13)'),
-      new Color('rgb(94, 17, 55)'),
-      new Color('rgb(56, 35, 4)'),
+      new Color('rgb(50, 40, 13)'),
+      new Color('rgb(35, 17, 25)'),
+      new Color('rgb(56, 35, 10)'),
     ],
   };
 
@@ -161,12 +162,10 @@ const App = () => {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 80 }}
-        dpr={0.5}
+        dpr={0.75}
       >
-
         {display === '3d' && (<CameraShake {...config} />)}
         <EffectComposer>
-
           <CornInstanced
             kernals={kernals}
             currentKernal={currentKernal}
@@ -175,20 +174,18 @@ const App = () => {
             height={height}
             display={display}
           />
-
           <directionalLight
             intensity={2}
-            position={[5, -10, 0]}
-            target-position={[-5, 0, 0]}
+            position={[0, -10, 0]}
+            target-position={[-5, -10, 0]}
             castShadow
             shadow-mapSize={1024}
             shadow-bias={0.00001}
           />
-          {/* <ambientLight color={0xffdd11} intensity={-0.5} /> */}
-          <ChromaticAberration offset={[0.002, 0.002]} />
-          {/* <DepthOfField focusDistance={0.25} focalLength={display === '3d' ? 0.04 : 1} bokehScale={2} height={1024} /> */}
-          <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
-          {/* <Noise opacity={0.05} intensity={0.002} /> */}
+          {/* <ChromaticAberration offset={[0.002, 0.002]} /> */}
+          {/* <DepthOfField focusDistance={0.05} focalLength={display === '3d' ? 0.1 : 1} bokehScale={2} height={1024} /> */}
+          {/* <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} /> */}
+          <Noise opacity={0.05} intensity={0.002} />
           <Vignette eskil={false} offset={0} darkness={0.8} />
           <Environment files={envMap} background blur={0.3} exposure={0.5} />
         </EffectComposer>
@@ -206,12 +203,6 @@ const App = () => {
         }}
       >
         ?
-      </button>
-      <button
-        type="button"
-        className="instanceToggle"
-        onClick={() => { setInstanced(!instanced); }}
-      >Instanced
       </button>
       <Footer />
       {instructions && (
