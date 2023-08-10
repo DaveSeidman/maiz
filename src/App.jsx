@@ -39,7 +39,7 @@ const App = () => {
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justChewed: false });
+  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
@@ -68,28 +68,27 @@ const App = () => {
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
-    // const justChewed = kernal.type !== 'chewed';
 
-    let justChewed = false;
+    let justPopped = false;
     if (kernal) {
       if (mode === 'normal' && kernal.type === 'wall') {
-        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justChewed });
+        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
         return;
       }
       if (kernal.end) {
         setResults(true);
         analytics.track('end', { difficulty: 'medium' });
       }
-      if (kernal.type !== 'chewed') {
-        justChewed = true;
+      if (kernal.type !== 'popped') {
+        justPopped = true;
         setKernalsEaten(kernalsEaten + 1);
       }
 
-      kernal.type = 'chewed';
+      kernal.type = 'popped';
       setKernals(kernals);
     }
 
-    setCurrentKernal({ x, y, justChewed });
+    setCurrentKernal({ x, y, justPopped });
   }, [move]);
 
   const colors = {
@@ -126,7 +125,7 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
-    setCurrentKernal({ x: 0, y: start, justChewed: false });
+    setCurrentKernal({ x: 0, y: start, justPopped: false });
     setMove({ x: 0, y: 0 });
     addEventListener('keydown', handleKeydown);
 

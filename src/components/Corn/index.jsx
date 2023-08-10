@@ -58,7 +58,7 @@ const Corn = (props) => {
     setUseSpin(false);
     prevKernalY = currentKernal.y;
 
-    // remove chewed kernals
+    // remove popped kernals
     const index = (currentKernal.y * (width + 1)) + currentKernal.x;
     const temp = new Matrix4();
     kernalsRef.current.getMatrixAt(index, temp);
@@ -75,7 +75,7 @@ const Corn = (props) => {
     cursorRef.current.rotation.set(rotation, 0, 0);
 
     // pop a kernal!
-    if (currentKernal.justChewed) {
+    if (currentKernal.justPopped) {
       const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
       poppedKernal.position.set(x, y, z);
       cobRef.current.add(poppedKernal);
