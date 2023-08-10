@@ -1,5 +1,7 @@
 // TODO: change 'normal' to 'path'
 // TODO: remove all !important's in CSS
+// TODO: better color on close / open instructions buttons
+// TODO: use some textures and normal maps
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
@@ -32,23 +34,26 @@ const count = 0;
 // let interval = null;
 
 const App = () => {
-  const width = 14;// 34;
-  const height = 26;
+  // const width = 14;// 34;
+  // const height = 26;
   const canvasRef = useRef();
-  const [start, setStart] = useState(false);
+  const [width, setWidth] = useState(34);
+  const [height, setHeight] = useState(26);
+  // const [start, setStart] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [instructions, setInstructions] = useState(true);
+  const [page, setPage] = useState('instructions');
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
+  const [currentKernal, setCurrentKernal] = useState({ x: width / 2, y: 0, justPopped: false });
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
-    if (instructions || results) return;
+    if (instructions || results || animating) return;
     let x = 0;
     let y = 0;
     switch (key) {
@@ -78,7 +83,8 @@ const App = () => {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
         return;
       }
-      if (kernal.end) {
+      if (kernal.end && !animating) {
+        console.log('this is being triggered', animating);
         setResults(true);
         analytics.track('end', { difficulty: 'medium' });
       }
@@ -128,7 +134,7 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
-    setCurrentKernal({ x: 0, y: start, justPopped: false });
+    setCurrentKernal({ x: width / 2, y: start, justPopped: false });
     setMove({ x: 0, y: 0 });
   }, []);
 
@@ -137,11 +143,31 @@ const App = () => {
     return () => {
       removeEventListener('keydown', handleKeydown);
     };
-  }, [instructions, results]);
+  }, [instructions, results, animating]);
+
+  const setDifficulty = (e) => {
+    console.log(e);
+  };
 
   const startGame = () => {
-    setInstructions(false);
-    setStart(true);
+    // setInstructions(false);
+    setAnimating(true);
+    const startKernal = kernals.find(kernal => kernal.start);
+    const endKernal = kernals.find(kernal => kernal.end);
+    setCurrentKernal(endKernal);
+    setPage('end');
+    console.log('REACH THE END OF THE MAZE');
+    setTimeout(() => {
+      setPage('start');
+      setCurrentKernal(startKernal);
+      console.log('START FROM THIS KERNAL');
+    }, 2000);
+    setTimeout(() => {
+      setPage('go');
+      setAnimating(false);
+      setInstructions(false);
+      console.log('START THE GAME!');
+    }, 4000);
     setMove({ x: 0, y: 0 });
     analytics.track('start', { difficulty: 'medium' });
     // console.log('set interval');
@@ -218,6 +244,8 @@ const App = () => {
         instructions={instructions}
         setInstructions={setInstructions}
         startGame={startGame}
+        setDifficult={setDifficulty}
+        page={page}
       />
       <Results
         results={results}
