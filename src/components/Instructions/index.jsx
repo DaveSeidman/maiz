@@ -10,7 +10,7 @@ const Instructions = (props) => {
     <div className={`instructions modalContainer ${instructions ? '' : 'hidden'}`}>
       <div className="instructions-content modal">
         <h1 className="instructions-content-title">- MAIZ- </h1>
-        <h2>{messages.instructions[page]}</h2>
+        <p>{messages.instructions[page]}</p>
         <p>Tap on the cob or use the arrow keys to make your way to the right end of the cob and escape the maiz!</p>
         <p>🟡 Pop the yellow kernals 🟡<br /> 🟤 brown kernals are walls 🟤</p>
         <div className="option">

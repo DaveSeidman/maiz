@@ -18,12 +18,14 @@
 
     .option {
       display: flex;
+      flex-direction: column;
       align-items: center;
       p {
         text-shadow: 1px 0px white;
       }
       button {
         white-space: nowrap;
+        margin: 0;
       }
     }
   }
