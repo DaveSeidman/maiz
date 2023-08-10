@@ -43,7 +43,7 @@ const Corn = (props) => {
   const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
   const poppedMeshes = gltf.scene.children.filter(child => child.name.indexOf('Popped') >= 0);
 
-  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.33 });
+  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.23 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
 
@@ -79,15 +79,14 @@ const Corn = (props) => {
     const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
     // console.log(poppedKernal);
     poppedKernal.position.set(x, y, z);
-    poppedKernal.rotation.set(rotation, 0, 0);
+    // poppedKernal.rotation.set(rotation, 0, 0);
     cobRef.current.add(poppedKernal);
     poppedKernal.updateMatrix();
     const worldPos = new Vector3();
     poppedKernal.getWorldPosition(worldPos);
-    console.log(worldPos);
     groupRef.current.add(poppedKernal);
     poppedKernal.position.set(worldPos.x, worldPos.y, worldPos.z);
-    poppedKernals.push({ mesh: poppedKernal, life: 0, velocity: new Vector3(0, y, z).normalize().multiplyScalar(0.1) });
+    poppedKernals.push({ mesh: poppedKernal, life: 0, velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1) });
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -103,10 +102,13 @@ const Corn = (props) => {
         cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
       }
 
+      const gravity = new Vector3(1, -2, 1);
       poppedKernals.forEach((kernal, index) => {
         // console.log(kernal);
         kernal.life += 1;
-        kernal.mesh.position.add(kernal.velocity);
+        kernal.velocity.multiply(gravity);
+        console.log(kernal.velocity);
+        kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
         if (kernal.life >= kernalLifeThreshold) {
           groupRef.current.remove(kernal.mesh);
           poppedKernals.splice(index, 1);

@@ -88,13 +88,13 @@ const App = () => {
   const colors = {
     yellows: [
       new Color('rgb(251, 225, 14)'),
-      new Color('rgb(214, 196, 18)'),
+      new Color('rgb(253, 244, 18)'),
       new Color('rgb(247, 229, 48)'),
     ],
     browns: [
-      new Color('rgb(50, 40, 13)'),
-      new Color('rgb(35, 17, 25)'),
-      new Color('rgb(56, 35, 10)'),
+      new Color('rgb(10 , 10, 5)'),
+      new Color('rgb(15, 7, 8)'),
+      new Color('rgb(13, 8, 6)'),
     ],
   };
 
