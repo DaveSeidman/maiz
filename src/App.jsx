@@ -39,7 +39,7 @@ const App = () => {
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0 });
+  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justChewed: false });
   const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
@@ -68,21 +68,28 @@ const App = () => {
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
     const kernal = kernals.find(k => k.x === x && k.y === y);
+    // const justChewed = kernal.type !== 'chewed';
+
+    let justChewed = false;
     if (kernal) {
       if (mode === 'normal' && kernal.type === 'wall') {
-        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y });
+        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justChewed });
         return;
       }
       if (kernal.end) {
         setResults(true);
         analytics.track('end', { difficulty: 'medium' });
       }
-      if (kernal.type !== 'chewed') setKernalsEaten(kernalsEaten + 1);
+      if (kernal.type !== 'chewed') {
+        justChewed = true;
+        setKernalsEaten(kernalsEaten + 1);
+      }
 
       kernal.type = 'chewed';
       setKernals(kernals);
     }
-    setCurrentKernal({ x, y });
+
+    setCurrentKernal({ x, y, justChewed });
   }, [move]);
 
   const colors = {
@@ -110,7 +117,6 @@ const App = () => {
           id,
           x,
           y,
-          // material: col ? `wall_${Math.floor(Math.random() * 3)}` : `normal_${Math.floor(Math.random() * 2)}`,
           color: randomColor(kernal ? 'browns' : 'yellows'),
           type: kernal ? 'wall' : 'normal',
           highlight: x === 2 && y === 0,
@@ -120,13 +126,12 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
-    setCurrentKernal({ x: 0, y: start });
+    setCurrentKernal({ x: 0, y: start, justChewed: false });
     setMove({ x: 0, y: 0 });
     addEventListener('keydown', handleKeydown);
 
     return () => {
       removeEventListener('keydown', handleKeydown);
-      // clearInterval(interval);
     };
   }, []);
 
@@ -185,7 +190,7 @@ const App = () => {
           <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
           <Noise opacity={0.05} intensity={0.002} />
           <Vignette eskil={false} offset={0} darkness={0.8} />
-          <Environment files={envMap} background blur={0.3} exposure={0.5} />
+          <Environment files={envMap} background blur={0.1} exposure={1} />
         </EffectComposer>
       </Canvas>
       <Score

@@ -43,7 +43,7 @@ const Corn = (props) => {
   const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
   const poppedMeshes = gltf.scene.children.filter(child => child.name.indexOf('Popped') >= 0);
 
-  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.23 });
+  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.23, envMapIntensity: 1 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
 
@@ -75,23 +75,22 @@ const Corn = (props) => {
     cursorRef.current.rotation.set(rotation, 0, 0);
 
     // pop a kernal!
-    // TODO: determine if this kernal was already "popped"
-    const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
-    // console.log(poppedKernal);
-    poppedKernal.position.set(x, y, z);
-    // poppedKernal.rotation.set(rotation, 0, 0);
-    cobRef.current.add(poppedKernal);
-    poppedKernal.updateMatrix();
-    const worldPos = new Vector3();
-    poppedKernal.getWorldPosition(worldPos);
-    groupRef.current.add(poppedKernal);
-    poppedKernal.position.set(worldPos.x, worldPos.y, worldPos.z);
-    poppedKernals.push({
-      mesh: poppedKernal,
-      life: 0,
-      velocity: new Vector3(3 * (Math.random() - 0.5), -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1),
-      rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
-    });
+    if (currentKernal.justChewed) {
+      const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
+      poppedKernal.position.set(x, y, z);
+      cobRef.current.add(poppedKernal);
+      poppedKernal.updateMatrix();
+      const worldPos = new Vector3();
+      poppedKernal.getWorldPosition(worldPos);
+      groupRef.current.add(poppedKernal);
+      poppedKernal.position.set(worldPos.x, worldPos.y, worldPos.z);
+      poppedKernals.push({
+        mesh: poppedKernal,
+        life: 0,
+        velocity: new Vector3(3 * (Math.random() - 0.5), -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1),
+        rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
+      });
+    }
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -107,12 +106,8 @@ const Corn = (props) => {
         cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
       }
 
-      const gravity = new Vector3(1, -1.1, 1);
       poppedKernals.forEach((kernal, index) => {
-        // console.log(kernal);
         kernal.life += 1;
-        // kernal.velocity.multiply(gravity);
-        // console.log(kernal.velocity);
         kernal.velocity.y -= 0.001;
         kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
         kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
