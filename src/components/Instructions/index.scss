@@ -1,12 +1,5 @@
 .instructions {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, .4);
-  backdrop-filter: blur(.25rem);
-  -webkit-backdrop-filter: blur(.25rem);
+  transition: visibility .5s, opacity .5s;
 
   &-content {
 

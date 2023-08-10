@@ -12,14 +12,14 @@ import { messages } from '../../assets/content.json';
 const random = array => array[Math.floor(Math.random() * array.length)];
 
 const Results = (props) => {
-  const { result } = props;
-  const index = Math.floor(Math.random() * messages[result].length);
-  const message = messages[result][index];
+  const { results } = props;
+  const index = Math.floor(Math.random() * messages.won.length);
+  const message = messages.won[index];
 
   const url = 'https://daveseidman.gitlab.io/cornmaze';
 
   return (
-    <div className="results">
+    <div className={`results modalContainer ${results ? '' : 'hidden'}`}>
       <div className="results-content modal">
         <h2>{message}</h2>
         <div className="results-content-share">

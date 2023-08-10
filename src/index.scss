@@ -36,6 +36,11 @@ html, body {
     line-height: 1.5rem;
   }
 
+  .hidden {
+    visibility: hidden;
+    opacity: 0;
+  }
+
   .instructionsToggle {
     position: absolute;
     top: 0;
@@ -72,6 +77,17 @@ html, body {
     text-shadow: 1px 0 $dark-orange;
     box-shadow: 0 0 5px 5px rgb(8 136 25 / 25%);
     margin: 1rem;
+  }
+
+  .modalContainer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, .4);
+    backdrop-filter: blur(.25rem);
+    -webkit-backdrop-filter: blur(.25rem);
   }
 
   .modal {

@@ -1,15 +1,7 @@
 .results {
-  position: absolute;
-  inset: 0;
-  background-color: rgba(255, 255, 255, .5);
-  backdrop-filter: blur(.5rem);
-  -webkit-backdrop-filter: blur(.5rem);
-  display:flex;
-  justify-content: center;
-  align-items: center;
-
+  transition: visibility .5s, opacity .5s;
   &-content {
-    width: 50%;
+    // width: 50%;
 
     &-share {
       margin-bottom: 1rem;

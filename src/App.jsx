@@ -32,9 +32,10 @@ const count = 0;
 // let interval = null;
 
 const App = () => {
-  const width = 34;
+  const width = 14;// 34;
   const height = 26;
   const canvasRef = useRef();
+  const [start, setStart] = useState(false);
   const [instructions, setInstructions] = useState(true);
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
@@ -46,6 +47,8 @@ const App = () => {
   const [kernalsEaten, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
+    console.log(instructions, results);
+    // if (instructions || results) return;
     let x = 0;
     let y = 0;
     switch (key) {
@@ -99,7 +102,7 @@ const App = () => {
     ],
     browns: [
       new Color('rgb(10 , 10, 5)'),
-      new Color('rgb(15, 7, 8)'),
+      new Color('rgb(19, 8, 10)'),
       new Color('rgb(13, 8, 6)'),
     ],
   };
@@ -118,7 +121,7 @@ const App = () => {
           y,
           color: randomColor(kernal ? 'browns' : 'yellows'),
           type: kernal ? 'wall' : 'normal',
-          highlight: x === 2 && y === 0,
+          start: x === 0 && y === start,
           end: x === width && y === end,
         });
         id += 1;
@@ -134,8 +137,9 @@ const App = () => {
     };
   }, []);
 
-  const start = () => {
+  const startGame = () => {
     setInstructions(false);
+    setStart(true);
     setMove({ x: 0, y: 0 });
     analytics.track('start', { difficulty: 'medium' });
     // console.log('set interval');
@@ -169,6 +173,7 @@ const App = () => {
         {display === '3d' && (<CameraShake {...config} />)}
         <EffectComposer>
           <Corn
+            canvasRef={canvasRef}
             kernals={kernals}
             currentKernal={currentKernal}
             setMove={setMove}
@@ -184,7 +189,7 @@ const App = () => {
             shadow-mapSize={1024}
             shadow-bias={0.00001}
           />
-          {/* <ChromaticAberration offset={[0.002, 0.002]} /> */}
+          <ChromaticAberration offset={[0.002, 0.002]} />
           {/* <DepthOfField focusDistance={0.05} focalLength={display === '3d' ? 0.1 : 1} bokehScale={2} height={1024} /> */}
           <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
           <Noise opacity={0.05} intensity={0.002} />
@@ -207,17 +212,16 @@ const App = () => {
         ?
       </button>
       <Footer />
-      {instructions && (
       <Instructions
-        start={start}
+        instructions={instructions}
         setInstructions={setInstructions}
+        startGame={startGame}
       />
-      )}
-      {results && (
       <Results
+        results={results}
+        setResults={setResults}
         result="won"
       />
-      )}
     </div>
   );
 };

@@ -13,7 +13,7 @@ let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
-let lerpAmount = 1;
+// let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
@@ -23,8 +23,7 @@ const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
 const Corn = (props) => {
-  const { setMove, currentKernal, kernals, width, height, display } = props;
-
+  const { canvasRef, setMove, currentKernal, kernals, width, height, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -41,6 +40,7 @@ const Corn = (props) => {
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
   const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
+  const arrowMesh = gltf.scene.children.find(child => child.name === 'Arrow');
   const poppedMeshes = gltf.scene.children.filter(child => child.name.indexOf('Popped') >= 0);
 
   const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.23, envMapIntensity: 1 });
@@ -55,6 +55,7 @@ const Corn = (props) => {
     // this will set a rotations counter to be added to the targetRotations to preven that jump
     if (currentKernal.y === height - 1 && prevKernalY === 0) setRotations(rotations - 1);
     if (currentKernal.y === 0 && prevKernalY === height - 1) setRotations(rotations + 1);
+
     setUseSpin(false);
     prevKernalY = currentKernal.y;
 
@@ -96,30 +97,27 @@ const Corn = (props) => {
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
     spin *= 0.9;
-    lerpAmount += ((display === '3d' ? 1 : 0) - lerpAmount) / 100;
+    // lerpAmount += ((display === '3d' ? 1 : 0) - lerpAmount) / 100;
     // console.log(lerpAmount);
-    if (display === '3d') {
-      cobRef.current.position.x += (targetPosition - cobRef.current.position.x) / 20;
 
-      if (useSpin) cobRef.current.rotation.x += timeDiff * spin;
-      else {
-        cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
-      }
+    cobRef.current.position.x += (targetPosition - cobRef.current.position.x) / 20;
 
-      poppedKernals.forEach((kernal, index) => {
-        kernal.life += 1;
-        kernal.velocity.y -= 0.001;
-        kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
-        kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
-        if (kernal.life >= kernalLifeThreshold) {
-          groupRef.current.remove(kernal.mesh);
-          poppedKernals.splice(index, 1);
-        }
-      });
-    } else {
-      cobRef.current.rotation.x = Math.PI; // TODO: no need to set on every frame
-      cobRef.current.position.x = -width / 2;
+    if (useSpin) cobRef.current.rotation.x += timeDiff * spin;
+    else {
+      cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
     }
+
+    poppedKernals.forEach((kernal, index) => {
+      kernal.life += 1;
+      kernal.velocity.y -= 0.001;
+      kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
+      kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
+      if (kernal.life >= kernalLifeThreshold) {
+        groupRef.current.remove(kernal.mesh);
+        poppedKernals.splice(index, 1);
+      }
+    });
+
     prevTime = e.clock.elapsedTime;
   });
 
@@ -158,7 +156,6 @@ const Corn = (props) => {
 
   const clickToMove = (e) => {
     const pointerMovement = Math.sqrt(Math.pow(pointer.startX - pointer.x, 2) + Math.pow(pointer.startY - pointer.y, 2));
-    console.log('click to move', pointerMovement);
     if (pointerMovement < pointerMovementThreshold) {
       // TODO: check these multipliers
       const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
@@ -180,23 +177,25 @@ const Corn = (props) => {
   };
 
   useEffect(() => {
-    addEventListener('mousewheel', moveCob);
-    addEventListener('touchstart', dragStart);
-    addEventListener('pointerdown', dragStart);
-    addEventListener('pointermove', drag);
-    addEventListener('touchmove', drag);
-    addEventListener('pointerup', dragEnd);
-    addEventListener('pointerleave', dragEnd);
-    addEventListener('click', clickToMove);
+    // console.log(canvasRef.current);
+
+    canvasRef.current.addEventListener('mousewheel', moveCob);
+    canvasRef.current.addEventListener('touchstart', dragStart);
+    canvasRef.current.addEventListener('pointerdown', dragStart);
+    canvasRef.current.addEventListener('pointermove', drag);
+    canvasRef.current.addEventListener('touchmove', drag);
+    canvasRef.current.addEventListener('pointerup', dragEnd);
+    canvasRef.current.addEventListener('pointerleave', dragEnd);
+    canvasRef.current.addEventListener('click', clickToMove);
     return () => {
-      removeEventListener('mousewheel', moveCob);
-      removeEventListener('touchstart', dragStart);
-      removeEventListener('touchmove', drag);
-      removeEventListener('pointermove', drag);
-      removeEventListener('pointerdown', dragStart);
-      removeEventListener('pointerup', dragEnd);
-      removeEventListener('pointerleave', dragEnd);
-      removeEventListener('click', clickToMove);
+      canvasRef.current.removeEventListener('mousewheel', moveCob);
+      canvasRef.current.removeEventListener('touchstart', dragStart);
+      canvasRef.current.removeEventListener('touchmove', drag);
+      canvasRef.current.removeEventListener('pointermove', drag);
+      canvasRef.current.removeEventListener('pointerdown', dragStart);
+      canvasRef.current.removeEventListener('pointerup', dragEnd);
+      canvasRef.current.removeEventListener('pointerleave', dragEnd);
+      canvasRef.current.removeEventListener('click', clickToMove);
     };
   });
 
@@ -204,6 +203,7 @@ const Corn = (props) => {
   useEffect(() => {
     const temp = new Object3D();
     kernals.forEach((kernal, index) => {
+      //      | position around cylindar | barrel outwards towards the middle
       const { x } = kernal;
       const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
       const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
@@ -215,6 +215,19 @@ const Corn = (props) => {
       kernalsRef.current.setColorAt(index, kernal.color);
       basesRef.current.setMatrixAt(index, temp.matrix);
     });
+
+    const startKernal = kernals.find(kernal => kernal.start);
+    const endKernal = kernals.find(kernal => kernal.end);
+    const startArrow = arrowMesh.clone();
+    const endArrow = arrowMesh.clone();
+    startArrow.material = cursorMaterial;
+    endArrow.material = cursorMaterial;
+    startArrow.position.set(startKernal.x - 2, Math.cos(startKernal.y / arc) * radius, Math.sin(startKernal.y / arc) * radius);
+    startArrow.rotation.set((startKernal.y / height) * (Math.PI * 2), 0, 0);
+    endArrow.position.set(endKernal.x + 1.25, Math.cos(endKernal.y / arc) * radius, Math.sin(endKernal.y / arc) * radius);
+    endArrow.rotation.set((endKernal.y / height) * (Math.PI * 2), 0, 0);
+    cobRef.current.add(startArrow);
+    cobRef.current.add(endArrow);
   }, [kernals]);
 
 
