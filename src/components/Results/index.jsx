@@ -1,3 +1,4 @@
+// TODO: rerendering with timer
 import React from 'react';
 import './index.scss';
 import {
@@ -12,9 +13,11 @@ import { messages } from '../../assets/content.json';
 const random = array => array[Math.floor(Math.random() * array.length)];
 
 const Results = (props) => {
-  const { results } = props;
+  const { results, playAgain, timer, popCount, kernals } = props;
   const index = Math.floor(Math.random() * messages.won.length);
   const message = messages.won[index];
+
+  const resultsMessage = `You escaped the maze in ${timer} seconds and only popped ${Math.round((popCount / kernals.length) * 100)}% of the kernals!`;
 
   const url = 'https://daveseidman.gitlab.io/cornmaze';
 
@@ -22,6 +25,7 @@ const Results = (props) => {
     <div className={`results modal ${results ? '' : 'hidden'}`}>
       <div className="results-content modal-content">
         <h2>{message}</h2>
+        <p>{resultsMessage}</p>
         <div className="results-content-share">
           <h3>Now go and brag about it!</h3>
           <TwitterShareButton
@@ -55,6 +59,8 @@ const Results = (props) => {
           ><EmailIcon />
           </EmailShareButton>
         </div>
+
+        <button type="button" onClick={playAgain}>Play Again!</button>
       </div>
     </div>
   );

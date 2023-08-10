@@ -13,6 +13,11 @@ $dark-orange: #f56425;
   src: url('./assets/CornDemo-Regular.ttf');
 }
 
+@keyframes border-pulse {
+  0%   { border: rgba(0, 255, 255, 1) !important; }
+  50%  { border: rgba(0, 255, 255, 0) !important; }
+  100% { border: rgba(0, 255, 255, 1) !important; }
+}
 
 html, body {
   font-size: 16px;
@@ -73,6 +78,11 @@ html, body {
     text-shadow: 1px 0 $dark-orange;
     box-shadow: 0 0 5px 5px rgb(8 136 25 / 25%);
     margin: 1rem;
+
+    &.selected {
+      // animation: border-pulse 2s infinite;
+      border: 2px solid red;
+    }
   }
 
   .modal {

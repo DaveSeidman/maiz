@@ -16,16 +16,11 @@ import Results from './components/Results';
 import Score from './components/Score';
 import envMap from './assets/limpopo_golf_course_2k.hdr';
 import Maze from './maze';
+import { camshakeConfig, levels, colors } from './config';
 
 import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
-
-const levels = {
-  easy: { width: 12, height: 24 },
-  medium: { width: 18, height: 24 },
-  hard: { width: 24, height: 24 },
-};
 
 const analytics = Analytics({
   app: 'website data',
@@ -37,7 +32,7 @@ const analytics = Analytics({
 });
 
 const count = 0;
-// let interval = null;
+let interval = null;
 
 const App = () => {
   // const width = 14;// 34;
@@ -46,9 +41,10 @@ const App = () => {
   const [width, setWidth] = useState(levels.easy.width);
   const [height, setHeight] = useState(levels.easy.height);
   // const [start, setStart] = useState(false);
-  const [difficulty, setDifficulty] = useState('easy');
+  const [difficulty, setDifficulty] = useState('medium');
   const [animating, setAnimating] = useState(false);
   const [instructions, setInstructions] = useState(true);
+  const [playing, setPlaying] = useState(false);
   const [page, setPage] = useState('instructions');
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
@@ -57,8 +53,9 @@ const App = () => {
   const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1 });
   // const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
-  const [timer, setTimer] = useState({ elapsed: 0 });
-  const [kernalsEaten, setKernalsEaten] = useState(0);
+  const [timer, setTimer] = useState(0);
+  // const [timerInterval, setTimerInterval] = useState();
+  const [popCount, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
     if (instructions || results || animating) return;
@@ -91,15 +88,18 @@ const App = () => {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
         return;
       }
+      // TODO: implement focusKernal complete and then remove the check for animating here
       if (kernal.end && !animating) {
         console.log('this is being triggered', animating);
         setResults(true);
+        clearInterval(interval);
+        // clearInterval(interval);
         // TODO: include results here
         analytics.track('end', { difficulty: 'medium' });
       }
       if (kernal.type !== 'popped') {
         justPopped = true;
-        setKernalsEaten(kernalsEaten + 1);
+        setKernalsEaten(popCount + 1);
       }
 
       kernal.type = 'popped';
@@ -109,26 +109,12 @@ const App = () => {
     setCurrentKernal({ x, y, justPopped });
   }, [move]);
 
-  const colors = {
-    yellows: [
-      new Color('rgb(251, 225, 14)'),
-      new Color('rgb(253, 244, 18)'),
-      new Color('rgb(247, 229, 48)'),
-    ],
-    browns: [
-      new Color('rgb(10 , 10, 5)'),
-      new Color('rgb(19, 8, 10)'),
-      new Color('rgb(13, 8, 6)'),
-    ],
-  };
-
   const randomColor = base => colors[base][Math.floor(Math.random() * colors[base].length)];
 
   useEffect(() => {
-    const { width, height } = levels[difficulty];
-    setWidth(width);
-    setHeight(height);
-    setFocusKernal({ x: width / 2, y: 0 });
+    setWidth(levels[difficulty].width);
+    setHeight(levels[difficulty].height);
+    setFocusKernal({ x: levels[difficulty].width / 2, y: 0 });
   }, [difficulty]);
 
   useEffect(() => {
@@ -155,11 +141,27 @@ const App = () => {
     };
   }, [instructions, results, animating]);
 
+  useEffect(() => {
+    if (playing) {
+      interval = setInterval(() => setTimer(prevTimer => prevTimer + 1), 1000);
+    }
+
+    return () => {
+      console.log('startedReturned');
+      clearInterval(interval);
+    };
+  }, [playing]);
+
+  useEffect(() => {
+    console.log('instructions?', instructions);
+  }, [instructions]);
+
   const startGame = () => {
     // setInstructions(false);
     // setAnimating(true);
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
+    setPlaying(true);
     // setAnimating(false);
     // setMove({ x: 0, y: 0 });
     setCurrentKernal({ x: startKernal.x, y: startKernal.y });
@@ -181,20 +183,12 @@ const App = () => {
     //   count += 1;
     //   setTimer({ elapsed: count });
     // }, 1000);
+    // setTimerInterval(startTimer);
     analytics.track('start', { difficulty: 'medium' });
   };
 
-  const config = {
-    maxYaw: 0.005, // Max amount camera can yaw in either direction
-    maxPitch: 0.005, // Max amount camera can pitch in either direction
-    maxRoll: 0.005, // Max amount camera can roll in either direction
-    yawFrequency: 0.7, // Frequency of the the yaw rotation
-    pitchFrequency: 0.7, // Frequency of the pitch rotation
-    rollFrequency: 0.7, // Frequency of the roll rotation
-    intensity: 1, // initial intensity of the shake
-    decay: false, // should the intensity decay over time
-    decayRate: 0.65, // if decay = true this is the rate at which intensity will reduce at
-    controls: undefined, // if using orbit controls, pass a ref here so we can update the rotation
+  const playAgain = () => {
+    console.log('play again!');
   };
 
   return (
@@ -205,7 +199,7 @@ const App = () => {
         camera={{ fov: 60 }}
         dpr={0.75}
       >
-        <CameraShake {...config} />
+        <CameraShake {...camshakeConfig} />
         <EffectComposer>
           <Corn
             canvasRef={canvasRef}
@@ -235,14 +229,15 @@ const App = () => {
       </Canvas>
       <Score
         timer={timer}
-        kernalsEaten={kernalsEaten}
+        popCount={popCount}
+        kernals={kernals}
       />
       <button
         className="instructionsToggle"
         type="button"
         onClick={() => {
           setInstructions(true);
-          // clearInterval(interval);
+          clearInterval(interval);
         }}
       >
         ?
@@ -252,13 +247,18 @@ const App = () => {
         instructions={instructions}
         setInstructions={setInstructions}
         startGame={startGame}
+        difficulty={difficulty}
         setDifficulty={setDifficulty}
         page={page}
       />
       <Results
         results={results}
         setResults={setResults}
+        playAgain={playAgain}
         result="won"
+        popCount={popCount}
+        timer={timer}
+        kernals={kernals}
       />
     </div>
   );

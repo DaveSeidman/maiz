@@ -1,5 +1,6 @@
 // TODO: increase and decrease rotations with dragging as well
 // TODO: sometimes gltf's don't load (usually the roots)
+// TODO: changing heights doesn't have effect here
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';

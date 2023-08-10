@@ -5,7 +5,7 @@ import './index.scss';
 
 
 const Instructions = (props) => {
-  const { instructions, setInstructions, setDifficulty, start, startGame, page } = props;
+  const { instructions, setInstructions, difficulty, setDifficulty, start, startGame, page } = props;
   // console.log(setDifficulty);
 
   const positions = {
@@ -17,14 +17,20 @@ const Instructions = (props) => {
     <div className={`instructions modal ${instructions ? '' : 'hidden'}`}>
       <div className={`instructions-content modal-content ${positions[page] || ''}`}>
         <h1 className="instructions-content-title">- MAIZ -</h1>
-        <p>{messages.instructions[page]}</p>
+        {page && (<p>{messages.instructions[page]}</p>)}
         <p>Escape the Maiz by following the yellow path</p>
         {/* <p>🟡 Pop the yellow kernals 🟡<br /> 🟤 brown kernals are walls 🟤</p> */}
-        <div className="option">
-          <p>Difficulty:</p>
-          <button type="button" onClick={() => { setDifficulty('easy'); }}>Easy 🌽</button>
-          <button type="button" onClick={() => { setDifficulty('medium'); }}>Medium 🌽🌽</button>
-          <button type="button" onClick={() => { setDifficulty('hard'); }}>Hard 🌽🌽🌽</button>
+        <p>Difficulty:</p>
+        <div className="options">
+          <button type="button" className={difficulty === 'easy' ? 'selected' : ''} onClick={() => { setDifficulty('easy'); }}>
+            Easy <span role="img" aria-label="corn">🌽</span>
+          </button>
+          <button type="button" className={difficulty === 'medium' ? 'selected' : ''} onClick={() => { setDifficulty('medium'); }}>
+            Medium <span role="img" aria-label="corn">🌽</span>
+          </button>
+          <button type="button" className={difficulty === 'hard' ? 'selected' : ''} onClick={() => { setDifficulty('hard'); }}>
+            Hard <span role="img" aria-label="corn">🌽</span>
+          </button>
         </div>
         <img className="graphic" src={cornImage} alt="corn" />
         <button
