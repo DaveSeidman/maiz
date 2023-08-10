@@ -19,7 +19,7 @@ const radius = 5;
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
 const pointerMovementThreshold = 10;
-const kernalLifeThreshold = 30;
+const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
 const Corn = (props) => {
@@ -86,7 +86,12 @@ const Corn = (props) => {
     poppedKernal.getWorldPosition(worldPos);
     groupRef.current.add(poppedKernal);
     poppedKernal.position.set(worldPos.x, worldPos.y, worldPos.z);
-    poppedKernals.push({ mesh: poppedKernal, life: 0, velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1) });
+    poppedKernals.push({
+      mesh: poppedKernal,
+      life: 0,
+      velocity: new Vector3(3 * (Math.random() - 0.5), -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1),
+      rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
+    });
   }, [currentKernal]);
 
   useFrame((e) => {
@@ -102,13 +107,15 @@ const Corn = (props) => {
         cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
       }
 
-      const gravity = new Vector3(1, -2, 1);
+      const gravity = new Vector3(1, -1.1, 1);
       poppedKernals.forEach((kernal, index) => {
         // console.log(kernal);
         kernal.life += 1;
-        kernal.velocity.multiply(gravity);
-        console.log(kernal.velocity);
+        // kernal.velocity.multiply(gravity);
+        // console.log(kernal.velocity);
+        kernal.velocity.y -= 0.001;
         kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
+        kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
         if (kernal.life >= kernalLifeThreshold) {
           groupRef.current.remove(kernal.mesh);
           poppedKernals.splice(index, 1);
