@@ -21,6 +21,12 @@ import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
 
+const levels = {
+  easy: { width: 12, height: 24 },
+  medium: { width: 18, height: 24 },
+  hard: { width: 24, height: 24 },
+};
+
 const analytics = Analytics({
   app: 'website data',
   plugins: [
@@ -37,17 +43,19 @@ const App = () => {
   // const width = 14;// 34;
   // const height = 26;
   const canvasRef = useRef();
-  const [width, setWidth] = useState(34);
-  const [height, setHeight] = useState(26);
+  const [width, setWidth] = useState(levels.easy.width);
+  const [height, setHeight] = useState(levels.easy.height);
   // const [start, setStart] = useState(false);
+  const [difficulty, setDifficulty] = useState('easy');
   const [animating, setAnimating] = useState(false);
   const [instructions, setInstructions] = useState(true);
   const [page, setPage] = useState('instructions');
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
-  const [currentKernal, setCurrentKernal] = useState({ x: width / 2, y: 0, justPopped: false });
-  const [display, setDisplay] = useState('3d');
+  const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
+  const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1 });
+  // const [display, setDisplay] = useState('3d');
   const [mode, setMode] = useState('normal');
   const [timer, setTimer] = useState({ elapsed: 0 });
   const [kernalsEaten, setKernalsEaten] = useState(0);
@@ -86,6 +94,7 @@ const App = () => {
       if (kernal.end && !animating) {
         console.log('this is being triggered', animating);
         setResults(true);
+        // TODO: include results here
         analytics.track('end', { difficulty: 'medium' });
       }
       if (kernal.type !== 'popped') {
@@ -116,27 +125,28 @@ const App = () => {
   const randomColor = base => colors[base][Math.floor(Math.random() * colors[base].length)];
 
   useEffect(() => {
+    const { width, height } = levels[difficulty];
+    setWidth(width);
+    setHeight(height);
+    setFocusKernal({ x: width / 2, y: 0 });
+  }, [difficulty]);
+
+  useEffect(() => {
     const { start, end, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {
       row.forEach((kernal, x) => {
-        nextKernals.push({
-          id,
-          x,
-          y,
-          color: randomColor(kernal ? 'browns' : 'yellows'),
-          type: kernal ? 'wall' : 'normal',
-          start: x === 0 && y === start,
-          end: x === width && y === end,
-        });
+        const color = randomColor(kernal ? 'browns' : 'yellows');
+        const type = kernal ? 'wall' : 'normal';
+        nextKernals.push({ id, x, y, color, type, start: x === 0 && y === start, end: x === width && y === end });
         id += 1;
       });
     });
     setKernals(() => nextKernals);
-    setCurrentKernal({ x: width / 2, y: start, justPopped: false });
+    // setCurrentKernal({ x: width / 2, y: start, justPopped: false });
     setMove({ x: 0, y: 0 });
-  }, []);
+  }, [width, height]);
 
   useEffect(() => {
     addEventListener('keydown', handleKeydown);
@@ -145,36 +155,33 @@ const App = () => {
     };
   }, [instructions, results, animating]);
 
-  const setDifficulty = (e) => {
-    console.log(e);
-  };
-
   const startGame = () => {
     // setInstructions(false);
-    setAnimating(true);
+    // setAnimating(true);
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
-    setCurrentKernal(endKernal);
-    setPage('end');
-    console.log('REACH THE END OF THE MAZE');
-    setTimeout(() => {
-      setPage('start');
-      setCurrentKernal(startKernal);
-      console.log('START FROM THIS KERNAL');
-    }, 2000);
-    setTimeout(() => {
-      setPage('go');
-      setAnimating(false);
-      setInstructions(false);
-      console.log('START THE GAME!');
-    }, 4000);
-    setMove({ x: 0, y: 0 });
-    analytics.track('start', { difficulty: 'medium' });
+    // setAnimating(false);
+    // setMove({ x: 0, y: 0 });
+    setCurrentKernal({ x: startKernal.x, y: startKernal.y });
+    setInstructions(false);
+    // setFocusKernal(endKernal);
+    // setPage('end');
+    // setTimeout(() => {
+    //   setPage('start');
+    //   setFocusKernal(startKernal);
+    // }, 3000);
+    // setTimeout(() => {
+    //   setPage('go');
+    //   setAnimating(false);
+    //   setInstructions(false);
+    // }, 6000);
+    // setMove({ x: 0, y: 0 });
     // console.log('set interval');
     // interval = setInterval(() => {
     //   count += 1;
     //   setTimer({ elapsed: count });
     // }, 1000);
+    analytics.track('start', { difficulty: 'medium' });
   };
 
   const config = {
@@ -198,16 +205,17 @@ const App = () => {
         camera={{ fov: 60 }}
         dpr={0.75}
       >
-        {display === '3d' && (<CameraShake {...config} />)}
+        <CameraShake {...config} />
         <EffectComposer>
           <Corn
             canvasRef={canvasRef}
             kernals={kernals}
             currentKernal={currentKernal}
+            focusKernal={focusKernal}
             setMove={setMove}
             width={width}
             height={height}
-            display={display}
+            // display={display}
           />
           <directionalLight
             intensity={2}
@@ -244,7 +252,7 @@ const App = () => {
         instructions={instructions}
         setInstructions={setInstructions}
         startGame={startGame}
-        setDifficult={setDifficulty}
+        setDifficulty={setDifficulty}
         page={page}
       />
       <Results

@@ -1,4 +1,5 @@
 // TODO: increase and decrease rotations with dragging as well
+// TODO: sometimes gltf's don't load (usually the roots)
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -23,7 +24,7 @@ const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
 const Corn = (props) => {
-  const { canvasRef, setMove, currentKernal, kernals, width, height, display } = props;
+  const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -88,11 +89,17 @@ const Corn = (props) => {
       poppedKernals.push({
         mesh: poppedKernal,
         life: 0,
-        velocity: new Vector3(3 * (Math.random() - 0.5), -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1),
+        velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1).add(new Vector3((Math.random() - 0.5) * 0.2, 0.1, 0)),
         rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
       });
     }
   }, [currentKernal]);
+
+  useEffect(() => {
+    console.log(focusKernal);
+    targetPosition = -focusKernal.x;
+    targetRotation = (focusKernal.y / height) * Math.PI * -2;
+  }, [focusKernal]);
 
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
@@ -109,7 +116,7 @@ const Corn = (props) => {
 
     poppedKernals.forEach((kernal, index) => {
       kernal.life += 1;
-      kernal.velocity.y -= 0.001;
+      kernal.velocity.y -= 0.01;
       kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
       kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
       if (kernal.life >= kernalLifeThreshold) {
@@ -224,7 +231,7 @@ const Corn = (props) => {
     endArrow.material = cursorMaterial;
     startArrow.position.set(startKernal.x - 2, Math.cos(startKernal.y / arc) * radius, Math.sin(startKernal.y / arc) * radius);
     startArrow.rotation.set((startKernal.y / height) * (Math.PI * 2), 0, 0);
-    endArrow.position.set(endKernal.x + 1.25, Math.cos(endKernal.y / arc) * radius, Math.sin(endKernal.y / arc) * radius);
+    endArrow.position.set(endKernal.x + 1.5, Math.cos(endKernal.y / arc) * radius, Math.sin(endKernal.y / arc) * radius);
     endArrow.rotation.set((endKernal.y / height) * (Math.PI * 2), 0, 0);
     cobRef.current.add(startArrow);
     cobRef.current.add(endArrow);
@@ -238,7 +245,7 @@ const Corn = (props) => {
       <group
         ref={cobRef}
         position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
-        scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
+        // scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
       >
         <instancedMesh
           key="roots"
@@ -271,7 +278,7 @@ Corn.propTypes = {
   kernals: PropTypes.array,
   width: PropTypes.number,
   height: PropTypes.number,
-  display: PropTypes.string,
+  // display: PropTypes.string,
 };
 
 Corn.defaultProps = {
@@ -279,5 +286,5 @@ Corn.defaultProps = {
   kernals: [],
   width: 0,
   height: 0,
-  display: '3d',
+  // display: '3d',
 };

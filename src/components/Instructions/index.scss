@@ -2,6 +2,14 @@
   transition: visibility .5s, opacity .5s;
 
   &-content {
+    transition: margin .5s;
+    &.left {
+      margin-left: -25%;
+    }
+
+    &.right {
+      margin-right: -25%;
+    }
 
     &-title {
       letter-spacing: .5rem;

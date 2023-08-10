@@ -1,6 +1,7 @@
 $yellow1: rgb(206, 206, 16);
 $yellow2: rgb(179, 169, 27);
 $blue: rgb(14, 176, 179);
+$dark-orange: #f56425;
 
 
 @font-face {
@@ -48,9 +49,6 @@ html, body {
     margin: 2rem;
     padding: 0;
     border-radius: 50%;
-    // border: 3px solid $yellow2;
-    // background: $yellow1;
-    // color: white;
     width: 3rem;
     height: 3rem;
     font-family: Arial, Helvetica, sans-serif;
@@ -62,8 +60,6 @@ html, body {
     left: 0;
     bottom: 4rem;
   }
-
-  $dark-orange: #f56425;
 
   button {
     cursor: pointer;
@@ -79,34 +75,37 @@ html, body {
     margin: 1rem;
   }
 
-  .modalContainer {
+  .modal {
     position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(255, 255, 255, .4);
-    backdrop-filter: blur(.25rem);
-    -webkit-backdrop-filter: blur(.25rem);
+    // background: rgba(255, 255, 255, .4);
+    // backdrop-filter: blur(.25rem);
+    // -webkit-backdrop-filter: blur(.25rem);
+
+    &-content {
+      position: absolute;
+      width: calc(100vw - 6rem);
+      max-width: 36rem;
+      color: white;
+      // background: rgba(182, 104, 7, .6);
+      background: rgba( 150, 150, 150 ,.75);
+      backdrop-filter: blur(.5rem);
+      will-change: backdrop-filter;
+      -webkit-backdrop-filter: blur(.5rem);
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      border: .5rem solid rgba(88, 13, 38, .7);
+      border-radius: 1rem;
+      padding: .5rem 1rem;
+      font-size: .75rem;
+      box-shadow: 0 .5rem .25rem rgba(81, 23, 8, 0.2);
+    }
   }
 
-  .modal {
-    position: absolute;
-    width: calc(100vw - 6rem);
-    max-width: 36rem;
-    color: white;
-    background: rgba(182, 104, 7, .6);
-    backdrop-filter: blur(2rem);
-    -webkit-backdrop-filter: blur(2rem);
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    border: .5rem solid rgba(88, 13, 38, .7);
-    border-radius: 1rem;
-    padding: .5rem 1rem;
-    font-size: .75rem;
-    box-shadow: 0 .5rem .25rem rgba(81, 23, 8, 0.2);
-  }
 }

@@ -19,8 +19,8 @@ const Results = (props) => {
   const url = 'https://daveseidman.gitlab.io/cornmaze';
 
   return (
-    <div className={`results modalContainer ${results ? '' : 'hidden'}`}>
-      <div className="results-content modal">
+    <div className={`results modal ${results ? '' : 'hidden'}`}>
+      <div className="results-content modal-content">
         <h2>{message}</h2>
         <div className="results-content-share">
           <h3>Now go and brag about it!</h3>
