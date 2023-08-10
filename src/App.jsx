@@ -1,5 +1,5 @@
 // TODO: change 'normal' to 'path'
-
+// TODO: remove all !important's in CSS
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
@@ -36,6 +36,7 @@ const App = () => {
   const height = 26;
   const canvasRef = useRef();
   const [start, setStart] = useState(false);
+  const [animating, setAnimating] = useState(false);
   const [instructions, setInstructions] = useState(true);
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
@@ -47,8 +48,7 @@ const App = () => {
   const [kernalsEaten, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
-    console.log(instructions, results);
-    // if (instructions || results) return;
+    if (instructions || results) return;
     let x = 0;
     let y = 0;
     switch (key) {
@@ -59,8 +59,8 @@ const App = () => {
       default: break;
     }
     setMove({ x, y });
-    if (key === 'r') setTimeout(() => { setResults(true); });
-    if (key === 'e') setTimeout(() => { setResults(false); });
+    // if (key === 'r') setTimeout(() => { setResults(true); });
+    // if (key === 'e') setTimeout(() => { setResults(false); });
     if (key === 'Escape') setInstructions(false);
   };
 
@@ -130,12 +130,14 @@ const App = () => {
     setKernals(() => nextKernals);
     setCurrentKernal({ x: 0, y: start, justPopped: false });
     setMove({ x: 0, y: 0 });
-    addEventListener('keydown', handleKeydown);
+  }, []);
 
+  useEffect(() => {
+    addEventListener('keydown', handleKeydown);
     return () => {
       removeEventListener('keydown', handleKeydown);
     };
-  }, []);
+  }, [instructions, results]);
 
   const startGame = () => {
     setInstructions(false);
