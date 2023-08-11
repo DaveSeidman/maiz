@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
-import gitlabLogo from '../../assets/gitlab-logo-700.svg';
+import React from 'react';
+import gitlabLogo from '../../assets/images/gitlab-logo-700.svg';
 import './index.scss';
 
 const Footer = () => (

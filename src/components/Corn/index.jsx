@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
-import kernalModel from '../../assets/models.glb';
+import kernalModel from '../../assets/models/models.glb';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let prevTime = 0;

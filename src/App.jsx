@@ -6,16 +6,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO } from '@react-three/postprocessing';
 import { Environment, CameraShake } from '@react-three/drei';
-import { Color, PCFSoftShadowMap } from 'three';
+import { PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
-import { BlendFunction } from 'postprocessing';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
 import Score from './components/Score';
-import envMap from './assets/limpopo_golf_course_2k.hdr';
+import envMap from './assets/images/limpopo_golf_course_2k.hdr';
 import Maze from './maze';
 import { camshakeConfig, levels, colors } from './config';
 

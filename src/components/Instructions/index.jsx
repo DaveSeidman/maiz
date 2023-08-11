@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
-import cornImage from '../../assets/corn2.png';
+import React from 'react';
+import cornImage from '../../assets/images/corn.png';
 import { messages } from '../../assets/content.json';
 import './index.scss';
 
