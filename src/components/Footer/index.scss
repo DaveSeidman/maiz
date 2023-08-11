@@ -9,5 +9,11 @@
   }
   p, a {
     color: white;
+    text-decoration: none;
+  }
+
+  a {
+    text-shadow: .75px 0 white;
+    letter-spacing: 1.5px;;
   }
 }

@@ -2,10 +2,17 @@
   position: absolute;
   top: 0;
   left: 0;
+  background: purple;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  width: 15rem;
+  justify-content: space-between;
 
   p {
     margin: .5rem 1rem !important;
     padding: 0 !important;
     user-select: none;
+    font-family: 'Rajdhani';
   }
 }

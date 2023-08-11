@@ -39,12 +39,6 @@ const Instructions = (props) => {
         >{start ? 'Continue' : 'Start!'}
         </button>
       </div>
-      <button
-        type="button"
-        className="close"
-        onClick={() => { setInstructions(false); }}
-      >×
-      </button>
     </div>
   );
 };

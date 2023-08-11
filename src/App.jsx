@@ -232,16 +232,18 @@ const App = () => {
         popCount={popCount}
         kernals={kernals}
       />
-      <button
-        className="instructionsToggle"
-        type="button"
-        onClick={() => {
-          setInstructions(true);
-          clearInterval(interval);
-        }}
-      >
-        ?
-      </button>
+      {!instructions && (
+        <button
+          className="instructionsToggle"
+          type="button"
+          onClick={() => {
+            setInstructions(true);
+            clearInterval(interval);
+          }}
+        >
+          ?
+        </button>
+      )}
       <Footer />
       <Instructions
         instructions={instructions}

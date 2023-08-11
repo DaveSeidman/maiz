@@ -31,13 +31,15 @@ const Corn = (props) => {
 
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
-  const [arc, setArc] = useState((height / 2) / Math.PI);
+  // const [arc, setArc] = useState((height / 2) / Math.PI);
+  // const [arrows, setArrows] = useState([]);
 
   const groupRef = useRef();
   const cobRef = useRef();
   const kernalsRef = useRef();
   const basesRef = useRef();
   const cursorRef = useRef();
+  const arrowsRef = useRef();
 
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
@@ -49,9 +51,50 @@ const Corn = (props) => {
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
 
+  const positionToCylindar = (temp, kernal) => {
+    const { x } = kernal;
+    const arc = (height / 2) / Math.PI;
+    //      | position around cylindar | barrel outwards towards the middle
+    const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((x / width) * Math.PI) / 2) - 1);
+    const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((x / width) * Math.PI) / 2) - 1);
+    const rotation = (kernal.y / height) * (Math.PI * 2);
+    temp.position.set(x, y, z);
+    temp.rotation.set(rotation, 0, 0);
+    temp.updateMatrix();
+  };
+
+  useEffect(() => {
+    const temp = new Object3D();
+    kernals.forEach((kernal, index) => {
+      positionToCylindar(temp, kernal);
+      kernalsRef.current.setMatrixAt(index, temp.matrix);
+      kernalsRef.current.setColorAt(index, kernal.color);
+      basesRef.current.setMatrixAt(index, temp.matrix);
+    });
+    kernalsRef.current.instanceMatrix.needsUpdate = true;
+    kernalsRef.current.instanceColor.needsUpdate = true;
+
+    const startKernal = kernals.find(kernal => kernal.start);
+    const endKernal = kernals.find(kernal => kernal.end);
+    const startKernalOffset = JSON.parse(JSON.stringify(startKernal));
+    const endKernalOffset = JSON.parse(JSON.stringify(endKernal));
+    startKernalOffset.x -= 2;
+    endKernalOffset.x += 2;
+    const tempStart = new Object3D();
+    const tempEnd = new Object3D();
+    positionToCylindar(tempStart, startKernalOffset);
+    positionToCylindar(tempEnd, endKernalOffset);
+    arrowsRef.current.setMatrixAt(0, tempStart.matrix);
+    arrowsRef.current.setMatrixAt(1, tempEnd.matrix);
+    arrowsRef.current.instanceMatrix.needsUpdate = true;
+  }, [kernals]);
+
   useEffect(() => {
     // adjust cob position / rotation
     targetPosition = -currentKernal.x;
+    // TODO: grab this from positionToCylindar object below
+    const temp = new Object3D();
+    positionToCylindar(temp, currentKernal);
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
     // this will set a rotations counter to be added to the targetRotations to preven that jump
@@ -61,32 +104,32 @@ const Corn = (props) => {
     setUseSpin(false);
     prevKernalY = currentKernal.y;
 
-    // remove popped kernals
-    const index = (currentKernal.y * (width + 1)) + currentKernal.x;
-    const temp = new Matrix4();
-    kernalsRef.current.getMatrixAt(index, temp);
-    temp.multiply(scaleZero);
-    kernalsRef.current.setMatrixAt(index, temp);
-    kernalsRef.current.instanceMatrix.needsUpdate = true;
-
     // set cursor position
-    const { x } = currentKernal;
-    const y = Math.cos(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
-    const z = Math.sin(currentKernal.y / arc) * (radius + (Math.sin((currentKernal.x / width) * Math.PI) / 2) - 1);
-    const rotation = (currentKernal.y / height) * (Math.PI * 2);
-    cursorRef.current.position.set(x, y, z);
-    cursorRef.current.rotation.set(rotation, 0, 0);
+    cursorRef.current.position.copy(temp.position);
+    cursorRef.current.rotation.copy(temp.rotation);
 
-    // pop a kernal!
     if (currentKernal.justPopped) {
+      // remove kernal mesh by scaling it to 0
+      const index = (currentKernal.y * (width + 1)) + currentKernal.x;
+      const matrix = new Matrix4();
+      kernalsRef.current.getMatrixAt(index, matrix);
+      matrix.multiply(scaleZero);
+      kernalsRef.current.setMatrixAt(index, matrix);
+      kernalsRef.current.instanceMatrix.needsUpdate = true;
+
+      // add popped kernal and animate
       const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
-      poppedKernal.position.set(x, y, z);
+      positionToCylindar(poppedKernal, currentKernal);
+      // add it to the cob
       cobRef.current.add(poppedKernal);
       poppedKernal.updateMatrix();
+      // get it's world position
       const worldPos = new Vector3();
       poppedKernal.getWorldPosition(worldPos);
+      // remove it from the cob, add it to the world so it's not affected by
+      // the cobs translations or rotations, and instead follows gravity
       groupRef.current.add(poppedKernal);
-      poppedKernal.position.set(worldPos.x, worldPos.y, worldPos.z);
+      poppedKernal.position.copy(worldPos);
       poppedKernals.push({
         mesh: poppedKernal,
         life: 0,
@@ -97,7 +140,6 @@ const Corn = (props) => {
   }, [currentKernal]);
 
   useEffect(() => {
-    console.log(focusKernal);
     targetPosition = -focusKernal.x;
     targetRotation = (focusKernal.y / height) * Math.PI * -2;
   }, [focusKernal]);
@@ -110,14 +152,15 @@ const Corn = (props) => {
 
     cobRef.current.position.x += (targetPosition - cobRef.current.position.x) / 20;
 
-    if (useSpin) cobRef.current.rotation.x += timeDiff * spin;
-    else {
+    if (useSpin) {
+      cobRef.current.rotation.x += timeDiff * spin;
+    } else {
       cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
     }
 
     poppedKernals.forEach((kernal, index) => {
-      kernal.life += 1;
-      kernal.velocity.y -= 0.01;
+      kernal.life += (timeDiff * 100);
+      kernal.velocity.y -= timeDiff;
       kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
       kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
       if (kernal.life >= kernalLifeThreshold) {
@@ -185,8 +228,6 @@ const Corn = (props) => {
   };
 
   useEffect(() => {
-    // console.log(canvasRef.current);
-
     canvasRef.current.addEventListener('mousewheel', moveCob);
     canvasRef.current.addEventListener('touchstart', dragStart);
     canvasRef.current.addEventListener('pointerdown', dragStart);
@@ -206,37 +247,6 @@ const Corn = (props) => {
       canvasRef.current.removeEventListener('click', clickToMove);
     };
   });
-
-
-  useEffect(() => {
-    const temp = new Object3D();
-    kernals.forEach((kernal, index) => {
-      //      | position around cylindar | barrel outwards towards the middle
-      const { x } = kernal;
-      const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
-      const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((kernal.x / width) * Math.PI) / 2) - 1);
-      const rotation = (kernal.y / height) * (Math.PI * 2);
-      temp.position.set(x, y, z);
-      temp.rotation.set(rotation, 0, 0);
-      temp.updateMatrix();
-      kernalsRef.current.setMatrixAt(index, temp.matrix);
-      kernalsRef.current.setColorAt(index, kernal.color);
-      basesRef.current.setMatrixAt(index, temp.matrix);
-    });
-
-    const startKernal = kernals.find(kernal => kernal.start);
-    const endKernal = kernals.find(kernal => kernal.end);
-    const startArrow = arrowMesh.clone();
-    const endArrow = arrowMesh.clone();
-    startArrow.material = cursorMaterial;
-    endArrow.material = cursorMaterial;
-    startArrow.position.set(startKernal.x - 2, Math.cos(startKernal.y / arc) * radius, Math.sin(startKernal.y / arc) * radius);
-    startArrow.rotation.set((startKernal.y / height) * (Math.PI * 2), 0, 0);
-    endArrow.position.set(endKernal.x + 1.5, Math.cos(endKernal.y / arc) * radius, Math.sin(endKernal.y / arc) * radius);
-    endArrow.rotation.set((endKernal.y / height) * (Math.PI * 2), 0, 0);
-    cobRef.current.add(startArrow);
-    cobRef.current.add(endArrow);
-  }, [kernals]);
 
 
   return (
@@ -262,6 +272,13 @@ const Corn = (props) => {
           material={kernalMaterial}
           args={[null, null, kernals.length]}
         />
+        <instancedMesh
+          key="arrows"
+          ref={arrowsRef}
+          geometry={arrowMesh.geometry}
+          material={cursorMaterial}
+          args={[null, null, 2]}
+        />
         <mesh
           key="cursor"
           ref={cursorRef}
@@ -275,7 +292,10 @@ const Corn = (props) => {
 export default Corn;
 
 Corn.propTypes = {
+  canvasRef: PropTypes.any,
+  setMove: PropTypes.func,
   currentKernal: PropTypes.any,
+  focusKernal: PropTypes.object,
   kernals: PropTypes.array,
   width: PropTypes.number,
   height: PropTypes.number,
@@ -283,7 +303,10 @@ Corn.propTypes = {
 };
 
 Corn.defaultProps = {
+  canvasRef: {},
+  setMove: () => {},
   currentKernal: { x: 0, y: 0 },
+  focusKernal: { x: 0, y: 0 },
   kernals: [],
   width: 0,
   height: 0,

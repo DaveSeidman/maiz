@@ -13,6 +13,11 @@ $dark-orange: #f56425;
   src: url('./assets/CornDemo-Regular.ttf');
 }
 
+@font-face {
+  font-family: 'Rajdhani';
+  src: url('./assets/Rajdhani-Bold.ttf');
+}
+
 @keyframes border-pulse {
   0%   { border: rgba(0, 255, 255, 1) !important; }
   50%  { border: rgba(0, 255, 255, 0) !important; }
@@ -71,11 +76,11 @@ html, body {
     padding: .5rem 1rem;
     background: #ffda00;
     border-radius: .5rem;
-    font-family: 'Corn';
+    font-family: 'Rajdhani';
     font-size: 1rem;
     border: 2px solid orange;
     color: $dark-orange;
-    text-shadow: 1px 0 $dark-orange;
+    // text-shadow: 1px 0 $dark-orange;
     box-shadow: 0 0 5px 5px rgb(8 136 25 / 25%);
     margin: 1rem;
 
