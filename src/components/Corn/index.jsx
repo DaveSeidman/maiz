@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
-import kernalModel from '../../assets/kernal.glb';
+import kernalModel from '../../assets/models.glb';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let prevTime = 0;
@@ -51,28 +51,32 @@ const Corn = (props) => {
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
 
-  const positionToCylindar = (temp, kernal) => {
+  const positionToGrid = (object, kernal) => {
+    object.position.set(kernal.x, kernal.y + height / -2, 0);
+    object.rotation.set(Math.PI / 2, 0, 0);
+    const scale = kernal.popped ? 0 : 0.9;
+    object.scale.set(scale, 0.1, scale);
+    object.updateMatrix();
+  };
+
+  const positionToCylindar = (object, kernal) => {
     const { x } = kernal;
     const arc = (height / 2) / Math.PI;
     //      | position around cylindar | barrel outwards towards the middle
     const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((x / width) * Math.PI) / 2) - 1);
     const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((x / width) * Math.PI) / 2) - 1);
     const rotation = (kernal.y / height) * (Math.PI * 2);
-    temp.position.set(x, y, z);
-    temp.rotation.set(rotation, 0, 0);
-    temp.updateMatrix();
-  };
-
-  const positionToGrid = (temp, kernal) => {
-    temp.position.set(kernal.x, kernal.y + height / -2, 0);
-    temp.rotation.set(Math.PI / 2, 0, 0);
-    temp.scale.set(0.9, 0.5, 0.9);
-    temp.updateMatrix();
+    object.position.set(x, y, z);
+    object.rotation.set(rotation, 0, 0);
+    const scale = kernal.popped ? 0 : 1;
+    object.scale.set(scale, scale, scale);
+    object.updateMatrix();
   };
 
   const blendMatrices = (object1, object2, amount) => {
     object1.position.lerp(object2.position, amount);
     object1.rotation.x = lerp(object1.rotation.x, object2.rotation.x, amount);
+    object1.scale.lerp(object2.scale, amount);
     object1.updateMatrix();
   };
 
@@ -110,12 +114,17 @@ const Corn = (props) => {
     positionKernals();
   }, [kernals, display]);
 
+  // currentKernal updated
   useEffect(() => {
     // adjust cob position / rotation
     targetPosition = -currentKernal.x;
     // TODO: grab this from positionToCylindar object below
-    const temp = new Object3D();
-    positionToCylindar(temp, currentKernal);
+    const object = new Object3D();
+    if (display === 'normal') positionToCylindar(object, currentKernal);
+    if (display === 'grid') {
+      positionToGrid(object, currentKernal);
+      object.position.z = -3;
+    }
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
     // this will set a rotations counter to be added to the targetRotations to preven that jump
@@ -126,8 +135,8 @@ const Corn = (props) => {
     prevKernalY = currentKernal.y;
 
     // set cursor position
-    cursorRef.current.position.copy(temp.position);
-    cursorRef.current.rotation.copy(temp.rotation);
+    cursorRef.current.position.copy(object.position);
+    cursorRef.current.rotation.copy(object.rotation);
 
     if (currentKernal.justPopped) {
       // remove kernal mesh by scaling it to 0
@@ -282,6 +291,7 @@ const Corn = (props) => {
   return (
     <group
       ref={groupRef}
+      position={display === 'normal' ? [0, 0, 0] : [0, 0, -10]}
     >
       <group
         ref={cobRef}

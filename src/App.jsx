@@ -4,11 +4,12 @@
 // TODO: use some textures and normal maps
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise } from '@react-three/postprocessing';
+import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO } from '@react-three/postprocessing';
 import { Environment, CameraShake } from '@react-three/drei';
 import { Color, PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
+import { BlendFunction } from 'postprocessing';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
@@ -169,6 +170,7 @@ const App = () => {
     // setAnimating(false);
     // setMove({ x: 0, y: 0 });
     setCurrentKernal({ x: startKernal.x, y: startKernal.y });
+    setMove({ x: 0, y: 0 });
     setInstructions(false);
     // setFocusKernal(endKernal);
     // setPage('end');
@@ -203,7 +205,7 @@ const App = () => {
         camera={{ fov: 60 }}
         dpr={0.5}
       >
-        <CameraShake {...camshakeConfig} />
+        {display === 'normal' && (<CameraShake {...camshakeConfig} />)}
         <EffectComposer>
           <Corn
             canvasRef={canvasRef}
@@ -223,12 +225,25 @@ const App = () => {
             shadow-mapSize={1024}
             shadow-bias={0.00001}
           />
-          <ChromaticAberration offset={[0.001, 0.001]} />
+          {/* <SSAO
+            blendFunction={BlendFunction.MULTIPLY} // blend mode
+            samples={600} // amount of samples per pixel (shouldn't be a multiple of the ring count)
+            rings={16} // amount of rings in the occlusion sampling pattern
+            distanceThreshold={1.0} // global distance threshold at which the occlusion effect starts to fade out. min: 0, max: 1
+            distanceFalloff={0.4} // distance falloff. min: 0, max: 1
+            rangeThreshold={0.15} // local occlusion range threshold at which the occlusion starts to fade out. min: 0, max: 1
+            rangeFalloff={0.9} // occlusion range falloff. min: 0, max: 1
+            luminanceInfluence={0.9} // how much the luminance of the scene influences the ambient occlusion
+            radius={2} // occlusion sampling radius
+            scale={2} // scale of the ambient occlusion
+            bias={0.9}
+          /> */}
+          {/* <ChromaticAberration offset={[0.001, 0.001]} /> */}
           {/* <DepthOfField focusDistance={0.05} focalLength={display === '3d' ? 0.1 : 1} bokehScale={2} height={1024} /> */}
           <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
-          <Noise opacity={0.05} intensity={0.002} />
-          <Vignette eskil={false} offset={0} darkness={0.8} />
-          <Environment files={envMap} background blur={0.1} exposure={1} />
+          {/* <Noise opacity={0.05} intensity={0.002} /> */}
+          {/* <Vignette eskil={false} offset={0} darkness={0.8} /> */}
+          <Environment files={envMap} background blur={0.1} exposure={0.1} />
         </EffectComposer>
       </Canvas>
       <Score
