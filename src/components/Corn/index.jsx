@@ -286,7 +286,6 @@ const Corn = (props) => {
       <group
         ref={cobRef}
         position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
-        // scale={display === '3d' ? [1, 1, 1] : [1, 1, 0.3]}
       >
         <instancedMesh
           key="roots"

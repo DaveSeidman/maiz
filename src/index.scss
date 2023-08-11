@@ -96,16 +96,14 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    // background: rgba(255, 255, 255, .4);
-    // backdrop-filter: blur(.25rem);
-    // -webkit-backdrop-filter: blur(.25rem);
-
+    pointer-events: none;
+    
     &-content {
+      pointer-events: initial;
       position: absolute;
       width: calc(100vw - 6rem);
       max-width: 36rem;
       color: white;
-      // background: rgba(182, 104, 7, .6);
       background: rgba( 150, 150, 150 ,.75);
       backdrop-filter: blur(.5rem);
       will-change: backdrop-filter;

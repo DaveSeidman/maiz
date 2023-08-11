@@ -2,18 +2,24 @@
   position: absolute;
   bottom: 0;
   left: 0;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
 
-  p {
-    margin: 1rem !important;
-    font-size: .75rem;
-  }
   p, a {
+    font-size: .75rem;
     color: white;
     text-decoration: none;
+    padding: 1rem;
   }
 
   a {
     text-shadow: .75px 0 white;
     letter-spacing: 1.5px;;
+  }
+
+  .gitlab {
+    width: 2rem;
+    height: 2rem;
   }
 }

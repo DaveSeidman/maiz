@@ -96,17 +96,18 @@ const App = () => {
         // TODO: include results here
         analytics.track('end', { difficulty: 'medium' });
       }
-      if (kernal.type !== 'popped') {
+      if (!kernal.popped) {
         justPopped = true;
+        kernal.popped = true;
         setKernalsEaten(popCount + 1);
       }
 
-      kernal.type = 'popped';
+      // kernal.popped = true;
       setKernals(kernals);
     }
 
     setCurrentKernal({ x, y, justPopped });
-  }, [move]);
+  }, [move]); // TODO add popcount here and to useState
 
   const randomColor = base => colors[base][Math.floor(Math.random() * colors[base].length)];
 
@@ -116,6 +117,8 @@ const App = () => {
     setFocusKernal({ x: levels[difficulty].width / 2, y: 0 });
   }, [difficulty]);
 
+
+  // create the maze
   useEffect(() => {
     const { start, end, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
@@ -124,7 +127,8 @@ const App = () => {
       row.forEach((kernal, x) => {
         const color = randomColor(kernal ? 'browns' : 'yellows');
         const type = kernal ? 'wall' : 'normal';
-        nextKernals.push({ id, x, y, color, type, start: x === 0 && y === start, end: x === width && y === end });
+        const popped = false;
+        nextKernals.push({ id, x, y, color, type, popped, start: x === 0 && y === start, end: x === width && y === end });
         id += 1;
       });
     });
