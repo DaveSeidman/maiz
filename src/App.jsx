@@ -52,7 +52,7 @@ const App = () => {
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
   const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1 });
   const [display, setDisplay] = useState('normal');
-  const [timer, setTimer] = useState(0);
+  const [timer, setTimer] = useState(120);
   // const [timerInterval, setTimerInterval] = useState();
   const [popCount, setKernalsEaten] = useState(0);
 
@@ -146,7 +146,7 @@ const App = () => {
 
   useEffect(() => {
     if (playing) {
-      interval = setInterval(() => setTimer(prevTimer => prevTimer + 1), 1000);
+      interval = setInterval(() => setTimer(prevTimer => prevTimer - 1), 1000);
     }
 
     return () => {
@@ -164,6 +164,7 @@ const App = () => {
     // setAnimating(true);
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
+    setTimer(120);
     setPlaying(true);
     // setAnimating(false);
     // setMove({ x: 0, y: 0 });
