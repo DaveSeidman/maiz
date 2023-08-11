@@ -126,7 +126,7 @@ const App = () => {
     cells.forEach((row, y) => {
       row.forEach((kernal, x) => {
         const color = randomColor(kernal ? 'browns' : 'yellows');
-        const type = kernal ? 'wall' : 'normal';
+        const type = kernal ? 'wall' : 'path';
         const popped = false;
         nextKernals.push({ id, x, y, color, type, popped, start: x === 0 && y === start, end: x === width && y === end });
         id += 1;
