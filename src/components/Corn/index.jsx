@@ -6,7 +6,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Color, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/kernal.glb';
 
@@ -15,7 +15,7 @@ let prevTime = 0;
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
-// let lerpAmount = 1;
+let lerpAmount = 1;
 let prevKernalY = 0;
 const radius = 5;
 const kernalWidth = 1;
@@ -25,7 +25,7 @@ const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
 const Corn = (props) => {
-  const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height } = props;
+  const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -63,13 +63,30 @@ const Corn = (props) => {
     temp.updateMatrix();
   };
 
-  useEffect(() => {
-    const temp = new Object3D();
+  const positionToGrid = (temp, kernal) => {
+    temp.position.set(kernal.x, kernal.y + height / -2, 0);
+    temp.rotation.set(Math.PI / 2, 0, 0);
+    temp.scale.set(0.9, 0.5, 0.9);
+    temp.updateMatrix();
+  };
+
+  const blendMatrices = (object1, object2, amount) => {
+    object1.position.lerp(object2.position, amount);
+    object1.rotation.x = lerp(object1.rotation.x, object2.rotation.x, amount);
+    object1.updateMatrix();
+  };
+
+
+  const positionKernals = () => {
+    const object1 = new Object3D();
+    const object2 = new Object3D();
     kernals.forEach((kernal, index) => {
-      positionToCylindar(temp, kernal);
-      kernalsRef.current.setMatrixAt(index, temp.matrix);
+      positionToGrid(object1, kernal);
+      positionToCylindar(object2, kernal);
+      blendMatrices(object1, object2, lerpAmount);
+      kernalsRef.current.setMatrixAt(index, object1.matrix);
       kernalsRef.current.setColorAt(index, kernal.color);
-      basesRef.current.setMatrixAt(index, temp.matrix);
+      basesRef.current.setMatrixAt(index, object1.matrix);
     });
     kernalsRef.current.instanceMatrix.needsUpdate = true;
     kernalsRef.current.instanceColor.needsUpdate = true;
@@ -87,7 +104,11 @@ const Corn = (props) => {
     arrowsRef.current.setMatrixAt(0, tempStart.matrix);
     arrowsRef.current.setMatrixAt(1, tempEnd.matrix);
     arrowsRef.current.instanceMatrix.needsUpdate = true;
-  }, [kernals]);
+  };
+
+  useEffect(() => {
+    positionKernals();
+  }, [kernals, display]);
 
   useEffect(() => {
     // adjust cob position / rotation
@@ -146,16 +167,25 @@ const Corn = (props) => {
 
   useFrame((e) => {
     const timeDiff = e.clock.elapsedTime - prevTime;
+
     spin *= 0.9;
-    // lerpAmount += ((display === '3d' ? 1 : 0) - lerpAmount) / 100;
-    // console.log(lerpAmount);
+    const lerpDifference = (display === 'normal' ? 1 : 0) - lerpAmount;
+    if (Math.abs(lerpDifference) > 0.001) {
+      lerpAmount += (lerpDifference) / (20);
+      positionKernals();
+    }
 
-    cobRef.current.position.x += (targetPosition - cobRef.current.position.x) / 20;
+    if (display === 'normal') {
+      cobRef.current.position.x += (targetPosition - cobRef.current.position.x) / 20;
 
-    if (useSpin) {
-      cobRef.current.rotation.x += timeDiff * spin;
+      if (useSpin) {
+        cobRef.current.rotation.x += timeDiff * spin;
+      } else {
+        cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
+      }
     } else {
-      cobRef.current.rotation.x += (((targetRotation + (degToRad(90))) - (rotations * (Math.PI * 2))) - cobRef.current.rotation.x) / 30;
+      cobRef.current.rotation.x = Math.PI;
+      cobRef.current.position.x = -width / 2;
     }
 
     poppedKernals.forEach((kernal, index) => {
@@ -264,6 +294,7 @@ const Corn = (props) => {
           geometry={baseMesh.geometry}
           material={baseMaterial}
           args={[null, null, kernals.length]}
+          visible={display === 'normal'}
         />
         <instancedMesh
           key="kernals"
@@ -299,7 +330,7 @@ Corn.propTypes = {
   kernals: PropTypes.array,
   width: PropTypes.number,
   height: PropTypes.number,
-  // display: PropTypes.string,
+  display: PropTypes.string,
 };
 
 Corn.defaultProps = {
@@ -310,5 +341,5 @@ Corn.defaultProps = {
   kernals: [],
   width: 0,
   height: 0,
-  // display: '3d',
+  display: 'normal',
 };

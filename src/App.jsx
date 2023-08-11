@@ -51,8 +51,7 @@ const App = () => {
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
   const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1 });
-  // const [display, setDisplay] = useState('3d');
-  const [mode, setMode] = useState('normal');
+  const [display, setDisplay] = useState('normal');
   const [timer, setTimer] = useState(0);
   // const [timerInterval, setTimerInterval] = useState();
   const [popCount, setKernalsEaten] = useState(0);
@@ -84,7 +83,7 @@ const App = () => {
 
     let justPopped = false;
     if (kernal) {
-      if (mode === 'normal' && kernal.type === 'wall') {
+      if (kernal.type === 'wall') {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
         return;
       }
@@ -197,7 +196,7 @@ const App = () => {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 60 }}
-        dpr={0.75}
+        dpr={0.5}
       >
         <CameraShake {...camshakeConfig} />
         <EffectComposer>
@@ -209,7 +208,7 @@ const App = () => {
             setMove={setMove}
             width={width}
             height={height}
-            // display={display}
+            display={display}
           />
           <directionalLight
             intensity={2}
@@ -219,7 +218,7 @@ const App = () => {
             shadow-mapSize={1024}
             shadow-bias={0.00001}
           />
-          <ChromaticAberration offset={[0.002, 0.002]} />
+          <ChromaticAberration offset={[0.001, 0.001]} />
           {/* <DepthOfField focusDistance={0.05} focalLength={display === '3d' ? 0.1 : 1} bokehScale={2} height={1024} /> */}
           <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
           <Noise opacity={0.05} intensity={0.002} />
@@ -262,6 +261,13 @@ const App = () => {
         timer={timer}
         kernals={kernals}
       />
+      <button
+        className="debug"
+        type="button"
+        onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
+      >Display
+      </button>
+
     </div>
   );
 };
