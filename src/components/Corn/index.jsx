@@ -151,7 +151,7 @@ const Corn = (props) => {
       // add popped kernal and animate
       const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
       positionToCylindar(poppedKernal, currentKernal);
-      poppedKernal.position.z -= 2;
+      // poppedKernal.position.y -= 2;
       // add it to the cob
       cobRef.current.add(poppedKernal);
       poppedKernal.updateMatrix();
