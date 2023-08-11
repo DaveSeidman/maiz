@@ -1,5 +1,7 @@
 // TODO: rerendering with timer
 import React from 'react';
+import cornImage from '../../assets/images/corn.png';
+
 import './index.scss';
 import {
   EmailShareButton, EmailIcon,
@@ -26,7 +28,7 @@ const Results = (props) => {
       <div className="results-content modal-content">
         <h2>{message}</h2>
         <p>{resultsMessage}</p>
-        <div className="results-content-share">
+        {/* <div className="results-content-share">
           <h3>Now go and brag about it!</h3>
           <TwitterShareButton
             url={url}
@@ -58,9 +60,12 @@ const Results = (props) => {
             subject={random(messages.share.titles)}
           ><EmailIcon />
           </EmailShareButton>
-        </div>
+        </div> */}
 
         <button type="button" onClick={playAgain}>Play Again!</button>
+        <button type="button" onClick={playAgain}>Share!</button>
+
+        <img className="graphic" src={cornImage} alt="corn" />
       </div>
     </div>
   );

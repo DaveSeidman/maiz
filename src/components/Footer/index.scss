@@ -35,3 +35,12 @@
     }
   }
 }
+
+.rws-container {
+  width: 360px;
+
+  .rws-icons {
+    grid-template-columns:repeat(3,1fr)
+  }
+
+}
