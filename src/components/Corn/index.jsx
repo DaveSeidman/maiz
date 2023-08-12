@@ -40,6 +40,7 @@ const Corn = (props) => {
   const basesRef = useRef();
   const cursorRef = useRef();
   const arrowsRef = useRef();
+  const kernalMatRef = useRef();
 
   const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
@@ -53,8 +54,9 @@ const Corn = (props) => {
   const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
 
   const loader = new TextureLoader();
-  loader.load(grayImage, (texture) => {
-    setTexture(texture);
+  loader.load(grayImage, (_texture) => {
+    setTexture(_texture);
+    kernalMatRef.needsUpdate = true;
   });
 
   const positionToGrid = (object, kernal) => {
@@ -330,9 +332,11 @@ const Corn = (props) => {
           args={[null, null, kernals.length]}
         >
           <meshStandardMaterial
+            userRef={kernalMatRef}
             map={texture}
-            roughness={0.4}
-            metalness={0.4}
+            roughness={0.2}
+            metalness={0.1}
+            envMapIntensity={2}
           />
         </instancedMesh>
         <instancedMesh

@@ -247,7 +247,7 @@ const App = () => {
         <Environment
           files={envMap}
           background
-          blur={0.8}
+          blur={0.4}
         />
           {/* <EffectComposer>
           <ToneMapping 
