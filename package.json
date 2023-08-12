@@ -8,8 +8,7 @@
   },
   "dependencies": {
     "@analytics/google-analytics": "^1.0.7",
-    "@react-spring/three": "^9.7.2",
-    "@react-three/drei": "^9.66.1",
+    "@react-three/drei": "^9.80.2",
     "@react-three/fiber": "^8.13.6",
     "@react-three/postprocessing": "^2.15.0",
     "analytics": "^0.8.9",
@@ -18,11 +17,9 @@
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.1",
-    "react-share": "^4.4.1",
     "react-web-share": "^2.0.2",
     "sass": "^1.55.0",
-    "three": "^0.146.0"
+    "three": "^0.155.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.17",

@@ -1,4 +1,4 @@
-import { Color, PCFSoftShadowMap } from 'three';
+import { Color } from 'three';
 
 export const camshakeConfig = {
   maxYaw: 0.005, // Max amount camera can yaw in either direction
@@ -21,14 +21,14 @@ export const levels = {
 
 export const colors = {
   yellows: [
-    new Color('hsl(48, 100%, 60%)'),
+    new Color('hsl(45, 100%, 60%)'),
     new Color('hsl(50, 100%, 60%)'),
     new Color('hsl(60, 100%, 50%)'),
   ],
   browns: [
     new Color('hsl(40, 20%, 20%)'),
     new Color('hsl(50, 20%, 20%)'),
-    new Color('hsl(90, 20%, 30%)'),
+    new Color('hsl(25, 20%, 30%)'),
   ],
 };
 

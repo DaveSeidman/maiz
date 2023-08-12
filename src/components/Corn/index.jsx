@@ -6,7 +6,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, SphereGeometry, BoxGeometry, MeshBasicMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/models/models.glb';
 import grayImage from '../../assets/images/gray.jpg';

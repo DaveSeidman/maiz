@@ -3,13 +3,13 @@ import React from 'react';
 import cornImage from '../../assets/images/corn.png';
 
 import './index.scss';
-import {
-  EmailShareButton, EmailIcon,
-  FacebookShareButton, FacebookIcon,
-  LinkedinShareButton, LinkedinIcon,
-  RedditShareButton, RedditIcon,
-  TwitterShareButton, TwitterIcon,
-} from 'react-share';
+// import {
+//   EmailShareButton, EmailIcon,
+//   FacebookShareButton, FacebookIcon,
+//   LinkedinShareButton, LinkedinIcon,
+//   RedditShareButton, RedditIcon,
+//   TwitterShareButton, TwitterIcon,
+// } from 'react-share';
 import { messages } from '../../assets/content.json';
 import { gameDuration } from '../../config';
 

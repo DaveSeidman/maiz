@@ -4,12 +4,12 @@
 // TODO: use some textures and normal maps
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
+// import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
 import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
 import { AmbientLight, PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
-import { BlendFunction } from 'postprocessing';
+// import { BlendFunction } from 'postprocessing';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
