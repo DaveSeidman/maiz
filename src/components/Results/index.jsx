@@ -11,6 +11,7 @@ import {
   TwitterShareButton, TwitterIcon,
 } from 'react-share';
 import { messages } from '../../assets/content.json';
+import { gameDuration } from '../../config';
 
 const random = array => array[Math.floor(Math.random() * array.length)];
 
@@ -19,7 +20,7 @@ const Results = (props) => {
   const index = Math.floor(Math.random() * messages.won.length);
   const message = messages.won[index];
 
-  const resultsMessage = `You escaped the maze in ${timer} seconds and only popped ${Math.round((popCount / kernals.length) * 100)}% of the kernals!`;
+  const resultsMessage = `You escaped the maze in ${gameDuration - timer} seconds and only popped ${Math.round((popCount / kernals.length) * 100)}% of the kernals!`;
 
   const url = 'https://daveseidman.gitlab.io/cornmaze';
 

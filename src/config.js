@@ -21,13 +21,15 @@ export const levels = {
 
 export const colors = {
   yellows: [
-    new Color('rgb(251, 225, 14)'),
-    new Color('rgb(253, 244, 18)'),
-    new Color('rgb(247, 229, 48)'),
+    new Color('hsl(48, 100%, 60%)'),
+    new Color('hsl(50, 100%, 60%)'),
+    new Color('hsl(60, 100%, 50%)'),
   ],
   browns: [
-    new Color('rgb(10 , 10, 5)'),
-    new Color('rgb(19, 8, 10)'),
-    new Color('rgb(13, 8, 6)'),
+    new Color('hsl(40, 20%, 20%)'),
+    new Color('hsl(50, 20%, 20%)'),
+    new Color('hsl(90, 20%, 30%)'),
   ],
 };
+
+export const gameDuration = 100;

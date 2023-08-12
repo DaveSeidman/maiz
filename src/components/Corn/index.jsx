@@ -6,9 +6,10 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import kernalModel from '../../assets/models/models.glb';
+import grayImage from '../../assets/images/gray.jpg';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let prevTime = 0;
@@ -17,7 +18,7 @@ let targetRotation = 0;
 let targetPosition = 0;
 let lerpAmount = 1;
 let prevKernalY = 0;
-const radius = 5;
+// const radius = 5;
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
 const pointerMovementThreshold = 10;
@@ -25,15 +26,14 @@ const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
 const Corn = (props) => {
-  const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, display } = props;
+  const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
-  // const [arc, setArc] = useState((height / 2) / Math.PI);
-  // const [arrows, setArrows] = useState([]);
-
+  const [texture, setTexture] = useState();
+  const [targetPosition2, setTargetPosition2] = useState(0);
   const groupRef = useRef();
   const cobRef = useRef();
   const kernalsRef = useRef();
@@ -47,15 +47,22 @@ const Corn = (props) => {
   const arrowMesh = gltf.scene.children.find(child => child.name === 'Arrow');
   const poppedMeshes = gltf.scene.children.filter(child => child.name.indexOf('Popped') >= 0);
 
-  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.23, envMapIntensity: 1 });
+  // const kernalMaterial = new MeshStandardMaterial({ roughness: 0.27, metalness: 0.13, envMapIntensity: 1 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
+  const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
+
+  const loader = new TextureLoader();
+  loader.load(grayImage, (texture) => {
+    setTexture(texture);
+  });
 
   const positionToGrid = (object, kernal) => {
     object.position.set(kernal.x, kernal.y + height / -2, 0);
     object.rotation.set(Math.PI / 2, 0, 0);
-    const scale = kernal.popped ? 0 : 0.9;
-    object.scale.set(scale, 0.1, scale);
+    // const scale = kernal.popped ? 0 : 0.9;
+    if (kernal.popped) object.scale.set(0, 0, 0);
+    else object.scale.set(0.9, 0.1, 0.7);
     object.updateMatrix();
   };
 
@@ -63,8 +70,8 @@ const Corn = (props) => {
     const { x } = kernal;
     const arc = (height / 2) / Math.PI;
     //      | position around cylindar | barrel outwards towards the middle
-    const y = Math.cos(kernal.y / arc) * (radius + (Math.sin((x / width) * Math.PI) / 2) - 1);
-    const z = Math.sin(kernal.y / arc) * (radius + (Math.sin((x / width) * Math.PI) / 2) - 1);
+    const y = Math.cos(kernal.y / arc) * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1));
+    const z = Math.sin(kernal.y / arc) * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1));
     const rotation = (kernal.y / height) * (Math.PI * 2);
     object.position.set(x, y, z);
     object.rotation.set(rotation, 0, 0);
@@ -88,13 +95,17 @@ const Corn = (props) => {
       positionToGrid(object1, kernal);
       positionToCylindar(object2, kernal);
       blendMatrices(object1, object2, lerpAmount);
+      const scale = kernal.popped ? 0 : 1;
+
+      object1.scale.set(scale, scale, scale);
       kernalsRef.current.setMatrixAt(index, object1.matrix);
       kernalsRef.current.setColorAt(index, kernal.color);
       basesRef.current.setMatrixAt(index, object1.matrix);
     });
     kernalsRef.current.instanceMatrix.needsUpdate = true;
+    basesRef.current.instanceMatrix.needsUpdate = true;
     kernalsRef.current.instanceColor.needsUpdate = true;
-
+    // kernalsRef.current.material.needsUpdate = true;
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
     const startKernalOffset = JSON.parse(JSON.stringify(startKernal));
@@ -111,9 +122,9 @@ const Corn = (props) => {
   };
 
   useEffect(() => {
-    console.log({ kernals });
+    // console.log({ kernals });
     positionKernals();
-  }, [kernals, display]);
+  }, [kernals, curvature, display]);
 
   // currentKernal updated
   useEffect(() => {
@@ -133,7 +144,6 @@ const Corn = (props) => {
     if (currentKernal.y === 0 && prevKernalY === height - 1) setRotations(rotations + 1);
 
     setUseSpin(false);
-    prevKernalY = currentKernal.y;
 
     // set cursor position
     cursorRef.current.position.copy(object.position);
@@ -150,6 +160,7 @@ const Corn = (props) => {
 
       // add popped kernal and animate
       const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
+      poppedKernal.material = poppedMaterial;
       positionToCylindar(poppedKernal, currentKernal);
       // poppedKernal.position.y -= 2;
       // add it to the cob
@@ -169,6 +180,7 @@ const Corn = (props) => {
         rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
       });
     }
+    prevKernalY = currentKernal.y;
   }, [currentKernal]);
 
   useEffect(() => {
@@ -293,7 +305,7 @@ const Corn = (props) => {
   return (
     <group
       ref={groupRef}
-      position={display === 'normal' ? [0, 0, 0] : [0, 0, -10]}
+      position={display === 'normal' ? [0, 0, 0] : [0, 0, 0]}
     >
       <group
         ref={cobRef}
@@ -304,16 +316,25 @@ const Corn = (props) => {
           ref={basesRef}
           geometry={baseMesh.geometry}
           material={baseMaterial}
+          receiveShadow
           args={[null, null, kernals.length]}
           visible={display === 'normal'}
         />
         <instancedMesh
           key="kernals"
           ref={kernalsRef}
+          castShadow
+          receiveShadow
           geometry={kernalMesh.geometry}
-          material={kernalMaterial}
+          // material={kernalMaterial}
           args={[null, null, kernals.length]}
-        />
+        >
+          <meshStandardMaterial
+            map={texture}
+            roughness={0.4}
+            metalness={0.4}
+          />
+        </instancedMesh>
         <instancedMesh
           key="arrows"
           ref={arrowsRef}

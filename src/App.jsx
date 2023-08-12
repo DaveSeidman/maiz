@@ -4,19 +4,20 @@
 // TODO: use some textures and normal maps
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO } from '@react-three/postprocessing';
-import { Environment, CameraShake } from '@react-three/drei';
-import { PCFSoftShadowMap } from 'three';
+import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
+import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
+import { AmbientLight, PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
+import { BlendFunction } from 'postprocessing';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
 import Results from './components/Results';
 import Score from './components/Score';
-import envMap from './assets/images/limpopo_golf_course_2k.hdr';
-import Maze from './maze';
-import { camshakeConfig, levels, colors } from './config';
+import envMap from './assets/images/spaichingen_hill_2k.hdr';
+import Maze from './components/Maze';
+import { camshakeConfig, levels, colors, gameDuration } from './config';
 
 import inobonce from 'inobounce'; // eslint-disable-line
 
@@ -31,7 +32,6 @@ const analytics = Analytics({
   ],
 });
 
-const count = 0;
 let interval = null;
 
 const App = () => {
@@ -40,10 +40,11 @@ const App = () => {
   const canvasRef = useRef();
   const [width, setWidth] = useState(levels.easy.width);
   const [height, setHeight] = useState(levels.easy.height);
+  const [curvature, setCurvature] = useState(1);
   // const [start, setStart] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
   const [animating, setAnimating] = useState(false);
-  const [instructions, setInstructions] = useState(true);
+  const [instructions, setInstructions] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [page, setPage] = useState('instructions');
   const [results, setResults] = useState(false);
@@ -52,7 +53,7 @@ const App = () => {
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
   const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1 });
   const [display, setDisplay] = useState('normal');
-  const [timer, setTimer] = useState(120);
+  const [timer, setTimer] = useState(gameDuration);
   // const [timerInterval, setTimerInterval] = useState();
   const [popCount, setKernalsEaten] = useState(0);
 
@@ -102,7 +103,6 @@ const App = () => {
         setKernalsEaten(popCount + 1);
       }
 
-      // kernal.popped = true;
       setKernals(kernals);
     }
 
@@ -133,8 +133,9 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
+    setFocusKernal({ x: width / 2, y: 0 });
     // setCurrentKernal({ x: width / 2, y: start, justPopped: false });
-    setMove({ x: 0, y: 0 });
+    // setMove({ x: 0, y: 0 });
   }, [width, height]);
 
   useEffect(() => {
@@ -146,7 +147,12 @@ const App = () => {
 
   useEffect(() => {
     if (playing) {
-      interval = setInterval(() => setTimer(prevTimer => prevTimer - 1), 1000);
+      interval = setInterval(() => setTimer(
+        (prevTimer) => {
+          if(prevTimer === 1) endGame();
+          return (prevTimer - 1);
+        },
+      ), 1000);
     }
 
     return () => {
@@ -160,11 +166,12 @@ const App = () => {
   }, [instructions]);
 
   const startGame = () => {
+    console.log('start game');
     // setInstructions(false);
     // setAnimating(true);
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
-    setTimer(120);
+    setTimer(gameDuration);
     setPlaying(true);
     // setAnimating(false);
     // setMove({ x: 0, y: 0 });
@@ -192,8 +199,16 @@ const App = () => {
     analytics.track('start', { difficulty: 'medium' });
   };
 
+  const endGame = () => {
+    clearInterval(interval);
+
+    setResults(true);
+  }
+
   const playAgain = () => {
-    console.log('play again!');
+    setResults(false);
+    setInstructions(true);
+    // console.log('play again!');
   };
 
   return (
@@ -203,47 +218,48 @@ const App = () => {
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 60 }}
         dpr={0.5}
+        
       >
-        {display === 'normal' && (<CameraShake {...camshakeConfig} />)}
-        <EffectComposer>
-          <Corn
-            canvasRef={canvasRef}
-            kernals={kernals}
-            currentKernal={currentKernal}
-            focusKernal={focusKernal}
-            setMove={setMove}
-            width={width}
-            height={height}
-            display={display}
+        <fog attach="fog" color="black" near={10} far={15} />
+
+
+        {/* <OrbitControls /> */}
+        {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
+        <Corn
+          canvasRef={canvasRef}
+          kernals={kernals}
+          currentKernal={currentKernal}
+          focusKernal={focusKernal}
+          setMove={setMove}
+          width={width}
+          height={height}
+          curvature={curvature}
+          display={display}
+        />
+        <directionalLight
+          intensity={1}
+          position={[0, 10, 5]}
+          target-position={[0, 0, -5]}
+          castShadow
+          shadow-mapSize={1024}
+          shadow-bias={-0.00001}
+        />
+        <Environment
+          files={envMap}
+          background
+          blur={0.8}
+        />
+          {/* <EffectComposer>
+          <ToneMapping 
+            blendFunction={BlendFunction.NORMAL} // blend mode
+            adaptive={true} // toggle adaptive luminance map usage
+            resolution={256} // texture resolution of the luminance map
+            middleGrey={0.6} // middle grey factor
+            maxLuminance={16.0} // maximum luminance
+            averageLuminance={1.0} // average luminance
+            adaptationRate={1.0} // luminance adaptation rate
           />
-          <directionalLight
-            intensity={2}
-            position={[0, -10, 0]}
-            target-position={[-5, -10, 0]}
-            castShadow
-            shadow-mapSize={1024}
-            shadow-bias={0.00001}
-          />
-          {/* <SSAO
-            blendFunction={BlendFunction.MULTIPLY} // blend mode
-            samples={600} // amount of samples per pixel (shouldn't be a multiple of the ring count)
-            rings={16} // amount of rings in the occlusion sampling pattern
-            distanceThreshold={1.0} // global distance threshold at which the occlusion effect starts to fade out. min: 0, max: 1
-            distanceFalloff={0.4} // distance falloff. min: 0, max: 1
-            rangeThreshold={0.15} // local occlusion range threshold at which the occlusion starts to fade out. min: 0, max: 1
-            rangeFalloff={0.9} // occlusion range falloff. min: 0, max: 1
-            luminanceInfluence={0.9} // how much the luminance of the scene influences the ambient occlusion
-            radius={2} // occlusion sampling radius
-            scale={2} // scale of the ambient occlusion
-            bias={0.9}
-          /> */}
-          {/* <ChromaticAberration offset={[0.001, 0.001]} /> */}
-          {/* <DepthOfField focusDistance={0.05} focalLength={display === '3d' ? 0.1 : 1} bokehScale={2} height={1024} /> */}
-          <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} height={500} />
-          {/* <Noise opacity={0.05} intensity={0.002} /> */}
-          {/* <Vignette eskil={false} offset={0} darkness={0.8} /> */}
-          <Environment files={envMap} background blur={0.1} exposure={0.1} />
-        </EffectComposer>
+        </EffectComposer> */}
       </Canvas>
       <Score
         timer={timer}
@@ -280,13 +296,43 @@ const App = () => {
         timer={timer}
         kernals={kernals}
       />
-      <button
-        className="debug"
-        type="button"
-        onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
-      >Display
-      </button>
-
+      <div className="debug">
+        <button
+          type="button"
+          onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
+        >Display
+        </button>
+        <input
+          type="range"
+          min="6"
+          max="60"
+          step="2"
+          value={width}
+          onChange={({ target }) => { setWidth(parseInt(target.value, 10)); }
+        }
+        />
+        <input
+          type="range"
+          min="6"
+          max="60"
+          step="2"
+          value={height}
+          onChange={
+          ({ target }) => { setHeight(parseInt(target.value, 10)); }
+        }
+        />
+        <input
+          type="range"
+          min="0"
+          max="10"
+          value={curvature}
+          onChange={
+          ({ target }) => {
+            setCurvature(target.value);
+          }
+        }
+        />
+      </div>
     </div>
   );
 };

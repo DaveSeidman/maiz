@@ -74,8 +74,8 @@ export default class Maze {
       this.cells[lastRow][randomCol] = 0;
       this.passages.push(randomCol);
     };
-    // add with / 5 passages
-    while (this.passages.length < this.width / 5) addPassage();
+    // add with / 3 passages
+    while (this.passages.length < this.width / 2) addPassage();
 
     this.cells.pop();
   }
