@@ -53,7 +53,7 @@ const App = () => {
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
-  const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1 });
+  const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1, offset: 0 });
   const [display, setDisplay] = useState('normal');
   const [timer, setTimer] = useState(gameDuration);
   // const [timerInterval, setTimerInterval] = useState();
@@ -116,7 +116,7 @@ const App = () => {
   useEffect(() => {
     setWidth(levels[difficulty].width);
     setHeight(levels[difficulty].height);
-    setFocusKernal({ x: levels[difficulty].width / 2, y: 0 });
+    setFocusKernal({ x: levels[difficulty].width / 2, y: 0, offset: 0 });
   }, [difficulty]);
 
 
@@ -135,7 +135,7 @@ const App = () => {
       });
     });
     setKernals(() => nextKernals);
-    setFocusKernal({ x: width / 2, y: 0 });
+    setFocusKernal({ x: width / 2, y: 0, offset: 0 });
     // setCurrentKernal({ x: width / 2, y: start, justPopped: false });
     // setMove({ x: 0, y: 0 });
   }, [width, height]);
@@ -173,15 +173,15 @@ const App = () => {
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
     setTimer(gameDuration);
-    setFocusKernal(startKernal);
+    setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: -2 });
     setPage(1);
     setTimeout(() => {
       setPage(2);
-      setFocusKernal(endKernal);
+      setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
     }, 3000);
     setTimeout(() => {
       setPage(3);
-      setFocusKernal({ x: width / 2, y: 0 })
+      setFocusKernal({ x: width / 2, y: 0, offset: 0 })
     }, 6000);
     setTimeout(() => {
       setCurrentKernal({ x: startKernal.x, y: startKernal.y })
@@ -332,7 +332,7 @@ const App = () => {
         <Joystick
           size={100}
           sticky={false}
-          throttle={100}
+          throttle={200}
           move={({ direction }) => {
             if (direction === 'BACKWARD') setMove({ x: 0, y: 1 });
             if (direction === 'FORWARD') setMove({ x: 0, y: -1 });

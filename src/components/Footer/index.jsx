@@ -36,7 +36,7 @@ const Footer = () => {
           sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
           onClick={() => console.log('shared successfully!')}
         >
-          <button>Share 🔗</button>
+          <button>Share</button>
         </RWebShare>
         <a
           href="https://gitlab.com/daveseidman/maiz"

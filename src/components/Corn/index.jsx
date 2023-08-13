@@ -192,7 +192,8 @@ const Corn = (props) => {
   }, [currentKernal]);
 
   useEffect(() => {
-    targetPosition = -focusKernal.x;
+    targetPosition = -focusKernal.x + focusKernal.offset;
+    console.log(targetPosition)
     targetRotation = (focusKernal.y / height) * Math.PI * -2;
   }, [focusKernal]);
 
@@ -289,6 +290,7 @@ const Corn = (props) => {
   };
 
   useEffect(() => {
+    if (!canvasRef.current) return;
     canvasRef.current.addEventListener('mousewheel', moveCob);
     canvasRef.current.addEventListener('touchstart', dragStart);
     canvasRef.current.addEventListener('pointerdown', dragStart);
@@ -298,6 +300,7 @@ const Corn = (props) => {
     canvasRef.current.addEventListener('pointerleave', dragEnd);
     canvasRef.current.addEventListener('click', clickToMove);
     return () => {
+      if (!canvasRef.current) return
       canvasRef.current.removeEventListener('mousewheel', moveCob);
       canvasRef.current.removeEventListener('touchstart', dragStart);
       canvasRef.current.removeEventListener('touchmove', drag);
@@ -376,7 +379,7 @@ Corn.propTypes = {
 
 Corn.defaultProps = {
   canvasRef: {},
-  setMove: () => {},
+  setMove: () => { },
   currentKernal: { x: 0, y: 0 },
   focusKernal: { x: 0, y: 0 },
   kernals: [],
