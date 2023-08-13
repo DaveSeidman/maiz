@@ -11,8 +11,8 @@ const Instructions = (props) => {
 
   const positions = [
     '',
-    'left',
     'right',
+    'left',
     '',
   ];
 
@@ -37,11 +37,11 @@ const Instructions = (props) => {
 
         )}
         {(!playing && !animating) && (
-        <button
-          type="button"
-          onClick={startGame}
-        >{playing ? 'Continue' : 'Start!'}
-        </button>
+          <button
+            type="button"
+            onClick={startGame}
+          >{playing ? 'Continue' : 'Start!'}
+          </button>
         )}
         <img className="graphic" src={cornImage} alt="corn" />
       </div>
@@ -63,8 +63,8 @@ Instructions.propTypes = {
 Instructions.defaultProps = {
   instructions: false,
   difficulty: 'medium',
-  setDifficulty: () => {},
-  startGame: () => {},
+  setDifficulty: () => { },
+  startGame: () => { },
   page: 0,
   playing: false,
 };

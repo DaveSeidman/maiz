@@ -291,7 +291,7 @@ const App = () => {
         timer={timer}
         kernals={kernals}
       />
-      <div className="debug">
+      {false && (<div className="debug">
         <button
           type="button"
           onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
@@ -327,7 +327,7 @@ const App = () => {
             }
           }
         />
-      </div>
+      </div>)}
       {(playing && mobile) && (
         <Joystick
           size={100}
