@@ -4,18 +4,22 @@
   &-content {
     transition: margin .5s;
     &.left {
-      margin-left: -25%;
+      // margin-left: -25%;
+      width: 25%;
+      left: 25%;
     }
 
     &.right {
-      margin-right: -25%;
+      // margin-right: -25%;
+      width: 25%;
+      left: 75%;
     }
 
     &-title {
       letter-spacing: .5rem;
       text-shadow: 1px 0px white;
     }
-    
+
     .option {
       display: flex;
       flex-direction: column;

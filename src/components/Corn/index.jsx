@@ -116,8 +116,14 @@ const Corn = (props) => {
     endKernalOffset.x += 2;
     const tempStart = new Object3D();
     const tempEnd = new Object3D();
-    positionToCylindar(tempStart, startKernalOffset);
-    positionToCylindar(tempEnd, endKernalOffset);
+    if (display === 'normal') {
+      positionToCylindar(tempStart, startKernalOffset);
+      positionToCylindar(tempEnd, endKernalOffset);
+    }
+    if (display === 'grid') {
+      positionToGrid(tempStart, startKernalOffset);
+      positionToGrid(tempEnd, endKernalOffset);
+    }
     arrowsRef.current.setMatrixAt(0, tempStart.matrix);
     arrowsRef.current.setMatrixAt(1, tempEnd.matrix);
     arrowsRef.current.instanceMatrix.needsUpdate = true;
@@ -307,7 +313,7 @@ const Corn = (props) => {
   return (
     <group
       ref={groupRef}
-      position={display === 'normal' ? [0, 0, 0] : [0, 0, 0]}
+      position={display === 'normal' ? [0, 0, 0] : [0, 0, -width / 2]}
     >
       <group
         ref={cobRef}
@@ -328,7 +334,6 @@ const Corn = (props) => {
           castShadow
           receiveShadow
           geometry={kernalMesh.geometry}
-          // material={kernalMaterial}
           args={[null, null, kernals.length]}
         >
           <meshStandardMaterial

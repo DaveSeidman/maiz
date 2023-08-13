@@ -19,7 +19,7 @@ import envMap from './assets/images/spaichingen_hill_2k.hdr';
 import Maze from './components/Maze';
 import { camshakeConfig, levels, colors, gameDuration } from './config';
 
-import inobonce from 'inobounce'; // eslint-disable-line
+// import inobonce from 'inobounce'; // eslint-disable-line
 
 import './index.scss';
 
@@ -44,9 +44,9 @@ const App = () => {
   // const [start, setStart] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
   const [animating, setAnimating] = useState(false);
-  const [instructions, setInstructions] = useState(false);
+  const [instructions, setInstructions] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [page, setPage] = useState('instructions');
+  const [page, setPage] = useState(0);
   const [results, setResults] = useState(false);
   const [move, setMove] = useState({ x: 0, y: 0 });
   const [kernals, setKernals] = useState([]);
@@ -89,9 +89,9 @@ const App = () => {
         return;
       }
       // TODO: implement focusKernal complete and then remove the check for animating here
-      if (kernal.end && !animating) {
+      if (kernal.end) {
         console.log('this is being triggered', animating);
-        setResults(true);
+        setResults({win: true});
         clearInterval(interval);
         // clearInterval(interval);
         // TODO: include results here
@@ -162,51 +162,44 @@ const App = () => {
   }, [playing]);
 
   useEffect(() => {
-    console.log('instructions?', instructions);
+    // console.log('instructions?', instructions);
   }, [instructions]);
 
   const startGame = () => {
     console.log('start game');
     // setInstructions(false);
-    // setAnimating(true);
+    setAnimating(true);
+    setPlaying(true);
+
     const startKernal = kernals.find(kernal => kernal.start);
     const endKernal = kernals.find(kernal => kernal.end);
     setTimer(gameDuration);
-    setPlaying(true);
-    // setAnimating(false);
     // setMove({ x: 0, y: 0 });
-    setCurrentKernal({ x: startKernal.x, y: startKernal.y });
-    setMove({ x: 0, y: 0 });
-    setInstructions(false);
-    // setFocusKernal(endKernal);
-    // setPage('end');
-    // setTimeout(() => {
-    //   setPage('start');
-    //   setFocusKernal(startKernal);
-    // }, 3000);
-    // setTimeout(() => {
-    //   setPage('go');
-    //   setAnimating(false);
-    //   setInstructions(false);
-    // }, 6000);
-    // setMove({ x: 0, y: 0 });
-    // console.log('set interval');
-    // interval = setInterval(() => {
-    //   count += 1;
-    //   setTimer({ elapsed: count });
-    // }, 1000);
-    // setTimerInterval(startTimer);
+    setFocusKernal(startKernal);
+    setPage(1);
+    setTimeout(() => {
+      setPage(2);
+      setFocusKernal(endKernal);
+    }, 3000);
+    setTimeout(() => {
+      setPage(3);
+      setFocusKernal({ x: width / 2, y: 0 })
+    }, 6000);
+    setTimeout(() => {
+      setCurrentKernal({x: startKernal.x, y: startKernal.y})
+      setAnimating(false);
+      setInstructions(false);
+    }, 7500);
     analytics.track('start', { difficulty: 'medium' });
   };
 
   const endGame = () => {
     clearInterval(interval);
-
-    setResults(true);
+    setResults( {win: false, reason: 'time'});
   }
 
   const playAgain = () => {
-    setResults(false);
+    setResults(null);
     setInstructions(true);
     // console.log('play again!');
   };
@@ -220,7 +213,7 @@ const App = () => {
         dpr={0.5}
         
       >
-        <fog attach="fog" color="black" near={10} far={15} />
+        <fog attach="fog" color="black" near={10} far={display === 'normal' ? 15 : 100} />
 
 
         {/* <OrbitControls /> */}

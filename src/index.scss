@@ -76,7 +76,7 @@ html, body {
     padding: .5rem 1rem;
     background: #ffda00;
     border-radius: .5rem;
-    font-family: 'Rajdhani';
+    font-family: 'Corn';
     font-size: 1rem;
     border: 2px solid orange;
     color: $dark-orange;
@@ -112,9 +112,9 @@ html, body {
       width: calc(100vw - 6rem);
       max-width: 36rem;
       color: white;
-      background: rgba( 150, 150, 150 ,.75);
-      backdrop-filter: blur(.5rem);
-      will-change: backdrop-filter;
+      background: rgba(105, 23, 14, 0.75);
+      // backdrop-filter: blur(.5rem);
+      // will-change: backdrop-filter;
       -webkit-backdrop-filter: blur(.5rem);
       display: flex;
       flex-direction: column;

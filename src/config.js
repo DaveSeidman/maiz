@@ -23,7 +23,6 @@ export const colors = {
   yellows: [
     new Color('hsl(45, 100%, 60%)'),
     new Color('hsl(50, 100%, 60%)'),
-    new Color('hsl(60, 100%, 50%)'),
   ],
   browns: [
     new Color('hsl(40, 20%, 20%)'),

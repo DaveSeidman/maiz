@@ -5,11 +5,12 @@
    "title": "MAIZ"
   },
   "messages": {
-    "instructions": {
-      "end": "Escape the Maiz by reaching this kernal",
-      "start": "Start from this Kernal",
-      "go": "Good luck!"
-    },
+    "instructions": [
+      "Circumnavigate the Cob!",
+      "Start from this kernal,",
+      "Make your way to the end of the maze!",
+      "Good luck!"
+    ],
     "welcome": [
       "Welcome to Maiz!"
     ],
