@@ -12,57 +12,28 @@ import './index.scss';
 // } from 'react-share';
 import { messages } from '../../assets/content.json';
 import { gameDuration } from '../../config';
+import PropTypes from 'prop-types';
 
-const random = array => array[Math.floor(Math.random() * array.length)];
+// const random = array => array[Math.floor(Math.random() * array.length)];
 
 const Results = (props) => {
   const { results, playAgain, timer, popCount, kernals } = props;
   const index = Math.floor(Math.random() * messages.won.length);
-  const message = messages.won[index];
+  const message = messages[results.win ? 'won' : 'lost'][index];
 
-  const resultsMessage = `You escaped the maze in ${gameDuration - timer} seconds and only popped ${Math.round((popCount / kernals.length) * 100)}% of the kernals!`;
+  const percentPopped = Math.round((popCount / kernals.length) * 100);
+  const time = gameDuration - timer;
 
-  const url = 'https://daveseidman.gitlab.io/cornmaze';
+  const winLossMessage = results.win
+    ? `You escaped the maze in ${time} seconds and only popped ${percentPopped}% of the kernals!`
+    : `You failed to escape the maze but at least you popped ${percentPopped}% of the kernals!`;
+
 
   return (
-    <div className={`results modal ${results ? '' : 'hidden'}`}>
+    <div className={`results modal ${results.won ? '' : 'hidden'}`}>
       <div className="results-content modal-content">
         <h2>{message}</h2>
-        <p>{resultsMessage}</p>
-        {/* <div className="results-content-share">
-          <h3>Now go and brag about it!</h3>
-          <TwitterShareButton
-            url={url}
-            title={random(messages.share.titles)}
-            hashtags={messages.share.hashtags}
-          ><TwitterIcon />
-          </TwitterShareButton>
-          <FacebookShareButton
-            url={url}
-            quote="test quote"
-            hashtag="#webgl,#threejs,#reactthreefiber"
-          ><FacebookIcon />
-          </FacebookShareButton>
-          <LinkedinShareButton
-            url={url}
-            title={random(messages.share.titles)}
-            summary="test summary"
-            source={url}
-          >
-            <LinkedinIcon />
-          </LinkedinShareButton>
-          <RedditShareButton
-            url={url}
-            title={random(messages.share.titles)}
-          ><RedditIcon />
-          </RedditShareButton>
-          <EmailShareButton
-            url={url}
-            subject={random(messages.share.titles)}
-          ><EmailIcon />
-          </EmailShareButton>
-        </div> */}
-
+        <p>{winLossMessage}</p>
         <button type="button" onClick={playAgain}>Play Again!</button>
         <button type="button" onClick={playAgain}>Share!</button>
 
@@ -72,3 +43,19 @@ const Results = (props) => {
   );
 };
 export default Results;
+
+Results.propTypes = {
+  results: PropTypes.objectOf(PropTypes.shape),
+  playAgain: PropTypes.func,
+  timer: PropTypes.number,
+  popCount: PropTypes.number,
+  kernals: PropTypes.arrayOf(PropTypes.objectOf),
+};
+
+Results.defaultProps = {
+  results: {},
+  playAgain: () => {},
+  timer: 0,
+  popCount: 0,
+  kernals: [],
+};

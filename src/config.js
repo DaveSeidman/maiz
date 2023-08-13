@@ -31,4 +31,4 @@ export const colors = {
   ],
 };
 
-export const gameDuration = 100;
+export const gameDuration = 10;

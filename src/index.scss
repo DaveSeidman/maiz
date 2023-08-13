@@ -132,6 +132,16 @@ html, body {
     }
   }
 
+  div[data-testid="joystick-base"] {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    button {
+      transition: transform .1s;
+    }
+  }
 }
 
 .debug {
