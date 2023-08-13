@@ -92,7 +92,10 @@ html, body {
 
   .modal {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -109,8 +112,8 @@ html, body {
   
       pointer-events: initial;
       position: absolute;
-      width: calc(100vw - 6rem);
-      max-width: 36rem;
+      // width: calc(100vw - 6rem);
+      // max-width: 36rem;
       color: white;
       background: rgba(105, 23, 14, 0.75);
       // backdrop-filter: blur(.5rem);

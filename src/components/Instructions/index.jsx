@@ -17,8 +17,8 @@ const Instructions = (props) => {
   ];
 
   return (
-    <div className={`instructions modal ${instructions ? '' : 'hidden'}`}>
-      <div className={`instructions-content modal-content ${positions[page] || ''}`}>
+    <div className={`instructions modal ${instructions ? '' : 'hidden'} ${positions[page] || ''}`}>
+      <div className="instructions-content modal-content">
         <h1 className="instructions-content-title">- MAIZ -</h1>
         <p>{messages.instructions[page]}</p>
         {/* <p>🟡 Pop the yellow kernals 🟡<br /> 🟤 brown kernals are walls 🟤</p> */}

@@ -1,19 +1,19 @@
 .instructions {
-  transition: visibility .5s, opacity .5s;
+  transition: visibility .5s, opacity .5s, left .5s, right .5s;
+
+  &.left {
+    // margin-left: -25%;
+    right: 50% !important;
+  }
+
+  &.right {
+    // margin-right: -25%;
+    left: 50% !important;
+  }
 
   &-content {
     transition: margin .5s;
-    &.left {
-      // margin-left: -25%;
-      width: 25%;
-      left: 25%;
-    }
 
-    &.right {
-      // margin-right: -25%;
-      width: 25%;
-      left: 75%;
-    }
 
     &-title {
       letter-spacing: .5rem;
