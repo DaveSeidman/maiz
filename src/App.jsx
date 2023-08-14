@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 // import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
 import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
-import { AmbientLight, PCFSoftShadowMap } from 'three';
+import { PCFSoftShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
 // import { BlendFunction } from 'postprocessing';
@@ -92,6 +92,7 @@ function App() {
     const startKernal = kernals.find((kernal) => kernal.start);
     const endKernal = kernals.find((kernal) => kernal.end);
     setTimer(gameDuration);
+    setPopCount(0);
     setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: -2 });
     setPage(1);
     setTimeout(() => {
@@ -205,9 +206,9 @@ function App() {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 60 }}
-        dpr={0.75}
+        dpr={0.5}
       >
-        {/* <fog attach="fog" color="black" near={10} far={display === 'normal' ? 15 : 100} /> */}
+        <fog attach="fog" color={new Color('rgb(128, 155, 175')} near={10} far={display === 'normal' ? 15 : 100} />
         {/* <OrbitControls /> */}
         {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
         <Corn

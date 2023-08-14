@@ -206,26 +206,18 @@ function Corn(props) {
   }, [currentKernal]);
 
   useEffect(() => {
-    console.log({ focusKernal, prevFocusKernal })
     if (focusKernal.x !== undefined && focusKernal.y !== undefined) {
       targetPosition = -focusKernal.x + focusKernal.offset;
       targetRotation = (focusKernal.y / height) * Math.PI * -2;
-      // }
     } else {
       targetPosition = -width / 2;
     }
-    // if (prevFocusKernal.x !== undefined && prevFocusKernal.y !== undefined) {
-
-    // const kernal = kernals.find(kernal => kernal.x = prevFocusKernal.x && kernal.y === prevFocusKernal.y);
-    // console.log(kernal);
-    //   if (kernal) {
-    // const index = kernalIndex(kernal);
-    // //     console.log('setColorAt', index, randomColor('yellows'));
-    // kernals.current.setColorAt(index, randomColor('yellows'));
-    // kernals.current.instanceColor.needsUpdate = true;
-    // }
-    // }
-    // prevFocusKernal = JSON.parse(JSON.stringify(focusKernal));
+    if (prevFocusKernal.x !== undefined) {
+      const index = kernalIndex(prevFocusKernal);
+      kernalsRef.current.setColorAt(index, randomColor('yellows'));
+      kernalsRef.current.instanceColor.needsUpdate = true;
+    }
+    prevFocusKernal = JSON.parse(JSON.stringify(focusKernal));
   }, [focusKernal]);
 
   useFrame((e, timeDiff) => {
