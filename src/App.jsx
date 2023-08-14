@@ -103,7 +103,8 @@ function App() {
       setFocusKernal({});
     }, 6000);
     setTimeout(() => {
-      setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
+      // setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
+      setCurrentKernal({ x: startKernal.x, y: startKernal.y });
       setAnimating(false);
       setInstructions(false);
       setPlaying(true);
@@ -114,6 +115,7 @@ function App() {
   const endGame = (won) => {
     // clearInterval(interval);
     setPlaying(false);
+    setFocusKernal({ x: width / 2, y: currentKernal.y, offset: 0 });
     setResults({ won });
     analytics.track('end', { won, difficulty: 'medium' });
   };
@@ -210,6 +212,7 @@ function App() {
         {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
         <Corn
           playing={playing}
+          animating={animating}
           canvasRef={canvasRef}
           kernals={kernals}
           currentKernal={currentKernal}

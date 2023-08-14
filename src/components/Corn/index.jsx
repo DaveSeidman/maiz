@@ -32,7 +32,7 @@ const poppedKernals = [];
 
 
 function Corn(props) {
-  const { playing, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
+  const { playing, animating, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -230,6 +230,10 @@ function Corn(props) {
 
   useFrame((e, timeDiff) => {
     elapsedTime += timeDiff;
+
+    if (!(playing || animating)) {
+      targetRotation += timeDiff / 4;
+    }
 
     if (focusKernal) {
       const index = kernalIndex(focusKernal);

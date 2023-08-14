@@ -79,6 +79,11 @@ html, body {
     // text-shadow: 1px 0 $dark-orange;
     box-shadow: 0 0 5px 5px rgb(8 136 25 / 25%);
     margin: 1rem;
+    white-space: nowrap;
+
+    img {
+      position: absolute;
+    }
 
     &.selected {
       // animation: border-pulse 2s infinite;
