@@ -6,26 +6,31 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, SphereGeometry, BoxGeometry, MeshBasicMaterial } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, Color } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
+import { colors } from '../../config'
 import kernalModel from '../../assets/models/models.glb';
 import grayImage from '../../assets/images/gray.jpg';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
-let prevTime = 0;
+
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
 let lerpAmount = 1;
-let prevKernalY = 0;
-// const radius = 5;
+let elapsedTime = 0;
+
+let prevKernal = {}; // TODO: may be a better way to handle this with state.previous?
+let endKernal = {};
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
 const pointerMovementThreshold = 10;
 const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
-const Corn = (props) => {
+
+
+function Corn(props) {
   const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
@@ -33,7 +38,7 @@ const Corn = (props) => {
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [texture, setTexture] = useState();
-  const [targetPosition2, setTargetPosition2] = useState(0);
+
   const groupRef = useRef();
   const cobRef = useRef();
   const kernalsRef = useRef();
@@ -42,22 +47,29 @@ const Corn = (props) => {
   const arrowsRef = useRef();
   const kernalMatRef = useRef();
 
-  const kernalMesh = gltf.scene.children.find(child => child.name === 'Kernal');
-  const baseMesh = gltf.scene.children.find(child => child.name === 'Base');
-  const cursorMesh = gltf.scene.children.find(child => child.name === 'Cursor');
-  const arrowMesh = gltf.scene.children.find(child => child.name === 'Arrow');
-  const poppedMeshes = gltf.scene.children.filter(child => child.name.indexOf('Popped') >= 0);
+  const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
+  const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
+  const cursorMesh = gltf.scene.children.find((child) => child.name === 'Cursor');
+  const arrowMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
+  const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
 
   // const kernalMaterial = new MeshStandardMaterial({ roughness: 0.27, metalness: 0.13, envMapIntensity: 1 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.2, color: 0xcbcb8a });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.1, metalness: 0.8, color: 0xddeeff, reflectivity: 0.9, transmission: 0.99, thickness: 0.02, opacity: 0.5 });
   const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
 
+  const highlightColor1 = colors.yellows[0];
+  // const highlightColor2 = new Color('rgb(255, 255, 255)');
+  const highlightColor2 = new Color('hsl(100, 100%, 70%)');
+  const highlightColor = highlightColor1.clone();
+
   const loader = new TextureLoader();
   loader.load(grayImage, (_texture) => {
     setTexture(_texture);
     kernalMatRef.needsUpdate = true;
   });
+
+  const kernalIndex = (kernal) => (kernal.y * (width + 1)) + kernal.x;
 
   const positionToGrid = (object, kernal) => {
     object.position.set(kernal.x, kernal.y + height / -2, 0);
@@ -89,7 +101,6 @@ const Corn = (props) => {
     object1.updateMatrix();
   };
 
-
   const positionKernals = () => {
     const object1 = new Object3D();
     const object2 = new Object3D();
@@ -108,8 +119,8 @@ const Corn = (props) => {
     basesRef.current.instanceMatrix.needsUpdate = true;
     kernalsRef.current.instanceColor.needsUpdate = true;
     // kernalsRef.current.material.needsUpdate = true;
-    const startKernal = kernals.find(kernal => kernal.start);
-    const endKernal = kernals.find(kernal => kernal.end);
+    const startKernal = kernals.find((kernal) => kernal.start);
+    const endKernal = kernals.find((kernal) => kernal.end);
     const startKernalOffset = JSON.parse(JSON.stringify(startKernal));
     const endKernalOffset = JSON.parse(JSON.stringify(endKernal));
     startKernalOffset.x -= 2;
@@ -130,7 +141,7 @@ const Corn = (props) => {
   };
 
   useEffect(() => {
-    // console.log({ kernals });
+    endKernal = kernals.find(kernal => kernal.end);
     positionKernals();
   }, [kernals, curvature, display]);
 
@@ -148,8 +159,8 @@ const Corn = (props) => {
     targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
     // this will set a rotations counter to be added to the targetRotations to preven that jump
-    if (currentKernal.y === height - 1 && prevKernalY === 0) setRotations(rotations - 1);
-    if (currentKernal.y === 0 && prevKernalY === height - 1) setRotations(rotations + 1);
+    if (currentKernal.y === height - 1 && prevKernal.y === 0) setRotations(rotations - 1);
+    if (currentKernal.y === 0 && prevKernal.y === height - 1) setRotations(rotations + 1);
 
     setUseSpin(false);
 
@@ -159,11 +170,13 @@ const Corn = (props) => {
 
     if (currentKernal.justPopped) {
       // remove kernal mesh by scaling it to 0
-      const index = (currentKernal.y * (width + 1)) + currentKernal.x;
+      const index = kernalIndex(currentKernal);
+      const prevIndex = kernalIndex(prevKernal);
       const matrix = new Matrix4();
-      kernalsRef.current.getMatrixAt(index, matrix);
+
+      kernalsRef.current.getMatrixAt(prevIndex, matrix);
       matrix.multiply(scaleZero);
-      kernalsRef.current.setMatrixAt(index, matrix);
+      kernalsRef.current.setMatrixAt(prevIndex, matrix);
       kernalsRef.current.instanceMatrix.needsUpdate = true;
 
       // add popped kernal and animate
@@ -188,17 +201,20 @@ const Corn = (props) => {
         rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
       });
     }
-    prevKernalY = currentKernal.y;
+    prevKernal = JSON.parse(JSON.stringify(currentKernal));
   }, [currentKernal]);
 
   useEffect(() => {
     targetPosition = -focusKernal.x + focusKernal.offset;
-    console.log(targetPosition)
     targetRotation = (focusKernal.y / height) * Math.PI * -2;
   }, [focusKernal]);
 
-  useFrame((e) => {
-    const timeDiff = e.clock.elapsedTime - prevTime;
+  useFrame((e, timeDiff) => {
+    elapsedTime += timeDiff;
+    const index = kernalIndex(endKernal);
+    highlightColor.lerpColors(highlightColor1, highlightColor2, Math.sin(elapsedTime * 7));
+    kernalsRef.current.setColorAt(index, highlightColor);
+    kernalsRef.current.instanceColor.needsUpdate = true;
 
     spin *= 0.9;
     const lerpDifference = (display === 'normal' ? 1 : 0) - lerpAmount;
@@ -230,9 +246,7 @@ const Corn = (props) => {
         poppedKernals.splice(index, 1);
       }
     });
-
-    prevTime = e.clock.elapsedTime;
-  });
+  }, []);
 
   const moveCob = ({ deltaX, deltaY }) => {
     setUseSpin(true);
@@ -268,7 +282,7 @@ const Corn = (props) => {
   };
 
   const clickToMove = (e) => {
-    const pointerMovement = Math.sqrt(Math.pow(pointer.startX - pointer.x, 2) + Math.pow(pointer.startY - pointer.y, 2));
+    const pointerMovement = Math.sqrt((pointer.startX - pointer.x) ** 2 + (pointer.startY - pointer.y) ** 2);
     if (pointerMovement < pointerMovementThreshold) {
       // TODO: check these multipliers
       const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
@@ -300,7 +314,7 @@ const Corn = (props) => {
     canvasRef.current.addEventListener('pointerleave', dragEnd);
     canvasRef.current.addEventListener('click', clickToMove);
     return () => {
-      if (!canvasRef.current) return
+      if (!canvasRef.current) return;
       canvasRef.current.removeEventListener('mousewheel', moveCob);
       canvasRef.current.removeEventListener('touchstart', dragStart);
       canvasRef.current.removeEventListener('touchmove', drag);
@@ -311,7 +325,6 @@ const Corn = (props) => {
       canvasRef.current.removeEventListener('click', clickToMove);
     };
   });
-
 
   return (
     <group
@@ -363,7 +376,7 @@ const Corn = (props) => {
       </group>
     </group>
   );
-};
+}
 export default Corn;
 
 Corn.propTypes = {

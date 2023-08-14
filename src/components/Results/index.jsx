@@ -30,7 +30,7 @@ const Results = (props) => {
 
 
   return (
-    <div className={`results modal ${results.won ? '' : 'hidden'}`}>
+    <div className={`results modal ${results.won !== undefined ? '' : 'hidden'}`}>
       <div className="results-content modal-content">
         <h2>{message}</h2>
         <p>{winLossMessage}</p>
@@ -54,7 +54,7 @@ Results.propTypes = {
 
 Results.defaultProps = {
   results: {},
-  playAgain: () => {},
+  playAgain: () => { },
   timer: 0,
   popCount: 0,
   kernals: [],

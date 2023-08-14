@@ -10,6 +10,8 @@ import { AmbientLight, PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
 // import { BlendFunction } from 'postprocessing';
+import { Joystick } from 'react-joystick-component';
+import Mobile from 'is-mobile';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
@@ -18,12 +20,12 @@ import Score from './components/Score';
 import envMap from './assets/images/spaichingen_hill_2k.hdr';
 import Maze from './components/Maze';
 import { camshakeConfig, levels, colors, gameDuration } from './config';
-import { Joystick } from 'react-joystick-component';
-import Mobile from 'is-mobile';
-
-const mobile = Mobile();
 
 import './index.scss';
+
+const randomColor = (base) => colors[base][Math.floor(Math.random() * colors[base].length)];
+
+const mobile = Mobile();
 
 const analytics = Analytics({
   app: 'website data',
@@ -34,33 +36,35 @@ const analytics = Analytics({
   ],
 });
 
-let interval = null;
+// const interval = null;
 
-const App = () => {
-  // const width = 14;// 34;
-  // const height = 26;
+function App() {
   const canvasRef = useRef();
-  const [width, setWidth] = useState(levels.easy.width);
-  const [height, setHeight] = useState(levels.easy.height);
+
+  const [width, setWidth] = useState(levels.medium.width);
+  const [height, setHeight] = useState(levels.medium.height);
   const [curvature, setCurvature] = useState(1);
-  // const [start, setStart] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
+
   const [animating, setAnimating] = useState(false);
   const [instructions, setInstructions] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [page, setPage] = useState(0);
   const [results, setResults] = useState({});
-  const [move, setMove] = useState({ x: 0, y: 0 });
+  const [timer, setTimer] = useState(gameDuration);
+  // const [timerInterval, setTimerInterval] = useState(null);
+
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
   const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1, offset: 0 });
   const [display, setDisplay] = useState('normal');
-  const [timer, setTimer] = useState(gameDuration);
+  const [move, setMove] = useState({ x: 0, y: 0 });
+
   // const [timerInterval, setTimerInterval] = useState();
   const [popCount, setKernalsEaten] = useState(0);
 
   const handleKeydown = ({ key }) => {
-    if (instructions || results || animating) return;
+    if (!playing) return;
     let x = 0;
     let y = 0;
     switch (key) {
@@ -71,8 +75,6 @@ const App = () => {
       default: break;
     }
     setMove({ x, y });
-    // if (key === 'r') setTimeout(() => { setResults(true); });
-    // if (key === 'e') setTimeout(() => { setResults(false); });
     if (key === 'Escape') setInstructions(false);
   };
 
@@ -82,7 +84,7 @@ const App = () => {
     if (x < 0 || x > width) return;
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
-    const kernal = kernals.find(k => k.x === x && k.y === y);
+    const kernal = kernals.find((k) => k.x === x && k.y === y);
 
     let justPopped = false;
     if (kernal) {
@@ -94,7 +96,6 @@ const App = () => {
       if (kernal.end) {
         console.log('this is being triggered', animating);
         setResults({ won: true });
-        clearInterval(interval);
         // clearInterval(interval);
         // TODO: include results here
         analytics.track('end', { difficulty: 'medium' });
@@ -111,14 +112,11 @@ const App = () => {
     setCurrentKernal({ x, y, justPopped });
   }, [move]); // TODO add popcount here and to useState
 
-  const randomColor = base => colors[base][Math.floor(Math.random() * colors[base].length)];
-
   useEffect(() => {
     setWidth(levels[difficulty].width);
     setHeight(levels[difficulty].height);
     setFocusKernal({ x: levels[difficulty].width / 2, y: 0, offset: 0 });
   }, [difficulty]);
-
 
   // create the maze
   useEffect(() => {
@@ -145,23 +143,25 @@ const App = () => {
     return () => {
       removeEventListener('keydown', handleKeydown);
     };
-  }, [instructions, results, animating]);
+  }, [instructions, results, animating]); // TODO: double check this dependency array
 
   useEffect(() => {
-    if (playing) {
-      interval = setInterval(() => setTimer(
-        (prevTimer) => {
-          if (prevTimer === 1) endGame();
-          return (prevTimer - 1);
-        },
-      ), 1000);
+    let interval;
+
+    if (playing && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      clearInterval(interval);
+      endGame();
+      // You can trigger some action here when the timer reaches zero
     }
 
     return () => {
-      console.log('startedReturned');
       clearInterval(interval);
     };
-  }, [playing]);
+  }, [playing, timer]);
 
   useEffect(() => {
     // console.log('instructions?', instructions);
@@ -170,8 +170,8 @@ const App = () => {
   const startGame = () => {
     console.log('start game');
     setAnimating(true);
-    const startKernal = kernals.find(kernal => kernal.start);
-    const endKernal = kernals.find(kernal => kernal.end);
+    const startKernal = kernals.find((kernal) => kernal.start);
+    const endKernal = kernals.find((kernal) => kernal.end);
     setTimer(gameDuration);
     setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: -2 });
     setPage(1);
@@ -181,26 +181,28 @@ const App = () => {
     }, 3000);
     setTimeout(() => {
       setPage(3);
-      setFocusKernal({ x: width / 2, y: 0, offset: 0 })
+      setFocusKernal({ x: width / 2, y: 0, offset: 0 });
     }, 6000);
     setTimeout(() => {
-      setCurrentKernal({ x: startKernal.x, y: startKernal.y })
+      setCurrentKernal({ x: startKernal.x, y: startKernal.y });
       setAnimating(false);
       setInstructions(false);
       setPlaying(true);
+      analytics.track('start', { difficulty });
     }, 7500);
-    analytics.track('start', { difficulty: 'medium' });
   };
 
   const endGame = () => {
-    clearInterval(interval);
+    // clearInterval(interval);
     setPlaying(false);
     setResults({ won: false, reason: 'time' });
-  }
+  };
 
   const playAgain = () => {
-    setPage(0)
+    setPage(0);
     setResults({});
+    setWidth(levels[difficulty].width);
+    setHeight(levels[difficulty].height);
     setInstructions(true);
   };
 
@@ -210,12 +212,9 @@ const App = () => {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 60 }}
-        dpr={0.5}
-
+        dpr={0.75}
       >
-        <fog attach="fog" color="black" near={10} far={display === 'normal' ? 15 : 100} />
-
-
+        {/* <fog attach="fog" color="black" near={10} far={display === 'normal' ? 15 : 100} /> */}
         {/* <OrbitControls /> */}
         {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
         <Corn
@@ -243,7 +242,7 @@ const App = () => {
           blur={0.4}
         />
         {/* <EffectComposer>
-          <ToneMapping 
+          <ToneMapping
             blendFunction={BlendFunction.NORMAL} // blend mode
             adaptive={true} // toggle adaptive luminance map usage
             resolution={256} // texture resolution of the luminance map
@@ -265,7 +264,7 @@ const App = () => {
           type="button"
           onClick={() => {
             setInstructions(true);
-            clearInterval(interval);
+            // clearInterval(interval);
           }}
         >
           ?
@@ -291,44 +290,45 @@ const App = () => {
         timer={timer}
         kernals={kernals}
       />
-      {false && (<div className="debug">
-        <button
-          type="button"
-          onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
-        >Display
-        </button>
-        <input
-          type="range"
-          min="6"
-          max="60"
-          step="2"
-          value={width}
-          onChange={({ target }) => { setWidth(parseInt(target.value, 10)); }
-          }
-        />
-        <input
-          type="range"
-          min="6"
-          max="60"
-          step="2"
-          value={height}
-          onChange={
-            ({ target }) => { setHeight(parseInt(target.value, 10)); }
-          }
-        />
-        <input
-          type="range"
-          min="0"
-          max="10"
-          value={curvature}
-          onChange={
-            ({ target }) => {
-              setCurvature(target.value);
+      {true && (
+        <div className="debug">
+          <button
+            type="button"
+            onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
+          >Display
+          </button>
+          <input
+            type="range"
+            min="6"
+            max="60"
+            step="2"
+            value={width}
+            onChange={({ target }) => { setWidth(parseInt(target.value, 10)); }}
+          />
+          <input
+            type="range"
+            min="6"
+            max="60"
+            step="2"
+            value={height}
+            onChange={
+              ({ target }) => { setHeight(parseInt(target.value, 10)); }
             }
-          }
-        />
-      </div>)}
-      {(playing && mobile) && (
+          />
+          <input
+            type="range"
+            min="0"
+            max="10"
+            value={curvature}
+            onChange={
+              ({ target }) => {
+                setCurvature(target.value);
+              }
+            }
+          />
+        </div>
+      )}
+      {((playing || animating) && mobile) && (
         <Joystick
           size={100}
           sticky={false}
@@ -340,9 +340,9 @@ const App = () => {
             if (direction === 'RIGHT') setMove({ x: 1, y: 0 });
           }}
           stop={() => { }}
-        ></Joystick>
+        />
       )}
     </div>
   );
-};
+}
 export default App;

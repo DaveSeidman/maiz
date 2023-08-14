@@ -1,35 +1,17 @@
 .instructions {
-  transition: visibility .5s, opacity .5s, left .5s, right .5s;
-
-  &.left {
-    // margin-left: -25%;
-    right: 50% !important;
-  }
-
-  &.right {
-    // margin-right: -25%;
-    left: 50% !important;
-  }
+  transition: visibility .5s, opacity .5s;
 
   &-content {
-    transition: margin .5s;
 
-
-    &-title {
-      letter-spacing: .5rem;
-      text-shadow: 1px 0px white;
-    }
-
-    .option {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      p {
-        text-shadow: 1px 0px white;
+    .difficulty {
+      h2 {
+        text-align: center;
       }
-      button {
-        white-space: nowrap;
-        margin: 0;
+      &-options {
+        display: flex;
+        button {
+          margin: .5rem;
+        }
       }
     }
   }

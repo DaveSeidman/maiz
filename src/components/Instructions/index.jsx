@@ -5,7 +5,7 @@ import { messages } from '../../assets/content.json';
 
 import './index.scss';
 
-const Instructions = (props) => {
+function Instructions(props) {
   const { instructions, difficulty, setDifficulty, playing, animating, startGame, page } = props;
   // console.log(setDifficulty);
 
@@ -17,22 +17,24 @@ const Instructions = (props) => {
   ];
 
   return (
-    <div className={`instructions modal ${instructions ? '' : 'hidden'} ${positions[page] || ''}`}>
-      <div className="instructions-content modal-content">
+    <div className={`instructions modal ${instructions ? '' : 'hidden'}`}>
+      <div className={`instructions-content modal-content  ${positions[page] || ''}`}>
         <h1 className="instructions-content-title">- MAIZ -</h1>
         <p>{messages.instructions[page]}</p>
-        {!animating && (
+        {page === 0 && (
           <div className="difficulty">
-            <p>Difficulty:</p>
-            <button type="button" className={difficulty === 'easy' ? 'selected' : ''} onClick={() => { setDifficulty('easy'); }}>
-              Easy <span role="img" aria-label="corn">🌽</span>
-            </button>
-            <button type="button" className={difficulty === 'medium' ? 'selected' : ''} onClick={() => { setDifficulty('medium'); }}>
-              Medium <span role="img" aria-label="corn">🌽</span>
-            </button>
-            <button type="button" className={difficulty === 'hard' ? 'selected' : ''} onClick={() => { setDifficulty('hard'); }}>
-              Hard <span role="img" aria-label="corn">🌽</span>
-            </button>
+            <h2>Difficulty:</h2>
+            <div className="difficulty-options">
+              <button type="button" className={difficulty === 'easy' ? 'selected' : ''} onClick={() => { setDifficulty('easy'); }}>
+                Easy <span role="img" aria-label="corn">🌽</span>
+              </button>
+              <button type="button" className={difficulty === 'medium' ? 'selected' : ''} onClick={() => { setDifficulty('medium'); }}>
+                Medium <span role="img" aria-label="corn">🌽</span>
+              </button>
+              <button type="button" className={difficulty === 'hard' ? 'selected' : ''} onClick={() => { setDifficulty('hard'); }}>
+                Hard <span role="img" aria-label="corn">🌽</span>
+              </button>
+            </div>
           </div>
 
         )}
@@ -47,7 +49,7 @@ const Instructions = (props) => {
       </div>
     </div>
   );
-};
+}
 
 export default Instructions;
 
