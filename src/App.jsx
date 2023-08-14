@@ -48,6 +48,7 @@ function App() {
   const [page, setPage] = useState(0);
   const [results, setResults] = useState({});
   const [timer, setTimer] = useState(gameDuration);
+  const [tabActive, setTabActive] = useState(true);
 
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
@@ -72,6 +73,10 @@ function App() {
     if (key === 'Escape') setInstructions(false);
   };
 
+  const handleTabActive = (e) => {
+    setTabActive(e.type === 'focus');
+  };
+
   const createMaze = () => {
     const { start, end, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
@@ -87,6 +92,7 @@ function App() {
     });
     setKernals(() => nextKernals);
   };
+
   const startGame = () => {
     setAnimating(true);
     const startKernal = kernals.find((kernal) => kernal.start);
@@ -98,11 +104,11 @@ function App() {
     setTimeout(() => {
       setPage(2);
       setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
-    }, 3000);
+    }, 1000);
     setTimeout(() => {
       setPage(3);
       setFocusKernal({});
-    }, 6000);
+    }, 3000);
     setTimeout(() => {
       // setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
@@ -110,7 +116,7 @@ function App() {
       setInstructions(false);
       setPlaying(true);
       analytics.track('start', { difficulty });
-    }, 7500);
+    }, 5000);
   };
 
   const endGame = (won) => {
@@ -177,8 +183,12 @@ function App() {
 
   useEffect(() => {
     addEventListener('keydown', handleKeydown);
+    addEventListener('blur', handleTabActive);
+    addEventListener('focus', handleTabActive);
     return () => {
       removeEventListener('keydown', handleKeydown);
+      removeEventListener('blur', handleTabActive);
+      removeEventListener('focus', handleTabActive);
     };
   }, [instructions, results, animating]); // TODO: double check this dependency array
 
@@ -208,10 +218,11 @@ function App() {
         camera={{ fov: 60 }}
         dpr={0.5}
       >
-        <fog attach="fog" color={new Color('rgb(128, 155, 175')} near={10} far={display === 'normal' ? 15 : 100} />
+        <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} />
         {/* <OrbitControls /> */}
         {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
         <Corn
+          tabActive={tabActive}
           playing={playing}
           animating={animating}
           canvasRef={canvasRef}

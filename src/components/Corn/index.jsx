@@ -6,14 +6,14 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, Color } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, Color, MeshNormalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import { colors, randomColor } from '../../config'
 import kernalModel from '../../assets/models/models.glb';
 import grayImage from '../../assets/images/gray.jpg';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
-
+const up = new Vector3(0, 1, 0);
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
@@ -30,9 +30,8 @@ const kernalLifeThreshold = 100;
 const poppedKernals = [];
 
 
-
 function Corn(props) {
-  const { playing, animating, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
+  const { tabActive, playing, animating, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -48,10 +47,13 @@ function Corn(props) {
   const arrowsRef = useRef();
   const kernalMatRef = useRef();
 
+  const playerRef = useRef();
+
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
   const cursorMesh = gltf.scene.children.find((child) => child.name === 'Cursor');
   const arrowMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
+  const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow2');
   const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
 
   // const kernalMaterial = new MeshStandardMaterial({ roughness: 0.27, metalness: 0.13, envMapIntensity: 1 });
@@ -87,6 +89,20 @@ function Corn(props) {
     //      | position around cylindar | barrel outwards towards the middle
     const y = Math.cos(kernal.y / arc) * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1));
     const z = Math.sin(kernal.y / arc) * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1));
+    const rotation = (kernal.y / height) * (Math.PI * 2);
+    object.position.set(x, y, z);
+    object.rotation.set(rotation, 0, 0);
+    const scale = kernal.popped ? 0 : 1;
+    object.scale.set(scale, scale, scale);
+    object.updateMatrix();
+  };
+
+  const positionToCylindar2 = (object, kernal) => {
+    const { x } = kernal;
+    const arc = (height / 2) / Math.PI;
+    //      | position around cylindar | barrel outwards towards the middle
+    const y = Math.cos(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
+    const z = Math.sin(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
     const rotation = (kernal.y / height) * (Math.PI * 2);
     object.position.set(x, y, z);
     object.rotation.set(rotation, 0, 0);
@@ -152,7 +168,12 @@ function Corn(props) {
     targetPosition = -currentKernal.x;
     // TODO: grab this from positionToCylindar object below
     const object = new Object3D();
-    if (display === 'normal') positionToCylindar(object, currentKernal);
+    const objectTemp = new Object3D();
+
+    if (display === 'normal') {
+      positionToCylindar(object, currentKernal);
+      positionToCylindar2(objectTemp, currentKernal);
+    }
     if (display === 'grid') {
       positionToGrid(object, currentKernal);
       object.position.z = -3;
@@ -168,6 +189,13 @@ function Corn(props) {
     // set cursor position
     cursorRef.current.position.copy(object.position);
     cursorRef.current.rotation.copy(object.rotation);
+    playerRef.current.position.copy(objectTemp.position);
+    playerRef.current.rotation.copy(objectTemp.rotation);
+
+    if (currentKernal.x > prevKernal.x) playerRef.current.rotateOnAxis(up, degToRad(0));
+    if (currentKernal.y < prevKernal.y) playerRef.current.rotateOnAxis(up, degToRad(90))
+    if (currentKernal.x < prevKernal.x) playerRef.current.rotateOnAxis(up, degToRad(180));
+    if (currentKernal.y > prevKernal.y) playerRef.current.rotateOnAxis(up, degToRad(270))
 
     if (currentKernal.justPopped) {
       // remove kernal mesh by scaling it to 0
@@ -175,9 +203,9 @@ function Corn(props) {
       const prevIndex = kernalIndex(prevKernal);
       const matrix = new Matrix4();
 
-      kernalsRef.current.getMatrixAt(prevIndex, matrix);
+      kernalsRef.current.getMatrixAt(index, matrix);
       matrix.multiply(scaleZero);
-      kernalsRef.current.setMatrixAt(prevIndex, matrix);
+      kernalsRef.current.setMatrixAt(index, matrix);
       kernalsRef.current.instanceMatrix.needsUpdate = true;
 
       // add popped kernal and animate
@@ -221,6 +249,7 @@ function Corn(props) {
   }, [focusKernal]);
 
   useFrame((e, timeDiff) => {
+    if (!tabActive) return;
     elapsedTime += timeDiff;
 
     if (!(playing || animating)) {
@@ -391,8 +420,16 @@ function Corn(props) {
         <mesh
           key="cursor"
           ref={cursorRef}
+          visible={false}
           geometry={cursorMesh.geometry}
           material={cursorMaterial}
+        />
+
+        <mesh
+          ref={playerRef}
+          geometry={playerMesh.geometry}
+          material={new MeshNormalMaterial()}
+          scale={[1, 1, 1]}
         />
       </group>
     </group>
@@ -401,6 +438,7 @@ function Corn(props) {
 export default Corn;
 
 Corn.propTypes = {
+  tabActive: PropTypes.bool,
   playing: PropTypes.bool,
   canvasRef: PropTypes.any,
   setMove: PropTypes.func,
@@ -413,6 +451,7 @@ Corn.propTypes = {
 };
 
 Corn.defaultProps = {
+  tabActive: true,
   playing: false,
   canvasRef: {},
   setMove: () => { },
