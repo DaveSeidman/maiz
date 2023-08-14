@@ -31,4 +31,6 @@ export const colors = {
   ],
 };
 
-export const gameDuration = 10;
+export const randomColor = (base) => colors[base][Math.floor(Math.random() * colors[base].length)];
+
+export const gameDuration = 30;

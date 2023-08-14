@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, Color } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
-import { colors } from '../../config'
+import { colors, randomColor } from '../../config'
 import kernalModel from '../../assets/models/models.glb';
 import grayImage from '../../assets/images/gray.jpg';
 
@@ -21,7 +21,8 @@ let lerpAmount = 1;
 let elapsedTime = 0;
 
 let prevKernal = {}; // TODO: may be a better way to handle this with state.previous?
-let endKernal = {};
+let prevFocusKernal = {};
+// let endKernal = {};
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
 const pointerMovementThreshold = 10;
@@ -31,7 +32,7 @@ const poppedKernals = [];
 
 
 function Corn(props) {
-  const { canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
+  const { playing, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -121,19 +122,19 @@ function Corn(props) {
     // kernalsRef.current.material.needsUpdate = true;
     const startKernal = kernals.find((kernal) => kernal.start);
     const endKernal = kernals.find((kernal) => kernal.end);
-    const startKernalOffset = JSON.parse(JSON.stringify(startKernal));
-    const endKernalOffset = JSON.parse(JSON.stringify(endKernal));
-    startKernalOffset.x -= 2;
-    endKernalOffset.x += 2;
+    // const startKernalOffset = JSON.parse(JSON.stringify(startKernal));
+    // const endKernalOffset = JSON.parse(JSON.stringify(endKernal));
+    // startKernalOffset.x -= 2;
+    // endKernalOffset.x += 2;
     const tempStart = new Object3D();
     const tempEnd = new Object3D();
     if (display === 'normal') {
-      positionToCylindar(tempStart, startKernalOffset);
-      positionToCylindar(tempEnd, endKernalOffset);
+      positionToCylindar(tempStart, startKernal);
+      positionToCylindar(tempEnd, endKernal);
     }
     if (display === 'grid') {
-      positionToGrid(tempStart, startKernalOffset);
-      positionToGrid(tempEnd, endKernalOffset);
+      positionToGrid(tempStart, startKernal);
+      positionToGrid(tempEnd, endKernal);
     }
     arrowsRef.current.setMatrixAt(0, tempStart.matrix);
     arrowsRef.current.setMatrixAt(1, tempEnd.matrix);
@@ -141,7 +142,7 @@ function Corn(props) {
   };
 
   useEffect(() => {
-    endKernal = kernals.find(kernal => kernal.end);
+    // endKernal = kernals.find(kernal => kernal.end);
     positionKernals();
   }, [kernals, curvature, display]);
 
@@ -205,16 +206,37 @@ function Corn(props) {
   }, [currentKernal]);
 
   useEffect(() => {
-    targetPosition = -focusKernal.x + focusKernal.offset;
-    targetRotation = (focusKernal.y / height) * Math.PI * -2;
+    console.log({ focusKernal, prevFocusKernal })
+    if (focusKernal.x !== undefined && focusKernal.y !== undefined) {
+      targetPosition = -focusKernal.x + focusKernal.offset;
+      targetRotation = (focusKernal.y / height) * Math.PI * -2;
+      // }
+    } else {
+      targetPosition = -width / 2;
+    }
+    // if (prevFocusKernal.x !== undefined && prevFocusKernal.y !== undefined) {
+
+    // const kernal = kernals.find(kernal => kernal.x = prevFocusKernal.x && kernal.y === prevFocusKernal.y);
+    // console.log(kernal);
+    //   if (kernal) {
+    // const index = kernalIndex(kernal);
+    // //     console.log('setColorAt', index, randomColor('yellows'));
+    // kernals.current.setColorAt(index, randomColor('yellows'));
+    // kernals.current.instanceColor.needsUpdate = true;
+    // }
+    // }
+    // prevFocusKernal = JSON.parse(JSON.stringify(focusKernal));
   }, [focusKernal]);
 
   useFrame((e, timeDiff) => {
     elapsedTime += timeDiff;
-    const index = kernalIndex(endKernal);
-    highlightColor.lerpColors(highlightColor1, highlightColor2, Math.sin(elapsedTime * 7));
-    kernalsRef.current.setColorAt(index, highlightColor);
-    kernalsRef.current.instanceColor.needsUpdate = true;
+
+    if (focusKernal) {
+      const index = kernalIndex(focusKernal);
+      highlightColor.lerpColors(highlightColor1, highlightColor2, Math.sin(elapsedTime * 7));
+      kernalsRef.current.setColorAt(index, highlightColor);
+      kernalsRef.current.instanceColor.needsUpdate = true;
+    }
 
     spin *= 0.9;
     const lerpDifference = (display === 'normal' ? 1 : 0) - lerpAmount;
@@ -249,6 +271,7 @@ function Corn(props) {
   }, []);
 
   const moveCob = ({ deltaX, deltaY }) => {
+    if (!playing) return;
     setUseSpin(true);
     targetPosition += -deltaX / 100;
     if (targetPosition > 0) targetPosition = 0;
@@ -265,6 +288,7 @@ function Corn(props) {
   };
 
   const drag = (e) => {
+    if (!playing) return;
     if (!pointer.down) return;
     setUseSpin(true);
     const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
@@ -282,6 +306,7 @@ function Corn(props) {
   };
 
   const clickToMove = (e) => {
+    if (!playing) return;
     const pointerMovement = Math.sqrt((pointer.startX - pointer.x) ** 2 + (pointer.startY - pointer.y) ** 2);
     if (pointerMovement < pointerMovementThreshold) {
       // TODO: check these multipliers
@@ -305,14 +330,14 @@ function Corn(props) {
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    canvasRef.current.addEventListener('mousewheel', moveCob);
-    canvasRef.current.addEventListener('touchstart', dragStart);
-    canvasRef.current.addEventListener('pointerdown', dragStart);
-    canvasRef.current.addEventListener('pointermove', drag);
-    canvasRef.current.addEventListener('touchmove', drag);
-    canvasRef.current.addEventListener('pointerup', dragEnd);
-    canvasRef.current.addEventListener('pointerleave', dragEnd);
-    canvasRef.current.addEventListener('click', clickToMove);
+    canvasRef.current.addEventListener('mousewheel', moveCob, { passive: true });
+    canvasRef.current.addEventListener('touchstart', dragStart, { passive: true });
+    canvasRef.current.addEventListener('pointerdown', dragStart, { passive: true });
+    canvasRef.current.addEventListener('pointermove', drag, { passive: true });
+    canvasRef.current.addEventListener('touchmove', drag, { passive: true });
+    canvasRef.current.addEventListener('pointerup', dragEnd, { passive: true });
+    canvasRef.current.addEventListener('pointerleave', dragEnd, { passive: true });
+    canvasRef.current.addEventListener('click', clickToMove, { passive: true });
     return () => {
       if (!canvasRef.current) return;
       canvasRef.current.removeEventListener('mousewheel', moveCob);
@@ -380,6 +405,7 @@ function Corn(props) {
 export default Corn;
 
 Corn.propTypes = {
+  playing: PropTypes.bool,
   canvasRef: PropTypes.any,
   setMove: PropTypes.func,
   currentKernal: PropTypes.any,
@@ -391,6 +417,7 @@ Corn.propTypes = {
 };
 
 Corn.defaultProps = {
+  playing: false,
   canvasRef: {},
   setMove: () => { },
   currentKernal: { x: 0, y: 0 },

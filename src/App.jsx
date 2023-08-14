@@ -19,11 +19,9 @@ import Results from './components/Results';
 import Score from './components/Score';
 import envMap from './assets/images/spaichingen_hill_2k.hdr';
 import Maze from './components/Maze';
-import { camshakeConfig, levels, colors, gameDuration } from './config';
+import { camshakeConfig, levels, randomColor, gameDuration } from './config';
 
 import './index.scss';
-
-const randomColor = (base) => colors[base][Math.floor(Math.random() * colors[base].length)];
 
 const mobile = Mobile();
 
@@ -35,8 +33,6 @@ const analytics = Analytics({
     }),
   ],
 });
-
-// const interval = null;
 
 function App() {
   const canvasRef = useRef();
@@ -52,16 +48,14 @@ function App() {
   const [page, setPage] = useState(0);
   const [results, setResults] = useState({});
   const [timer, setTimer] = useState(gameDuration);
-  // const [timerInterval, setTimerInterval] = useState(null);
 
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
-  const [focusKernal, setFocusKernal] = useState({ x: width / 2, y: 1, offset: 0 });
+  const [focusKernal, setFocusKernal] = useState({ x: levels[difficulty].width / 2, y: 0, offset: 0 });
   const [display, setDisplay] = useState('normal');
   const [move, setMove] = useState({ x: 0, y: 0 });
 
-  // const [timerInterval, setTimerInterval] = useState();
-  const [popCount, setKernalsEaten] = useState(0);
+  const [popCount, setPopCount] = useState(0);
 
   const handleKeydown = ({ key }) => {
     if (!playing) return;
@@ -78,13 +72,71 @@ function App() {
     if (key === 'Escape') setInstructions(false);
   };
 
+  const createMaze = () => {
+    const { start, end, cells } = new Maze(height / 2, width / 2);
+    const nextKernals = [];
+    let id = 0;
+    cells.forEach((row, y) => {
+      row.forEach((kernal, x) => {
+        const type = kernal ? 'wall' : 'path';
+        const color = randomColor(type === 'wall' ? 'browns' : 'yellows');
+        const popped = false;
+        nextKernals.push({ id, x, y, color, type, popped, start: x === 0 && y === start, end: x === width && y === end });
+        id += 1;
+      });
+    });
+    setKernals(() => nextKernals);
+  };
+  const startGame = () => {
+    setAnimating(true);
+    const startKernal = kernals.find((kernal) => kernal.start);
+    const endKernal = kernals.find((kernal) => kernal.end);
+    setTimer(gameDuration);
+    setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: -2 });
+    setPage(1);
+    setTimeout(() => {
+      setPage(2);
+      setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
+    }, 3000);
+    setTimeout(() => {
+      setPage(3);
+      setFocusKernal({});
+    }, 6000);
+    setTimeout(() => {
+      setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
+      setAnimating(false);
+      setInstructions(false);
+      setPlaying(true);
+      analytics.track('start', { difficulty });
+    }, 7500);
+  };
+
+  const endGame = (won) => {
+    // clearInterval(interval);
+    setPlaying(false);
+    setResults({ won });
+    analytics.track('end', { won, difficulty: 'medium' });
+  };
+
+  const playAgain = () => {
+    setPage(0);
+    setResults({});
+    createMaze();
+    // setWidth(levels[difficulty].width);
+    // setHeight(levels[difficulty].height);
+
+    setInstructions(true);
+  };
+
   useEffect(() => {
     const x = currentKernal.x + move.x;
     let y = currentKernal.y + move.y;
     if (x < 0 || x > width) return;
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
+
     const kernal = kernals.find((k) => k.x === x && k.y === y);
+    // console.log({ x, y, kernals });
 
     let justPopped = false;
     if (kernal) {
@@ -94,23 +146,17 @@ function App() {
       }
       // TODO: implement focusKernal complete and then remove the check for animating here
       if (kernal.end) {
-        console.log('this is being triggered', animating);
-        setResults({ won: true });
-        // clearInterval(interval);
-        // TODO: include results here
-        analytics.track('end', { difficulty: 'medium' });
+        endGame(true);
       }
       if (!kernal.popped) {
         justPopped = true;
         kernal.popped = true;
-        setKernalsEaten(popCount + 1);
+        setPopCount(popCount + 1);
       }
-
-      setKernals(kernals);
+      // setKernals(kernals);
     }
-
     setCurrentKernal({ x, y, justPopped });
-  }, [move]); // TODO add popcount here and to useState
+  }, [move]);
 
   useEffect(() => {
     setWidth(levels[difficulty].width);
@@ -120,20 +166,8 @@ function App() {
 
   // create the maze
   useEffect(() => {
-    const { start, end, cells } = new Maze(height / 2, width / 2);
-    const nextKernals = [];
-    let id = 0;
-    cells.forEach((row, y) => {
-      row.forEach((kernal, x) => {
-        const color = randomColor(kernal ? 'browns' : 'yellows');
-        const type = kernal ? 'wall' : 'path';
-        const popped = false;
-        nextKernals.push({ id, x, y, color, type, popped, start: x === 0 && y === start, end: x === width && y === end });
-        id += 1;
-      });
-    });
-    setKernals(() => nextKernals);
-    setFocusKernal({ x: width / 2, y: 0, offset: 0 });
+    createMaze();
+    // setFocusKernal({ x: width / 2, y: 0, offset: 0 });
     // setCurrentKernal({ x: width / 2, y: start, justPopped: false });
     // setMove({ x: 0, y: 0 });
   }, [width, height]);
@@ -154,7 +188,7 @@ function App() {
       }, 1000);
     } else if (timer === 0) {
       clearInterval(interval);
-      endGame();
+      endGame(false);
       // You can trigger some action here when the timer reaches zero
     }
 
@@ -162,49 +196,6 @@ function App() {
       clearInterval(interval);
     };
   }, [playing, timer]);
-
-  useEffect(() => {
-    // console.log('instructions?', instructions);
-  }, [instructions]);
-
-  const startGame = () => {
-    console.log('start game');
-    setAnimating(true);
-    const startKernal = kernals.find((kernal) => kernal.start);
-    const endKernal = kernals.find((kernal) => kernal.end);
-    setTimer(gameDuration);
-    setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: -2 });
-    setPage(1);
-    setTimeout(() => {
-      setPage(2);
-      setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
-    }, 3000);
-    setTimeout(() => {
-      setPage(3);
-      setFocusKernal({ x: width / 2, y: 0, offset: 0 });
-    }, 6000);
-    setTimeout(() => {
-      setCurrentKernal({ x: startKernal.x, y: startKernal.y });
-      setAnimating(false);
-      setInstructions(false);
-      setPlaying(true);
-      analytics.track('start', { difficulty });
-    }, 7500);
-  };
-
-  const endGame = () => {
-    // clearInterval(interval);
-    setPlaying(false);
-    setResults({ won: false, reason: 'time' });
-  };
-
-  const playAgain = () => {
-    setPage(0);
-    setResults({});
-    setWidth(levels[difficulty].width);
-    setHeight(levels[difficulty].height);
-    setInstructions(true);
-  };
 
   return (
     <div className="app">
@@ -218,6 +209,7 @@ function App() {
         {/* <OrbitControls /> */}
         {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
         <Corn
+          playing={playing}
           canvasRef={canvasRef}
           kernals={kernals}
           currentKernal={currentKernal}
@@ -290,7 +282,7 @@ function App() {
         timer={timer}
         kernals={kernals}
       />
-      {true && (
+      {false && (
         <div className="debug">
           <button
             type="button"

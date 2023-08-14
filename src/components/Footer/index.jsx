@@ -6,8 +6,7 @@ import sourceCodeLogo from '../../assets/images/code.svg';
 import { metadata } from '../../assets/content.json';
 import './index.scss';
 
-
-const Footer = () => {
+function Footer() {
   const { title, text, url } = metadata;
 
   const share = () => {
@@ -43,16 +42,19 @@ const Footer = () => {
           target="_blank"
           rel="noreferrer"
         >
-          <img
-            className="gitlab"
-            alt="source code logo"
-            src={sourceCodeLogo}
-          />
+          <button type="button">
+            Source
+            <img
+              className="gitlab"
+              alt="source code logo"
+              src={sourceCodeLogo}
+            />
+          </button>
         </a>
       </div>
 
     </div>
   );
-};
+}
 
 export default Footer;
