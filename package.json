@@ -30,7 +30,6 @@
     "@vitejs/plugin-react": "^2.1.0",
     "eslint": "^8.47.0",
     "eslint-config-airbnb": "^19.0.4",
-    "eslint-plugin-import": "9.7.1",
     "eslint-plugin-react": "^7.33.1",
     "vite": "^3.1.0"
   },
