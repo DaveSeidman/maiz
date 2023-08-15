@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 
 import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, Color, MeshNormalMaterial } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
-import { colors, randomColor } from '../../config'
+import { colors, randomColor } from '../../config';
 import kernalModel from '../../assets/models/models.glb';
 import grayImage from '../../assets/images/gray.jpg';
 
@@ -29,7 +29,6 @@ const pointerMovementThreshold = 10;
 const kernalLifeThreshold = 300;
 const poppedKernals = [];
 
-
 function Corn(props) {
   const { tabActive, playing, animating, explode, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
@@ -49,6 +48,7 @@ function Corn(props) {
 
   const playerRef = useRef();
   const playerRefTarget = useRef();
+  const playerChildRef = useRef();
 
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
@@ -98,19 +98,19 @@ function Corn(props) {
     object.updateMatrix();
   };
 
-  const positionToCylindar2 = (object, kernal) => {
-    const { x } = kernal;
-    const arc = (height / 2) / Math.PI;
-    //      | position around cylindar | barrel outwards towards the middle
-    const y = Math.cos(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
-    const z = Math.sin(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
-    const rotation = (kernal.y / height) * (Math.PI * 2);
-    object.position.set(x, y, z);
-    object.rotation.set(rotation, 0, 0);
-    const scale = kernal.popped ? 0 : 1;
-    object.scale.set(scale, scale, scale);
-    object.updateMatrix();
-  };
+  // const positionToCylindar2 = (object, kernal) => {
+  //   const { x } = kernal;
+  //   const arc = (height / 2) / Math.PI;
+  //   //      | position around cylindar | barrel outwards towards the middle
+  //   const y = Math.cos(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
+  //   const z = Math.sin(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
+  //   const rotation = (kernal.y / height) * (Math.PI * 2);
+  //   object.position.set(x, y, z);
+  //   object.rotation.set(rotation, 0, 0);
+  //   const scale = kernal.popped ? 0 : 1;
+  //   object.scale.set(scale, scale, scale);
+  //   object.updateMatrix();
+  // };
 
   const blendMatrices = (object1, object2, amount) => {
     object1.position.lerp(object2.position, amount);
@@ -120,18 +120,19 @@ function Corn(props) {
   };
 
   const positionKernals = () => {
-    const object1 = new Object3D();
-    const object2 = new Object3D();
+    const kernalsOnGrid = new Object3D();
+    const kernalsOnCylindar = new Object3D();
+    const basesOnCylindar = new Object3D();
     kernals.forEach((kernal, index) => {
-      positionToGrid(object1, kernal);
-      positionToCylindar(object2, kernal);
-      blendMatrices(object1, object2, lerpAmount);
+      positionToGrid(kernalsOnGrid, kernal);
+      positionToCylindar(kernalsOnCylindar, kernal);
+      positionToCylindar(basesOnCylindar, kernal);
+      blendMatrices(kernalsOnGrid, kernalsOnCylindar, lerpAmount);
       const scale = kernal.popped ? 0 : 1;
-
-      object1.scale.set(scale, scale, scale);
-      kernalsRef.current.setMatrixAt(index, object1.matrix);
+      kernalsOnGrid.scale.set(scale, scale, scale);
+      kernalsRef.current.setMatrixAt(index, kernalsOnGrid.matrix);
       kernalsRef.current.setColorAt(index, kernal.color);
-      basesRef.current.setMatrixAt(index, object1.matrix);
+      basesRef.current.setMatrixAt(index, basesOnCylindar.matrix);
     });
     kernalsRef.current.instanceMatrix.needsUpdate = true;
     basesRef.current.instanceMatrix.needsUpdate = true;
@@ -179,7 +180,7 @@ function Corn(props) {
     poppedKernal.getWorldPosition(worldPos);
     const velocity = new Vector3();
     poppedKernal.getWorldDirection(velocity);
-    velocity.multiplyScalar(.5);
+    velocity.multiplyScalar(0.5);
     // remove it from the cob, add it to the world so it's not affected by
     // the cobs translations or rotations, and instead follows gravity
     groupRef.current.add(poppedKernal);
@@ -191,7 +192,7 @@ function Corn(props) {
       // velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1).add(new Vector3((Math.random() - 0.5) * 0.2, 0.1, 0)),
       rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
     });
-  }
+  };
 
   useEffect(() => {
     // endKernal = kernals.find(kernal => kernal.end);
@@ -204,11 +205,11 @@ function Corn(props) {
     targetPosition = -currentKernal.x;
     // TODO: grab this from positionToCylindar object below
     const object = new Object3D();
-    const objectTemp = new Object3D();
+    // const objectTemp = new Object3D();
 
     if (display === 'normal') {
       positionToCylindar(object, currentKernal);
-      positionToCylindar2(objectTemp, currentKernal);
+      // positionToCylindar2(objectTemp, currentKernal);
     }
     if (display === 'grid') {
       positionToGrid(object, currentKernal);
@@ -225,17 +226,29 @@ function Corn(props) {
     // set cursor position
     cursorRef.current.position.copy(object.position);
     cursorRef.current.rotation.copy(object.rotation);
-    playerRefTarget.current.position.copy(objectTemp.position);
+
+    // const lifted = new Vector3();
+    // const dir = new Vector3();
+    // object.getWorldDirection(dir);
+    // dir.multiplyScalar(2);
+    // lifted.copy(object.position);
+    // lifted.add(object.getWorldDirection())
+
+    playerRefTarget.current.position.copy(object.position);
 
     if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
       console.log('didnt move');
     } else {
-      playerRefTarget.current.rotation.copy(objectTemp.rotation);
+      playerRefTarget.current.rotation.copy(object.rotation);
       // Rotate to match heading
-      if (currentKernal.x > prevKernal.x) playerRefTarget.current.rotateOnAxis(up, degToRad(0));
-      if (currentKernal.y < prevKernal.y) playerRefTarget.current.rotateOnAxis(up, degToRad(90))
-      if (currentKernal.x < prevKernal.x) playerRefTarget.current.rotateOnAxis(up, degToRad(180));
-      if (currentKernal.y > prevKernal.y) playerRefTarget.current.rotateOnAxis(up, degToRad(270))
+      // if (currentKernal.x > prevKernal.x) playerRefTarget.current.rotateOnAxis(up, degToRad(0));
+      // if (currentKernal.y < prevKernal.y) playerRefTarget.current.rotateOnAxis(up, degToRad(90));
+      // if (currentKernal.x < prevKernal.x) playerRefTarget.current.rotateOnAxis(up, degToRad(180));
+      // if (currentKernal.y > prevKernal.y) playerRefTarget.current.rotateOnAxis(up, degToRad(270));
+      if (currentKernal.x > prevKernal.x) playerChildRef.current.rotation.y = degToRad(0);
+      if (currentKernal.y < prevKernal.y) playerChildRef.current.rotation.y = degToRad(90);
+      if (currentKernal.x < prevKernal.x) playerChildRef.current.rotation.y = degToRad(180);
+      if (currentKernal.y > prevKernal.y) playerChildRef.current.rotation.y = degToRad(270);
     }
 
     if (currentKernal.justPopped) {
@@ -272,13 +285,13 @@ function Corn(props) {
 
   useEffect(() => {
     if (explode) {
-      kernals.forEach(kernal => {
+      kernals.forEach((kernal) => {
         if (kernal.type === 'path' && !kernal.popped) {
-          popKernal(kernal)
+          // popKernal(kernal);
         }
-      })
+      });
     }
-  }, [explode])
+  }, [explode]);
 
   useFrame((e, timeDiff) => {
     if (!tabActive) return;
@@ -300,10 +313,10 @@ function Corn(props) {
       playerRef.current.position.y += (playerRefTarget.current.position.y - playerRef.current.position.y) / 10;
       playerRef.current.position.z += (playerRefTarget.current.position.z - playerRef.current.position.z) / 10;
 
-      playerRef.current.quaternion._x += (playerRefTarget.current.quaternion._x - playerRef.current.quaternion._x) / 10;
-      playerRef.current.quaternion._y += (playerRefTarget.current.quaternion._y - playerRef.current.quaternion._y) / 10;
-      playerRef.current.quaternion._z += (playerRefTarget.current.quaternion._z - playerRef.current.quaternion._z) / 10;
-      playerRef.current.quaternion._w += (playerRefTarget.current.quaternion._w - playerRef.current.quaternion._w) / 10;
+      // playerRef.current.quaternion._x += (playerRefTarget.current.quaternion._x - playerRef.current.quaternion._x) / 10;
+      // playerRef.current.quaternion._y += (playerRefTarget.current.quaternion._y - playerRef.current.quaternion._y) / 10;
+      // playerRef.current.quaternion._z += (playerRefTarget.current.quaternion._z - playerRef.current.quaternion._z) / 10;
+      // playerRef.current.quaternion._w += (playerRefTarget.current.quaternion._w - playerRef.current.quaternion._w) / 10;
     }
 
     spin *= 0.9;
@@ -376,7 +389,8 @@ function Corn(props) {
 
   const clickToMove = (e) => {
     if (!playing) return;
-    const pointerMovement = Math.sqrt((pointer.startX - pointer.x) ** 2 + (pointer.startY - pointer.y) ** 2);
+    // eslint-disable-next-line
+    const pointerMovement = Math.sqrt(Math.pow((pointer.startX - pointer.x), 2) + Math.pow((pointer.startY - pointer.y), 2));
     if (pointerMovement < pointerMovementThreshold) {
       // TODO: check these multipliers
       const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
@@ -398,25 +412,27 @@ function Corn(props) {
   };
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-    canvasRef.current.addEventListener('mousewheel', moveCob, { passive: true });
-    canvasRef.current.addEventListener('touchstart', dragStart, { passive: true });
-    canvasRef.current.addEventListener('pointerdown', dragStart, { passive: true });
-    canvasRef.current.addEventListener('pointermove', drag, { passive: true });
-    canvasRef.current.addEventListener('touchmove', drag, { passive: true });
-    canvasRef.current.addEventListener('pointerup', dragEnd, { passive: true });
-    canvasRef.current.addEventListener('pointerleave', dragEnd, { passive: true });
-    canvasRef.current.addEventListener('click', clickToMove, { passive: true });
+    if (canvasRef.current) {
+      canvasRef.current.addEventListener('mousewheel', moveCob, { passive: true });
+      canvasRef.current.addEventListener('touchstart', dragStart, { passive: true });
+      canvasRef.current.addEventListener('pointerdown', dragStart, { passive: true });
+      canvasRef.current.addEventListener('pointermove', drag, { passive: true });
+      canvasRef.current.addEventListener('touchmove', drag, { passive: true });
+      canvasRef.current.addEventListener('pointerup', dragEnd, { passive: true });
+      canvasRef.current.addEventListener('pointerleave', dragEnd, { passive: true });
+      canvasRef.current.addEventListener('click', clickToMove, { passive: true });
+    }
     return () => {
-      if (!canvasRef.current) return;
-      canvasRef.current.removeEventListener('mousewheel', moveCob);
-      canvasRef.current.removeEventListener('touchstart', dragStart);
-      canvasRef.current.removeEventListener('touchmove', drag);
-      canvasRef.current.removeEventListener('pointermove', drag);
-      canvasRef.current.removeEventListener('pointerdown', dragStart);
-      canvasRef.current.removeEventListener('pointerup', dragEnd);
-      canvasRef.current.removeEventListener('pointerleave', dragEnd);
-      canvasRef.current.removeEventListener('click', clickToMove);
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener('mousewheel', moveCob);
+        canvasRef.current.removeEventListener('touchstart', dragStart);
+        canvasRef.current.removeEventListener('touchmove', drag);
+        canvasRef.current.removeEventListener('pointermove', drag);
+        canvasRef.current.removeEventListener('pointerdown', dragStart);
+        canvasRef.current.removeEventListener('pointerup', dragEnd);
+        canvasRef.current.removeEventListener('pointerleave', dragEnd);
+        canvasRef.current.removeEventListener('click', clickToMove);
+      }
     };
   });
 
@@ -430,7 +446,7 @@ function Corn(props) {
         position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
       >
         <instancedMesh
-          key="roots"
+          key="bases"
           ref={basesRef}
           geometry={baseMesh.geometry}
           material={baseMaterial}
@@ -468,17 +484,22 @@ function Corn(props) {
           geometry={cursorMesh.geometry}
           material={cursorMaterial}
         />
-        <mesh
-          ref={playerRefTarget}
-          geometry={playerMesh.clone().geometry}
-          material={new MeshNormalMaterial()}
-          // scale={[.5, .5, .5]}
-          visible={false}
-        />
+        <group ref={playerRefTarget}>
+          <mesh
+            ref={playerChildRef}
+            geometry={playerMesh.clone().geometry}
+            material={new MeshNormalMaterial()}
+            position={[0, 2, 0]}
+            // scale={[.5, .5, .5]}
+            visible
+          />
+        </group>
         <mesh
           ref={playerRef}
           geometry={playerMesh.clone().geometry}
           material={new MeshNormalMaterial()}
+          position={[0, 0, 0]}
+          visible={false}
         />
       </group>
     </group>

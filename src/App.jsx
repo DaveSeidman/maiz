@@ -105,11 +105,11 @@ function App() {
     setTimeout(() => {
       setPage(2);
       setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
-    }, 1000);
+    }, 500);
     setTimeout(() => {
       setPage(3);
       setFocusKernal({});
-    }, 3000);
+    }, 1000);
     setTimeout(() => {
       // setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
@@ -117,7 +117,7 @@ function App() {
       setInstructions(false);
       setPlaying(true);
       analytics.track('start', { difficulty });
-    }, 5000);
+    }, 1500);
   };
 
   const endGame = (won) => {

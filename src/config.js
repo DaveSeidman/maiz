@@ -22,7 +22,7 @@ export const levels = {
 export const colors = {
   yellows: [
     new Color('hsl(45, 100%, 60%)'),
-    new Color('hsl(50, 100%, 60%)'),
+    new Color('hsl(55, 100%, 60%)'),
   ],
   browns: [
     new Color('hsl(40, 20%, 20%)'),
@@ -33,4 +33,4 @@ export const colors = {
 
 export const randomColor = (base) => colors[base][Math.floor(Math.random() * colors[base].length)];
 
-export const gameDuration = 30;
+export const gameDuration = 60;
