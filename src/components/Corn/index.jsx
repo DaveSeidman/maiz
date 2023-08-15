@@ -26,12 +26,12 @@ let prevFocusKernal = {};
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
 const pointerMovementThreshold = 10;
-const kernalLifeThreshold = 100;
+const kernalLifeThreshold = 300;
 const poppedKernals = [];
 
 
 function Corn(props) {
-  const { tabActive, playing, animating, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
+  const { tabActive, playing, animating, explode, canvasRef, setMove, currentKernal, focusKernal, kernals, width, height, curvature, display } = props;
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
@@ -48,6 +48,7 @@ function Corn(props) {
   const kernalMatRef = useRef();
 
   const playerRef = useRef();
+  const playerRefTarget = useRef();
 
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
@@ -157,6 +158,41 @@ function Corn(props) {
     arrowsRef.current.instanceMatrix.needsUpdate = true;
   };
 
+  const popKernal = (currentKernal) => {
+    const index = kernalIndex(currentKernal);
+    // const prevIndex = kernalIndex(prevKernal);
+    const matrix = new Matrix4();
+    kernalsRef.current.getMatrixAt(index, matrix);
+    matrix.multiply(scaleZero);
+    kernalsRef.current.setMatrixAt(index, matrix);
+    kernalsRef.current.instanceMatrix.needsUpdate = true;
+
+    const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
+    poppedKernal.material = poppedMaterial;
+    positionToCylindar(poppedKernal, currentKernal);
+    // poppedKernal.position.y -= 2;
+    // add it to the cob
+    cobRef.current.add(poppedKernal);
+    poppedKernal.updateMatrix();
+    // get it's world position
+    const worldPos = new Vector3();
+    poppedKernal.getWorldPosition(worldPos);
+    const velocity = new Vector3();
+    poppedKernal.getWorldDirection(velocity);
+    velocity.multiplyScalar(.5);
+    // remove it from the cob, add it to the world so it's not affected by
+    // the cobs translations or rotations, and instead follows gravity
+    groupRef.current.add(poppedKernal);
+    poppedKernal.position.copy(worldPos);
+    poppedKernals.push({
+      mesh: poppedKernal,
+      life: 0,
+      velocity,
+      // velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1).add(new Vector3((Math.random() - 0.5) * 0.2, 0.1, 0)),
+      rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
+    });
+  }
+
   useEffect(() => {
     // endKernal = kernals.find(kernal => kernal.end);
     positionKernals();
@@ -189,46 +225,31 @@ function Corn(props) {
     // set cursor position
     cursorRef.current.position.copy(object.position);
     cursorRef.current.rotation.copy(object.rotation);
-    playerRef.current.position.copy(objectTemp.position);
-    playerRef.current.rotation.copy(objectTemp.rotation);
+    playerRefTarget.current.position.copy(objectTemp.position);
 
-    if (currentKernal.x > prevKernal.x) playerRef.current.rotateOnAxis(up, degToRad(0));
-    if (currentKernal.y < prevKernal.y) playerRef.current.rotateOnAxis(up, degToRad(90))
-    if (currentKernal.x < prevKernal.x) playerRef.current.rotateOnAxis(up, degToRad(180));
-    if (currentKernal.y > prevKernal.y) playerRef.current.rotateOnAxis(up, degToRad(270))
+    if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
+      console.log('didnt move');
+    } else {
+      playerRefTarget.current.rotation.copy(objectTemp.rotation);
+      // Rotate to match heading
+      if (currentKernal.x > prevKernal.x) playerRefTarget.current.rotateOnAxis(up, degToRad(0));
+      if (currentKernal.y < prevKernal.y) playerRefTarget.current.rotateOnAxis(up, degToRad(90))
+      if (currentKernal.x < prevKernal.x) playerRefTarget.current.rotateOnAxis(up, degToRad(180));
+      if (currentKernal.y > prevKernal.y) playerRefTarget.current.rotateOnAxis(up, degToRad(270))
+    }
 
     if (currentKernal.justPopped) {
       // remove kernal mesh by scaling it to 0
-      const index = kernalIndex(currentKernal);
-      const prevIndex = kernalIndex(prevKernal);
-      const matrix = new Matrix4();
-
-      kernalsRef.current.getMatrixAt(index, matrix);
-      matrix.multiply(scaleZero);
-      kernalsRef.current.setMatrixAt(index, matrix);
-      kernalsRef.current.instanceMatrix.needsUpdate = true;
+      // const index = kernalIndex(currentKernal);
+      // // const prevIndex = kernalIndex(prevKernal);
+      // const matrix = new Matrix4();
+      // kernalsRef.current.getMatrixAt(index, matrix);
+      // matrix.multiply(scaleZero);
+      // kernalsRef.current.setMatrixAt(index, matrix);
+      // kernalsRef.current.instanceMatrix.needsUpdate = true;
 
       // add popped kernal and animate
-      const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
-      poppedKernal.material = poppedMaterial;
-      positionToCylindar(poppedKernal, currentKernal);
-      // poppedKernal.position.y -= 2;
-      // add it to the cob
-      cobRef.current.add(poppedKernal);
-      poppedKernal.updateMatrix();
-      // get it's world position
-      const worldPos = new Vector3();
-      poppedKernal.getWorldPosition(worldPos);
-      // remove it from the cob, add it to the world so it's not affected by
-      // the cobs translations or rotations, and instead follows gravity
-      groupRef.current.add(poppedKernal);
-      poppedKernal.position.copy(worldPos);
-      poppedKernals.push({
-        mesh: poppedKernal,
-        life: 0,
-        velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1).add(new Vector3((Math.random() - 0.5) * 0.2, 0.1, 0)),
-        rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
-      });
+      popKernal(currentKernal);
     }
     prevKernal = JSON.parse(JSON.stringify(currentKernal));
   }, [currentKernal]);
@@ -242,11 +263,22 @@ function Corn(props) {
     }
     if (prevFocusKernal.x !== undefined) {
       const index = kernalIndex(prevFocusKernal);
-      kernalsRef.current.setColorAt(index, randomColor('yellows'));
+      const kernal = kernals[index];
+      kernalsRef.current.setColorAt(index, randomColor(kernal.type === 'path' ? 'yellows' : 'browns'));
       kernalsRef.current.instanceColor.needsUpdate = true;
     }
     prevFocusKernal = JSON.parse(JSON.stringify(focusKernal));
   }, [focusKernal]);
+
+  useEffect(() => {
+    if (explode) {
+      kernals.forEach(kernal => {
+        if (kernal.type === 'path' && !kernal.popped) {
+          popKernal(kernal)
+        }
+      })
+    }
+  }, [explode])
 
   useFrame((e, timeDiff) => {
     if (!tabActive) return;
@@ -261,6 +293,17 @@ function Corn(props) {
       highlightColor.lerpColors(highlightColor1, highlightColor2, Math.sin(elapsedTime * 7));
       kernalsRef.current.setColorAt(index, highlightColor);
       kernalsRef.current.instanceColor.needsUpdate = true;
+    }
+
+    if (playerRef.current && playerRefTarget.current) {
+      playerRef.current.position.x += (playerRefTarget.current.position.x - playerRef.current.position.x) / 10;
+      playerRef.current.position.y += (playerRefTarget.current.position.y - playerRef.current.position.y) / 10;
+      playerRef.current.position.z += (playerRefTarget.current.position.z - playerRef.current.position.z) / 10;
+
+      playerRef.current.quaternion._x += (playerRefTarget.current.quaternion._x - playerRef.current.quaternion._x) / 10;
+      playerRef.current.quaternion._y += (playerRefTarget.current.quaternion._y - playerRef.current.quaternion._y) / 10;
+      playerRef.current.quaternion._z += (playerRefTarget.current.quaternion._z - playerRef.current.quaternion._z) / 10;
+      playerRef.current.quaternion._w += (playerRefTarget.current.quaternion._w - playerRef.current.quaternion._w) / 10;
     }
 
     spin *= 0.9;
@@ -285,7 +328,8 @@ function Corn(props) {
 
     poppedKernals.forEach((kernal, index) => {
       kernal.life += (timeDiff * 100);
-      kernal.velocity.y -= timeDiff;
+      kernal.velocity.multiplyScalar(0.975);
+      // kernal.velocity.y -= timeDiff;
       kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
       kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
       if (kernal.life >= kernalLifeThreshold) {
@@ -424,12 +468,17 @@ function Corn(props) {
           geometry={cursorMesh.geometry}
           material={cursorMaterial}
         />
-
+        <mesh
+          ref={playerRefTarget}
+          geometry={playerMesh.clone().geometry}
+          material={new MeshNormalMaterial()}
+          // scale={[.5, .5, .5]}
+          visible={false}
+        />
         <mesh
           ref={playerRef}
-          geometry={playerMesh.geometry}
+          geometry={playerMesh.clone().geometry}
           material={new MeshNormalMaterial()}
-          scale={[1, 1, 1]}
         />
       </group>
     </group>
@@ -440,6 +489,7 @@ export default Corn;
 Corn.propTypes = {
   tabActive: PropTypes.bool,
   playing: PropTypes.bool,
+  explode: PropTypes.bool,
   canvasRef: PropTypes.any,
   setMove: PropTypes.func,
   currentKernal: PropTypes.any,
@@ -453,6 +503,7 @@ Corn.propTypes = {
 Corn.defaultProps = {
   tabActive: true,
   playing: false,
+  explode: false,
   canvasRef: {},
   setMove: () => { },
   currentKernal: { x: 0, y: 0 },

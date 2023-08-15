@@ -49,6 +49,7 @@ function App() {
   const [results, setResults] = useState({});
   const [timer, setTimer] = useState(gameDuration);
   const [tabActive, setTabActive] = useState(true);
+  const [explode, setExplode] = useState(false);
 
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
@@ -121,6 +122,7 @@ function App() {
 
   const endGame = (won) => {
     // clearInterval(interval);
+    setExplode(true);
     setPlaying(false);
     setFocusKernal({ x: width / 2, y: currentKernal.y, offset: 0 });
     setResults({ won });
@@ -225,6 +227,7 @@ function App() {
           tabActive={tabActive}
           playing={playing}
           animating={animating}
+          explode={explode}
           canvasRef={canvasRef}
           kernals={kernals}
           currentKernal={currentKernal}
