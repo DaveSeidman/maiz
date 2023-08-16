@@ -1,6 +1,7 @@
 // TODO: increase and decrease rotations with dragging as well
 // TODO: changing heights doesn't have effect here
 // TODO: Dracoloader needs to be, reproduce by testing site offline
+// TODO: figure out why endkernal is being scaled to 0 even if we remove the .popped in App.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -41,8 +42,6 @@ function Corn(props) {
   const cobRef = useRef();
   const kernalsRef = useRef();
   const basesRef = useRef();
-  const cursorRef = useRef();
-  // const arrowsRef = useRef();
   const kernalMatRef = useRef();
 
   const endKernal = useRef();
@@ -145,7 +144,7 @@ function Corn(props) {
     // get it's world position
     const worldPos = new Vector3();
     poppedKernal.getWorldPosition(worldPos);
-    const velocity = new Vector3(0, -worldPos.y * 0.05, -worldPos.z * 0.05);
+    const velocity = new Vector3(0, -worldPos.y * (Math.random() * 0.125), -worldPos.z * (Math.random() * 0.125));
     // remove it from the cob, add it to the world so it's not affected by
     // the cobs translations or rotations, and instead follows gravity
     groupRef.current.add(poppedKernal);
@@ -154,7 +153,7 @@ function Corn(props) {
       mesh: poppedKernal,
       life: 0,
       velocity,
-      // velocity: new Vector3(0, -worldPos.y, -worldPos.z).normalize().multiplyScalar(0.1).add(new Vector3((Math.random() - 0.5) * 0.2, 0.1, 0)),
+      gravity: 0,
       rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
     });
   };
@@ -167,6 +166,7 @@ function Corn(props) {
   useEffect(() => {
     // adjust cob position / rotation
     targetPosition = -currentKernal.x;
+    targetRotation = (currentKernal.y / height) * Math.PI * -2;
 
     const object = new Object3D();
 
@@ -178,23 +178,21 @@ function Corn(props) {
       positionToGrid(object, currentKernal);
       object.position.z = -3;
     }
-    targetRotation = (currentKernal.y / height) * Math.PI * -2;
     // handle "overrotations", when going from near 0 to near 360 we get a jump in how we're easing our rotation
     // this will set a rotations counter to be added to the targetRotations to preven that jump
     if (currentKernal.y === height - 1 && prevKernal.y === 0) setRotations(rotations - 1);
     if (currentKernal.y === 0 && prevKernal.y === height - 1) setRotations(rotations + 1);
 
     // set cursor position
-    cursorRef.current.position.copy(object.position);
-    cursorRef.current.rotation.copy(object.rotation);
-
     playerRefTarget.current.position.copy(object.position);
 
     const { start } = kernals.find((kernal) => kernal.x === currentKernal.x && kernal.y === currentKernal.y);
-
-    console.log('here, start?', currentKernal, start);
     playerRefTarget.current.rotation.copy(object.rotation);
     playerRef.current.rotation.copy(object.rotation);
+    if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
+      // console.log('bump the player so they know they hit a wall');
+    }
+
     if (start) {
       // if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
       // console.log('didnt move');
@@ -207,19 +205,19 @@ function Corn(props) {
       // TODO: this occasionally flips if we're at the cylindar's wrapping point
       // console.log(currentKernal.y, prevKernal.y, height);
       if (currentKernal.x > prevKernal.x) {
-        console.log('face right');
+        // console.log('face right');
         playerTargetChildRef.current.rotation.y = degToRad(0);
       }
       if (currentKernal.x < prevKernal.x) {
-        console.log('face left');
+        // console.log('face left');
         playerTargetChildRef.current.rotation.y = degToRad(180);
       }
       if (currentKernal.y < prevKernal.y) {
-        console.log('face up');
+        // console.log('face up');
         playerTargetChildRef.current.rotation.y = degToRad(prevKernal.y ? 90 : 270);
       }
       if (currentKernal.y > prevKernal.y) {
-        console.log('face down');
+        // console.log('face down');
         playerTargetChildRef.current.rotation.y = degToRad(currentKernal.y ? 270 : 90);
       }
     }
@@ -252,7 +250,7 @@ function Corn(props) {
     if (explode) {
       kernals.forEach((kernal) => {
         if (kernal.type === 'path' && !kernal.popped) {
-          // popKernal(kernal);
+          popKernal(kernal);
         }
       });
     }
@@ -268,18 +266,11 @@ function Corn(props) {
       if (timeDiff < 1) { targetRotation += timeDiff / 4; }
     }
 
-    // if (endKernalIndex) {
-    //   const index = kernalIndex(focusKernal);
-    // highlightColor.lerpColors(highlightColor1, highlightColor2, Math.sin(elapsedTime * 7));
-    // kernalsRef.current.setColorAt(endKernalIndex, highlightColor);
-    // kernalsRef.current.instanceColor.needsUpdate = true;
-    // }
-
     if (playerRef.current && playerRefTarget.current) {
       playerRef.current.position.x += (playerRefTarget.current.position.x - playerRef.current.position.x) / 10;
       playerRef.current.position.y += (playerRefTarget.current.position.y - playerRef.current.position.y) / 10;
       playerRef.current.position.z += (playerRefTarget.current.position.z - playerRef.current.position.z) / 10;
-
+      // console.log(playerTargetChildRef.current.rotation.y);
       playerChildRef.current.rotation.y += (playerTargetChildRef.current.rotation.y - playerChildRef.current.rotation.y) / 10;
     }
 
@@ -306,8 +297,9 @@ function Corn(props) {
     poppedKernals.forEach((kernal, index) => {
       kernal.life += (timeDiff * 100);
       kernal.velocity.multiplyScalar(0.975);
+      kernal.gravity -= 0.005;
       // kernal.velocity.y -= timeDiff;
-      kernal.mesh.position.add(kernal.velocity).add(new Vector3(0, Math.pow(kernal.life, 2) / -2000, 0));
+      kernal.mesh.position.add(kernal.velocity).add(new Vector3(0, kernal.gravity, 0));
       kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
       if (kernal.life >= kernalLifeThreshold) {
         groupRef.current.remove(kernal.mesh);
@@ -361,7 +353,7 @@ function Corn(props) {
       const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
 
       const kernalScreenPosition = new Vector3();
-      kernalScreenPosition.setFromMatrixPosition(cursorRef.current.matrixWorld);
+      kernalScreenPosition.setFromMatrixPosition(playerRef.current.matrixWorld);
       kernalScreenPosition.project(camera);
       const moveX = clickX - kernalScreenPosition.x;
       const moveY = clickY - kernalScreenPosition.y;
@@ -432,20 +424,10 @@ function Corn(props) {
           geometry={kernalMesh.geometry.clone()}
           material={new MeshNormalMaterial()}
         />
-        <mesh
-          key="cursor"
-          ref={cursorRef}
-          visible={false}
-          geometry={cursorMesh.geometry}
-          // material={cursorMaterial}
-          castShadow
-          receiveShadow
-        />
         <group ref={playerRefTarget}>
           <mesh
             ref={playerTargetChildRef}
             geometry={playerMesh.clone().geometry}
-            // material={new MeshNormalMaterial()}
             position={[0, 2, 0]}
             visible={false}
           />

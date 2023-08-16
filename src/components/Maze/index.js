@@ -42,14 +42,14 @@ export default class Maze {
       });
     });
 
-    // startKernal partitioning
+    // startCell partitioning
     this.partition(1, this.height - 1, 1, this.width - 1);
 
-    // pick random startKernal and endKernal kernals
+    // pick random startCell and endCell kernals
     const randomYPosition = () => Math.floor(Math.random() * ((this.height * 2) - 1)) + 1;
     const randomXPosition = () => Math.floor(Math.random() * ((this.width * 2) - 1)) + 1;
-    this.startKernal = 0;
-    this.endKernal = 0;
+    this.startCell = 0;
+    this.endCell = 0;
     const firstCol = 0;
     const afterFirstCol = firstCol + 1;
     const lastCol = this.width * 2;
@@ -58,10 +58,10 @@ export default class Maze {
     const afterFirstRow = firstRow + 1;
     const lastRow = this.height * 2;
     const nextToLastRow = lastRow - 1;
-    while (this.cells[this.startKernal][afterFirstCol]) this.startKernal = randomYPosition();
-    while (this.cells[this.endKernal][nextToLastCol]) this.endKernal = randomYPosition();
-    this.cells[this.startKernal][firstCol] = 0;
-    this.cells[this.endKernal][lastCol] = 0;
+    while (this.cells[this.startCell][afterFirstCol]) this.startCell = randomYPosition();
+    while (this.cells[this.endCell][nextToLastCol]) this.endCell = randomYPosition();
+    this.cells[this.startCell][firstCol] = 0;
+    this.cells[this.endCell][lastCol] = 0;
 
     // cut random passage through top/bottom
     this.passages = [];
@@ -97,8 +97,8 @@ export default class Maze {
     let vert;
     let x;
     let y;
-    let startKernal;
-    let endKernal;
+    let startCell;
+    let endCell;
 
     if ((r2 < r1) || (c2 < c1)) {
       return false;
@@ -109,9 +109,9 @@ export default class Maze {
     } else {
       x = r1 + 1;
       y = r2 - 1;
-      startKernal = Math.round(x + (y - x) / 4);
-      endKernal = Math.round(x + 3 * (y - x) / 4);
-      horiz = rand(startKernal, endKernal);
+      startCell = Math.round(x + (y - x) / 4);
+      endCell = Math.round(x + 3 * (y - x) / 4);
+      horiz = rand(startCell, endCell);
     }
 
     if (c1 === c2) {
@@ -119,9 +119,9 @@ export default class Maze {
     } else {
       x = c1 + 1;
       y = c2 - 1;
-      startKernal = Math.round(x + (y - x) / 3);
-      endKernal = Math.round(x + 2 * (y - x) / 3);
-      vert = rand(startKernal, endKernal);
+      startCell = Math.round(x + (y - x) / 3);
+      endCell = Math.round(x + 2 * (y - x) / 3);
+      vert = rand(startCell, endCell);
     }
 
     for (let i = posToWall(r1) - 1; i <= posToWall(r2) + 1; i += 1) {

@@ -79,21 +79,23 @@ function App() {
   };
 
   const createMaze = () => {
-    const { startKernal, endKernal, cells } = new Maze(height / 2, width / 2);
+    const { startCell, endCell, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {
       row.forEach((kernal, x) => {
         const type = kernal ? 'wall' : 'path';
         const color = randomColor(type === 'wall' ? 'browns' : 'yellows');
-        const start = x === 0 && y === startKernal;
-        const end = x === width && y === endKernal;
+        const start = x === 0 && y === startCell;
+        const end = x === width && y === endCell;
         const popped = start || end;
         nextKernals.push({ id, x, y, color, type, popped, start, end });
         id += 1;
       });
     });
     setKernals(() => nextKernals);
+    // console.log();
+    setCurrentKernal({ x: 0, y: startCell });
   };
 
   const startGame = () => {
@@ -136,9 +138,6 @@ function App() {
     setPage(0);
     setResults({});
     createMaze();
-    // setWidth(levels[difficulty].width);
-    // setHeight(levels[difficulty].height);
-
     setInstructions(true);
   };
 
@@ -158,7 +157,6 @@ function App() {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
         return;
       }
-      console.log('here?', kernal.start);
       // TODO: implement focusKernal complete and then remove the check for animating here
       if (kernal.end) {
         endGame(true);
@@ -182,9 +180,6 @@ function App() {
   // create the maze
   useEffect(() => {
     createMaze();
-    // setFocusKernal({ x: width / 2, y: 0, offset: 0 });
-    // setCurrentKernal({ x: width / 2, y: start, justPopped: false });
-    // setMove({ x: 0, y: 0 });
   }, [width, height]);
 
   useEffect(() => {
@@ -208,7 +203,6 @@ function App() {
     } else if (timer === 0) {
       clearInterval(interval);
       endGame(false);
-      // You can trigger some action here when the timer reaches zero
     }
 
     return () => {
