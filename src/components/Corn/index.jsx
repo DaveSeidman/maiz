@@ -13,7 +13,6 @@ import kernalModel from '../../assets/models/models.glb';
 import grayImage from '../../assets/images/gray.jpg';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
-const up = new Vector3(0, 1, 0);
 let spin = 0;
 let targetRotation = 0;
 let targetPosition = 0;
@@ -57,17 +56,8 @@ function Corn(props) {
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
   const cursorMesh = gltf.scene.children.find((child) => child.name === 'Cursor');
-  // const arrowMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
   const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow2');
   const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
-
-  //   <meshStandardMaterial
-  //   userRef={kernalMatRef}
-  //   map={texture}
-  //   roughness={0.2}
-  //   metalness={0.1}
-  //   envMapIntensity={2}
-  // />
   const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.4 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.1, color: 0xf4e8a3 });
   const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.2, ior: 1.0, color: 0xdd44dd, reflectivity: 0.8, transmission: 0.9, thickness: 0.5, opacity: 0, envMapIntensity: 2 });
@@ -109,20 +99,6 @@ function Corn(props) {
     object.updateMatrix();
   };
 
-  // const positionToCylindar2 = (object, kernal) => {
-  //   const { x } = kernal;
-  //   const arc = (height / 2) / Math.PI;
-  //   //      | position around cylindar | barrel outwards towards the middle
-  //   const y = Math.cos(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
-  //   const z = Math.sin(kernal.y / arc) * (1.5 * (((height / 2) / Math.PI) + (curvature * (Math.sin((x / width) * Math.PI) / 2) - 1)));
-  //   const rotation = (kernal.y / height) * (Math.PI * 2);
-  //   object.position.set(x, y, z);
-  //   object.rotation.set(rotation, 0, 0);
-  //   const scale = kernal.popped ? 0 : 1;
-  //   object.scale.set(scale, scale, scale);
-  //   object.updateMatrix();
-  // };
-
   const blendMatrices = (object1, object2, amount) => {
     object1.position.lerp(object2.position, amount);
     object1.rotation.x = lerp(object1.rotation.x, object2.rotation.x, amount);
@@ -141,8 +117,6 @@ function Corn(props) {
       positionToCylindar(kernalsOnCylindar, kernal, 'kernal');
       positionToCylindar(basesOnCylindar, kernal, 'base');
       blendMatrices(kernalsOnGrid, kernalsOnCylindar, lerpAmount);
-      // const scale = kernal.popped ? 0 : 1;
-      // kernalsOnGrid.scale.set(scale, scale, scale);
       kernalsRef.current.setMatrixAt(index, kernalsOnGrid.matrix);
       kernalsRef.current.setColorAt(index, kernal.color);
       basesRef.current.setMatrixAt(index, basesOnCylindar.matrix);
@@ -193,9 +167,8 @@ function Corn(props) {
   useEffect(() => {
     // adjust cob position / rotation
     targetPosition = -currentKernal.x;
-    // TODO: grab this from positionToCylindar object below
+
     const object = new Object3D();
-    // const objectTemp = new Object3D();
 
     if (display === 'normal') {
       positionToCylindar(object, currentKernal, 'kernal');
@@ -211,19 +184,24 @@ function Corn(props) {
     if (currentKernal.y === height - 1 && prevKernal.y === 0) setRotations(rotations - 1);
     if (currentKernal.y === 0 && prevKernal.y === height - 1) setRotations(rotations + 1);
 
-    setUseSpin(false);
-
     // set cursor position
     cursorRef.current.position.copy(object.position);
     cursorRef.current.rotation.copy(object.rotation);
 
     playerRefTarget.current.position.copy(object.position);
 
-    if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
+    const { start } = kernals.find((kernal) => kernal.x === currentKernal.x && kernal.y === currentKernal.y);
+
+    console.log('here, start?', currentKernal, start);
+    playerRefTarget.current.rotation.copy(object.rotation);
+    playerRef.current.rotation.copy(object.rotation);
+    if (start) {
+      // if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
       // console.log('didnt move');
+      playerTargetChildRef.current.rotation.y = degToRad(0);
     } else {
-      playerRefTarget.current.rotation.copy(object.rotation);
-      playerRef.current.rotation.copy(object.rotation);
+      // playerRefTarget.current.rotation.copy(object.rotation);
+      // playerRef.current.rotation.copy(object.rotation);
 
       // Rotate to match heading
       // TODO: this occasionally flips if we're at the cylindar's wrapping point
@@ -247,9 +225,10 @@ function Corn(props) {
     }
 
     if (currentKernal.justPopped) {
-      // add popped kernal and animate
       popKernal(currentKernal);
     }
+
+    setUseSpin(false);
     prevKernal = JSON.parse(JSON.stringify(currentKernal));
   }, [currentKernal]);
 

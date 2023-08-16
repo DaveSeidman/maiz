@@ -8,8 +8,8 @@ const shuffle = (_array) => {
 };
 
 const rand = (min, max) => min + Math.floor(Math.random() * (1 + max - min));
-const posToSpace = x => 2 * (x - 1) + 1;
-const posToWall = x => 2 * x;
+const posToSpace = (x) => 2 * (x - 1) + 1;
+const posToWall = (x) => 2 * x;
 
 export default class Maze {
   // Original JavaScript code by Chirp Internet: www.chirpinternet.eu
@@ -42,14 +42,14 @@ export default class Maze {
       });
     });
 
-    // start partitioning
+    // startKernal partitioning
     this.partition(1, this.height - 1, 1, this.width - 1);
 
-    // pick random start and end kernals
+    // pick random startKernal and endKernal kernals
     const randomYPosition = () => Math.floor(Math.random() * ((this.height * 2) - 1)) + 1;
     const randomXPosition = () => Math.floor(Math.random() * ((this.width * 2) - 1)) + 1;
-    this.start = 0;
-    this.end = 0;
+    this.startKernal = 0;
+    this.endKernal = 0;
     const firstCol = 0;
     const afterFirstCol = firstCol + 1;
     const lastCol = this.width * 2;
@@ -58,15 +58,15 @@ export default class Maze {
     const afterFirstRow = firstRow + 1;
     const lastRow = this.height * 2;
     const nextToLastRow = lastRow - 1;
-    while (this.cells[this.start][afterFirstCol]) this.start = randomYPosition();
-    while (this.cells[this.end][nextToLastCol]) this.end = randomYPosition();
-    this.cells[this.start][firstCol] = 0;
-    this.cells[this.end][lastCol] = 0;
+    while (this.cells[this.startKernal][afterFirstCol]) this.startKernal = randomYPosition();
+    while (this.cells[this.endKernal][nextToLastCol]) this.endKernal = randomYPosition();
+    this.cells[this.startKernal][firstCol] = 0;
+    this.cells[this.endKernal][lastCol] = 0;
 
     // cut random passage through top/bottom
     this.passages = [];
-    const adjacentPassageExists = passage => this.passages.indexOf(passage - 1) >= 0 || this.passages.indexOf(passage) >= 0 || this.passages.indexOf(passage + 1) >= 0;
-    const doesNotConnect = randomCol => this.cells[afterFirstRow][randomCol] || this.cells[nextToLastRow][randomCol];
+    const adjacentPassageExists = (passage) => this.passages.indexOf(passage - 1) >= 0 || this.passages.indexOf(passage) >= 0 || this.passages.indexOf(passage + 1) >= 0;
+    const doesNotConnect = (randomCol) => this.cells[afterFirstRow][randomCol] || this.cells[nextToLastRow][randomCol];
     const addPassage = () => {
       let randomCol = 0;
       while (doesNotConnect(randomCol) || adjacentPassageExists(randomCol)) randomCol = randomXPosition();
@@ -97,8 +97,8 @@ export default class Maze {
     let vert;
     let x;
     let y;
-    let start;
-    let end;
+    let startKernal;
+    let endKernal;
 
     if ((r2 < r1) || (c2 < c1)) {
       return false;
@@ -109,9 +109,9 @@ export default class Maze {
     } else {
       x = r1 + 1;
       y = r2 - 1;
-      start = Math.round(x + (y - x) / 4);
-      end = Math.round(x + 3 * (y - x) / 4);
-      horiz = rand(start, end);
+      startKernal = Math.round(x + (y - x) / 4);
+      endKernal = Math.round(x + 3 * (y - x) / 4);
+      horiz = rand(startKernal, endKernal);
     }
 
     if (c1 === c2) {
@@ -119,9 +119,9 @@ export default class Maze {
     } else {
       x = c1 + 1;
       y = c2 - 1;
-      start = Math.round(x + (y - x) / 3);
-      end = Math.round(x + 2 * (y - x) / 3);
-      vert = rand(start, end);
+      startKernal = Math.round(x + (y - x) / 3);
+      endKernal = Math.round(x + 2 * (y - x) / 3);
+      vert = rand(startKernal, endKernal);
     }
 
     for (let i = posToWall(r1) - 1; i <= posToWall(r2) + 1; i += 1) {

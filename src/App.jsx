@@ -79,15 +79,17 @@ function App() {
   };
 
   const createMaze = () => {
-    const { start, end, cells } = new Maze(height / 2, width / 2);
+    const { startKernal, endKernal, cells } = new Maze(height / 2, width / 2);
     const nextKernals = [];
     let id = 0;
     cells.forEach((row, y) => {
       row.forEach((kernal, x) => {
         const type = kernal ? 'wall' : 'path';
         const color = randomColor(type === 'wall' ? 'browns' : 'yellows');
-        const popped = false;
-        nextKernals.push({ id, x, y, color, type, popped, start: x === 0 && y === start, end: x === width && y === end });
+        const start = x === 0 && y === startKernal;
+        const end = x === width && y === endKernal;
+        const popped = start || end;
+        nextKernals.push({ id, x, y, color, type, popped, start, end });
         id += 1;
       });
     });
