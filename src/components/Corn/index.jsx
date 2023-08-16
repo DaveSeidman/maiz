@@ -1,6 +1,6 @@
 // TODO: increase and decrease rotations with dragging as well
-// TODO: sometimes gltf's don't load (usually the roots)
 // TODO: changing heights doesn't have effect here
+// TODO: Dracoloader needs to be, reproduce by testing site offline
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -171,7 +171,7 @@ function Corn(props) {
     // get it's world position
     const worldPos = new Vector3();
     poppedKernal.getWorldPosition(worldPos);
-    const velocity = new Vector3(poppedKernal.rotation._x, 0, 0);
+    const velocity = new Vector3(0, -worldPos.y * 0.05, -worldPos.z * 0.05);
     // remove it from the cob, add it to the world so it's not affected by
     // the cobs translations or rotations, and instead follows gravity
     groupRef.current.add(poppedKernal);
@@ -285,7 +285,8 @@ function Corn(props) {
     // elapsedTime += timeDiff;
 
     if (!(playing || animating) && tabActive) {
-      targetRotation += timeDiff / 4;
+      // TODO: this should be fixed to be more robust
+      if (timeDiff < 1) { targetRotation += timeDiff / 4; }
     }
 
     // if (endKernalIndex) {
@@ -327,7 +328,7 @@ function Corn(props) {
       kernal.life += (timeDiff * 100);
       kernal.velocity.multiplyScalar(0.975);
       // kernal.velocity.y -= timeDiff;
-      kernal.mesh.position.add(kernal.velocity);// .add(0, -kernal.life / 2, 0);
+      kernal.mesh.position.add(kernal.velocity).add(new Vector3(0, Math.pow(kernal.life, 2) / -2000, 0));
       kernal.mesh.rotateOnAxis(kernal.rotation, 0.05);
       if (kernal.life >= kernalLifeThreshold) {
         groupRef.current.remove(kernal.mesh);
