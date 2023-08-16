@@ -18,22 +18,39 @@
     letter-spacing: 1.5px;;
   }
 
-  .gitlab {
-    width: 2rem;
-    height: 2rem;
-  }
+  // .gitlab, .share {
+  //   width: 2rem;
+  //   height: 2rem;
+  // }
 
-  .share {
-    background: none;
-    border: none;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
+  button {
+    background: none !important;
+    color: white !important;
+    position: relative;
+    padding-right: 2.5rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    // display: flex;
+    // flex-direction: row;
     img {
-      width: 2rem;
       height: 2rem;
+      position: absolute;
+      right: 0;
+      top: 0;
     }
   }
+
+  // .share {
+  //   background: none;
+  //   border: none;
+  //   box-shadow: none;
+  //   margin: 0;
+  //   padding: 0;
+  //   img {
+  //     width: 2rem;
+  //     height: 2rem;
+  //   }
+  // }
 }
 
 .rws-container {

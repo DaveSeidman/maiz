@@ -2,20 +2,20 @@ import React from 'react';
 import { RWebShare } from 'react-web-share';
 // import gitlabLogo from '../../assets/images/gitlab-logo-700.svg';
 import sourceCodeLogo from '../../assets/images/code.svg';
-// import shareIcon from '../../assets/images/share.svg';
+import shareIcon from '../../assets/images/share.svg';
 import { metadata } from '../../assets/content.json';
 import './index.scss';
 
 function Footer() {
   const { title, text, url } = metadata;
 
-  const share = () => {
-    navigator.share({
-      url: 'https://maiz.uno',
-      title: 'MAÍZ',
-      text: description,
-    });
-  };
+  // const share = () => {
+  //   navigator.share({
+  //     url: 'https://maiz.uno',
+  //     title: 'MAÍZ',
+  //     text,
+  //   });
+  // };
   return (
     <div className="footer">
       <div className="left">
@@ -35,7 +35,14 @@ function Footer() {
           sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
           onClick={() => console.log('shared successfully!')}
         >
-          <button>Share</button>
+          <button type="button">
+            Share
+            <img
+              className="share"
+              alt="share icon"
+              src={shareIcon}
+            />
+          </button>
         </RWebShare>
         <a
           href="https://gitlab.com/daveseidman/maiz"

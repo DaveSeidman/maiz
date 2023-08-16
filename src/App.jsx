@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 // import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
 import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
-import { PCFSoftShadowMap, Color } from 'three';
+import { PCFSoftShadowMap, BasicShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
 // import { BlendFunction } from 'postprocessing';
@@ -113,6 +113,7 @@ function App() {
     setTimeout(() => {
       // setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
+      setMove({ x: 0, y: 0 });
       setAnimating(false);
       setInstructions(false);
       setPlaying(true);
@@ -155,6 +156,7 @@ function App() {
         setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
         return;
       }
+      console.log('here?', kernal.start);
       // TODO: implement focusKernal complete and then remove the check for animating here
       if (kernal.end) {
         endGame(true);
@@ -217,7 +219,7 @@ function App() {
       <Canvas
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
-        camera={{ fov: 60 }}
+        camera={{ fov: 60, far: 30 }}
         dpr={0.5}
       >
         <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} />
@@ -239,12 +241,12 @@ function App() {
           display={display}
         />
         <directionalLight
-          intensity={1}
-          position={[0, 10, 5]}
-          target-position={[0, 0, -5]}
+          intensity={3}
+          position={[-10, 10, 0]}
+          target-position={[0, 0, 0]}
           castShadow
           shadow-mapSize={1024}
-          shadow-bias={-0.00001}
+          shadow-bias={0.00001}
         />
         <Environment
           files={envMap}
@@ -338,7 +340,7 @@ function App() {
           />
         </div>
       )}
-      {((playing || animating) && mobile) && (
+      {((playing || animating) /* && mobile */) && (
         <Joystick
           size={100}
           sticky={false}
