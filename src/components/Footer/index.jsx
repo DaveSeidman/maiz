@@ -9,13 +9,6 @@ import './index.scss';
 function Footer() {
   const { title, text, url } = metadata;
 
-  // const share = () => {
-  //   navigator.share({
-  //     url: 'https://maiz.uno',
-  //     title: 'MAÍZ',
-  //     text,
-  //   });
-  // };
   return (
     <div className="footer">
       <div className="left">
@@ -49,14 +42,14 @@ function Footer() {
           target="_blank"
           rel="noreferrer"
         >
-          <button type="button">
+          {/* <button type="button">
             Source
             <img
               className="gitlab"
               alt="source code logo"
               src={sourceCodeLogo}
             />
-          </button>
+          </button> */}
         </a>
       </div>
 

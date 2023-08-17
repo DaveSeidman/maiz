@@ -1,14 +1,13 @@
-// TODO: change 'normal' to 'path'
 // TODO: remove all !important's in CSS
 // TODO: better color on close / open instructions buttons
 // TODO: use some textures and normal maps
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-// import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
 import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
 import { PCFSoftShadowMap, BasicShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
+// import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
 // import { BlendFunction } from 'postprocessing';
 import { Joystick } from 'react-joystick-component';
 import Mobile from 'is-mobile';
@@ -71,7 +70,7 @@ function App() {
       default: break;
     }
     setMove({ x, y });
-    if (key === 'Escape') setInstructions(false);
+    if (key === 'Escape') setInstructions(!instructions);
   };
 
   const handleTabActive = (e) => {
@@ -89,7 +88,8 @@ function App() {
         const start = x === 0 && y === startCell;
         const end = x === width && y === endCell;
         const popped = start || end;
-        nextKernals.push({ id, x, y, color, type, popped, start, end });
+        const direction = undefined;
+        nextKernals.push({ id, x, y, color, type, popped, start, end, direction });
         id += 1;
       });
     });
@@ -115,7 +115,6 @@ function App() {
       setFocusKernal({});
     }, 1000);
     setTimeout(() => {
-      // setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: 0 });
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
       setMove({ x: 0, y: 0 });
       setAnimating(false);
@@ -123,6 +122,15 @@ function App() {
       setPlaying(true);
       analytics.track('start', { difficulty });
     }, 1500);
+    setTimeout(() => {
+      setPage(4);
+    }, 3000);
+  };
+
+  const continueGame = () => {
+    console.log('continue');
+    setInstructions(false);
+    setPlaying(true);
   };
 
   const endGame = (won) => {
@@ -137,10 +145,13 @@ function App() {
   const playAgain = () => {
     setPage(0);
     setResults({});
+    setFocusKernal({ x: width / 2, y: 0, offset: 0 });
     createMaze();
     setInstructions(true);
   };
 
+  // Move Event
+  // TODO: consider making this a string: up, down, left, right
   useEffect(() => {
     const x = currentKernal.x + move.x;
     let y = currentKernal.y + move.y;
@@ -148,13 +159,15 @@ function App() {
     if (y > height - 1) y = 0;
     if (y < 0) y = height - 1;
 
+    let direction;
+    if (move.x !== 0) direction = move.x > 0 ? 'right' : 'left';
+    if (move.y !== 0) direction = move.y > 0 ? 'down' : 'up';
     const kernal = kernals.find((k) => k.x === x && k.y === y);
-    // console.log({ x, y, kernals });
 
     let justPopped = false;
     if (kernal) {
       if (kernal.type === 'wall') {
-        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped });
+        setCurrentKernal({ x: currentKernal.x, y: currentKernal.y, justPopped, direction });
         return;
       }
       // TODO: implement focusKernal complete and then remove the check for animating here
@@ -168,7 +181,7 @@ function App() {
       }
       // setKernals(kernals);
     }
-    setCurrentKernal({ x, y, justPopped });
+    setCurrentKernal({ x, y, justPopped, direction });
   }, [move]);
 
   useEffect(() => {
@@ -241,7 +254,7 @@ function App() {
           position={[-10, 10, 0]}
           target-position={[0, 0, 0]}
           castShadow
-          shadow-mapSize={1024}
+          shadow-mapSize={512}
           shadow-bias={0.00001}
         />
         <Environment
@@ -260,17 +273,19 @@ function App() {
             adaptationRate={1.0} // luminance adaptation rate
           />
         </EffectComposer> */}
+
       </Canvas>
       <Score
         timer={timer}
         popCount={popCount}
         kernals={kernals}
       />
-      {!instructions && (
+      {!(instructions || results.won) && (
         <button
           className="instructionsToggle"
           type="button"
           onClick={() => {
+            // TODO: maybe just set playing to false here
             setInstructions(true);
             // clearInterval(interval);
           }}
@@ -283,6 +298,7 @@ function App() {
         instructions={instructions}
         setInstructions={setInstructions}
         startGame={startGame}
+        continueGame={continueGame}
         difficulty={difficulty}
         setDifficulty={setDifficulty}
         playing={playing}
@@ -298,7 +314,7 @@ function App() {
         timer={timer}
         kernals={kernals}
       />
-      {false && (
+      {/* {false && (
         <div className="debug">
           <button
             type="button"
@@ -335,7 +351,7 @@ function App() {
             }
           />
         </div>
-      )}
+      )} */}
       {((playing || animating) /* && mobile */) && (
         <Joystick
           size={100}

@@ -1,6 +1,6 @@
 // TODO: rerendering with timer
 import React from 'react';
-import cornImage from '../../assets/images/corn.png';
+import cornImage from '../../assets/images/maiz-logo.png';
 
 import './index.scss';
 import { messages } from '../../assets/content.json';

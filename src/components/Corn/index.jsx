@@ -15,7 +15,7 @@ import grayImage from '../../assets/images/gray.jpg';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let spin = 0;
-let targetRotation = 0;
+// let targetRotation = 0;
 let targetPosition = 0;
 let lerpAmount = 1;
 
@@ -33,6 +33,7 @@ function Corn(props) {
   const gltf = useGLTF(kernalModel);
   const { camera } = useThree();
 
+  const [targetRotation, setTargetRotation] = useState(0);
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
   const [texture, setTexture] = useState();
@@ -166,8 +167,8 @@ function Corn(props) {
   useEffect(() => {
     // adjust cob position / rotation
     targetPosition = -currentKernal.x;
-    targetRotation = (currentKernal.y / height) * Math.PI * -2;
-
+    // targetRotation = (currentKernal.y / height) * Math.PI * -2;
+    setTargetRotation((currentKernal.y / height) * Math.PI * -2);
     const object = new Object3D();
 
     if (display === 'normal') {
@@ -186,39 +187,31 @@ function Corn(props) {
     // set cursor position
     playerRefTarget.current.position.copy(object.position);
 
-    const { start } = kernals.find((kernal) => kernal.x === currentKernal.x && kernal.y === currentKernal.y);
+    const kernal = kernals.find((k) => k.x === currentKernal.x && k.y === currentKernal.y);
     playerRefTarget.current.rotation.copy(object.rotation);
     playerRef.current.rotation.copy(object.rotation);
     if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
       // console.log('bump the player so they know they hit a wall');
     }
 
-    if (start) {
+    const angles = {
+      up: 90,
+      down: 270,
+      left: 180,
+      right: 0,
+    };
+
+    if (kernal.start) {
       // if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
-      // console.log('didnt move');
       playerTargetChildRef.current.rotation.y = degToRad(0);
     } else {
-      // playerRefTarget.current.rotation.copy(object.rotation);
-      // playerRef.current.rotation.copy(object.rotation);
-
-      // Rotate to match heading
       // TODO: this occasionally flips if we're at the cylindar's wrapping point
       // console.log(currentKernal.y, prevKernal.y, height);
-      if (currentKernal.x > prevKernal.x) {
-        // console.log('face right');
-        playerTargetChildRef.current.rotation.y = degToRad(0);
-      }
-      if (currentKernal.x < prevKernal.x) {
-        // console.log('face left');
-        playerTargetChildRef.current.rotation.y = degToRad(180);
-      }
-      if (currentKernal.y < prevKernal.y) {
-        // console.log('face up');
-        playerTargetChildRef.current.rotation.y = degToRad(prevKernal.y ? 90 : 270);
-      }
-      if (currentKernal.y > prevKernal.y) {
-        // console.log('face down');
-        playerTargetChildRef.current.rotation.y = degToRad(currentKernal.y ? 270 : 90);
+      console.log(prevKernal.direction, currentKernal.direction);
+      playerTargetChildRef.current.rotation.y = degToRad(angles[currentKernal.direction]);
+      if (prevKernal.direction === 'right' && currentKernal.direction === 'down') {
+        // playerTargetChildRef.current.rotation.y -= degToRad(360);
+        // TODO: use a spinCount here similar to rotationCount
       }
     }
 
@@ -233,7 +226,8 @@ function Corn(props) {
   useEffect(() => {
     if (focusKernal.x !== undefined && focusKernal.y !== undefined) {
       targetPosition = -focusKernal.x + focusKernal.offset;
-      targetRotation = (focusKernal.y / height) * Math.PI * -2;
+      // targetRotation = (focusKernal.y / height) * Math.PI * -2;
+      setTargetRotation((focusKernal.y / height) * Math.PI * -2);
     } else {
       targetPosition = -width / 2;
     }
@@ -250,7 +244,9 @@ function Corn(props) {
     if (explode) {
       kernals.forEach((kernal) => {
         if (kernal.type === 'path' && !kernal.popped) {
-          popKernal(kernal);
+          setTimeout(() => {
+            popKernal(kernal);
+          }, Math.random() * 300);
         }
       });
     }
@@ -263,7 +259,10 @@ function Corn(props) {
 
     if (!(playing || animating) && tabActive) {
       // TODO: this should be fixed to be more robust
-      if (timeDiff < 1) { targetRotation += timeDiff / 4; }
+      if (timeDiff < 1) {
+        // targetRotation += timeDiff / 4;
+        setTargetRotation(targetRotation + (timeDiff / 4));
+      }
     }
 
     if (playerRef.current && playerRefTarget.current) {

@@ -1,7 +1,9 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+
 import './index.scss';
 
-const Score = (props) => {
+function Score(props) {
   const { popCount, kernals, timer } = props;
 
   return (
@@ -16,7 +18,18 @@ const Score = (props) => {
       </div>
     </div>
   );
-};
-
+}
 
 export default Score;
+
+Score.propTypes = {
+  popCount: 0,
+  kernals: PropTypes.arrayOf(PropTypes.shape),
+  timer: PropTypes.number,
+};
+
+Score.defaultProps = {
+  popCount: 0,
+  kernals: [],
+  timer: 0,
+};

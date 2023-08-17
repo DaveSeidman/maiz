@@ -1,12 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import cornImage from '../../assets/images/corn.png';
+import cornImage from '../../assets/images/maiz-logo.png';
 import { messages } from '../../assets/content.json';
 
 import './index.scss';
 
 function Instructions(props) {
-  const { instructions, difficulty, setDifficulty, playing, animating, startGame, page } = props;
+  const {
+    instructions,
+    difficulty,
+    setDifficulty,
+    playing,
+    animating,
+    startGame,
+    continueGame,
+    page,
+  } = props;
   // console.log(setDifficulty);
 
   const positions = [
@@ -26,25 +35,25 @@ function Instructions(props) {
             <h2>Difficulty:</h2>
             <div className="difficulty-options">
               <button type="button" className={difficulty === 'easy' ? 'selected' : ''} onClick={() => { setDifficulty('easy'); }}>
-                Easy <span role="img" aria-label="corn">🌽</span>
+                Easy
               </button>
               <button type="button" className={difficulty === 'medium' ? 'selected' : ''} onClick={() => { setDifficulty('medium'); }}>
-                Medium <span role="img" aria-label="corn">🌽</span>
+                Medium
               </button>
               <button type="button" className={difficulty === 'hard' ? 'selected' : ''} onClick={() => { setDifficulty('hard'); }}>
-                Hard <span role="img" aria-label="corn">🌽</span>
+                Hard
               </button>
             </div>
           </div>
-
         )}
-        {(!playing && !animating) && (
-          <button
-            type="button"
-            onClick={startGame}
-          >{playing ? 'Continue' : 'Start!'}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => {
+            if (!playing) startGame();
+            else continueGame();
+          }}
+        >{playing ? 'Continue' : 'Start!'}
+        </button>
         <img className="graphic" src={cornImage} alt="corn" />
       </div>
     </div>

@@ -117,7 +117,7 @@ html, body {
       border: .5rem solid rgba(88, 13, 38, .7);
       border-radius: 1rem;
       padding: .5rem 1rem;
-      box-shadow: 0 .5rem .25rem rgba(81, 23, 8, 0.2);
+      box-shadow: 0 .5rem .25rem rgba(45, 12, 4, 0.5);
 
       &.left {
         left: 25%
@@ -128,10 +128,10 @@ html, body {
 
       .graphic {
         position: absolute;
-        width: 10rem;
-        height: 10rem;
-        top: -5rem;
-        left: 0;
+        width: 12rem;
+        height: 12rem;
+        top: -8rem;
+        left: -4rem;
       }
     }
   }
