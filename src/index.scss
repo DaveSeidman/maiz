@@ -2,20 +2,17 @@ $yellow1: rgb(206, 206, 16);
 $yellow2: rgb(179, 169, 27);
 $blue: rgb(14, 176, 179);
 $dark-orange: #f56425;
+$gray: rgb(180, 180, 180);
+$black: rgb(10, 10, 10);
 
 
 @font-face {
-  font-family: 'Kanit';
-  src: url('./assets/fonts/Kanit-Regular.ttf');
+  font-family: 'Roboto';
+  src: url('./assets/fonts/RobotoMono-Regular.ttf');
 }
 @font-face {
   font-family: 'Corn';
   src: url('./assets/fonts/CornDemo-Regular.ttf');
-}
-
-@font-face {
-  font-family: 'Rajdhani';
-  src: url('./assets/fonts/Rajdhani-Bold.ttf');
 }
 
 @keyframes border-pulse {
@@ -41,7 +38,7 @@ html, body {
   h1, h2, h3, p { 
     margin: 0;
     padding: 1rem;
-    line-height: 1.5rem;
+    // line-height: 1.5rem;
   }
 
   h1 {
@@ -134,6 +131,15 @@ html, body {
         left: -4rem;
       }
     }
+  }
+
+  .numbers {
+    font-family: 'Roboto';
+    letter-spacing: .25rem;
+    background: $gray;
+    padding: 0 .25rem 0 .5rem;
+    color: $black;
+    border-radius: .3rem;
   }
 
   div[data-testid="joystick-base"] {

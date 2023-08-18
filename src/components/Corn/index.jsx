@@ -45,7 +45,7 @@ function Corn(props) {
   const basesRef = useRef();
   const kernalMatRef = useRef();
 
-  const endKernal = useRef();
+  const endKernalRef = useRef();
   const playerRef = useRef();
   const playerRefTarget = useRef();
   const playerTargetChildRef = useRef();
@@ -55,12 +55,12 @@ function Corn(props) {
 
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
-  const cursorMesh = gltf.scene.children.find((child) => child.name === 'Cursor');
-  const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow2');
+  // const cursorMesh = gltf.scene.children.find((child) => child.name === 'Cursor');
+  const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
   const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
   const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.4 });
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.1, color: 0xf4e8a3 });
-  const cursorMaterial = new MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.2, ior: 1.0, color: 0xdd44dd, reflectivity: 0.8, transmission: 0.9, thickness: 0.5, opacity: 0, envMapIntensity: 2 });
+  const playerMaterial = new MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.2, ior: 1.0, color: 0xdd44dd, reflectivity: 0.8, transmission: 0.9, thickness: 0.5, opacity: 0, envMapIntensity: 2 });
   const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
 
   const highlightColor1 = colors.yellows[0];
@@ -110,9 +110,8 @@ function Corn(props) {
     const kernalsOnGrid = new Object3D();
     const kernalsOnCylindar = new Object3D();
     const basesOnCylindar = new Object3D();
+    // TODO: add a finalKernalPosition Object3D() since kernalOnGrid is confusing (lerped value)
     kernals.forEach((kernal, index) => {
-      if (kernal.end) setEndKernalIndex(index);
-
       positionToGrid(kernalsOnGrid, kernal);
       positionToCylindar(kernalsOnCylindar, kernal, 'kernal');
       positionToCylindar(basesOnCylindar, kernal, 'base');
@@ -120,6 +119,13 @@ function Corn(props) {
       kernalsRef.current.setMatrixAt(index, kernalsOnGrid.matrix);
       kernalsRef.current.setColorAt(index, kernal.color);
       basesRef.current.setMatrixAt(index, basesOnCylindar.matrix);
+
+      if (kernal.end) {
+        setEndKernalIndex(index);
+        console.log(kernalsOnGrid.position);
+        // endKernalRef.position.copy(kernalsOnGrid.position);
+        // endKernalRef.rotation.copy(kernalsOnGrid.rotation);
+      }
     });
     kernalsRef.current.instanceMatrix.needsUpdate = true;
     basesRef.current.instanceMatrix.needsUpdate = true;
@@ -227,6 +233,7 @@ function Corn(props) {
     if (focusKernal.x !== undefined && focusKernal.y !== undefined) {
       targetPosition = -focusKernal.x + focusKernal.offset;
       // targetRotation = (focusKernal.y / height) * Math.PI * -2;
+      // TODO: incorporate rotations here so that we don't overspin back to this:
       setTargetRotation((focusKernal.y / height) * Math.PI * -2);
     } else {
       targetPosition = -width / 2;
@@ -419,7 +426,7 @@ function Corn(props) {
           args={[null, null, kernals.length]}
         />
         <mesh
-          ref={endKernal}
+          ref={endKernalRef}
           geometry={kernalMesh.geometry.clone()}
           material={new MeshNormalMaterial()}
         />
@@ -435,7 +442,7 @@ function Corn(props) {
           <mesh
             ref={playerChildRef}
             geometry={playerMesh.clone().geometry}
-            material={cursorMaterial}
+            material={playerMaterial}
             position={[0, 2, 0]}
           />
         </group>

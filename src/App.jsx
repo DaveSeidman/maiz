@@ -1,6 +1,8 @@
 // TODO: remove all !important's in CSS
 // TODO: better color on close / open instructions buttons
 // TODO: use some textures and normal maps
+// TODO: should sharing from results include data?
+// TODO: implenent: https://github.com/pmndrs/drei#performancemonitor
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
@@ -124,20 +126,20 @@ function App() {
     }, 1500);
     setTimeout(() => {
       setPage(4);
-    }, 3000);
+    }, 3500);
   };
 
   const continueGame = () => {
-    console.log('continue');
     setInstructions(false);
     setPlaying(true);
   };
 
   const endGame = (won) => {
-    // clearInterval(interval);
     setExplode(true);
     setPlaying(false);
-    setFocusKernal({ x: width / 2, y: currentKernal.y, offset: 0 });
+    setTimeout(() => {
+      setFocusKernal({ x: width / 2, y: currentKernal.y, offset: 0 });
+    }, 1000);
     setResults({ won });
     analytics.track('end', { won, difficulty: 'medium' });
   };
@@ -208,7 +210,6 @@ function App() {
 
   useEffect(() => {
     let interval;
-
     if (playing && timer > 0) {
       interval = setInterval(() => {
         setTimer((prevTime) => prevTime - 1);
@@ -352,7 +353,7 @@ function App() {
           />
         </div>
       )} */}
-      {((playing || animating) /* && mobile */) && (
+      <div className={`joystick ${((playing || animating) && !instructions && mobile) ? '' : 'hidden'}`}>
         <Joystick
           size={100}
           sticky={false}
@@ -365,7 +366,7 @@ function App() {
           }}
           stop={() => { }}
         />
-      )}
+      </div>
     </div>
   );
 }

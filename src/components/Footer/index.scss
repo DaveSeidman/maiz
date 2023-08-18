@@ -5,6 +5,7 @@
   display: flex;
   width: 100%;
   justify-content: space-between;
+  align-items: baseline;
 
   p, a {
     font-size: .75rem;
@@ -18,11 +19,6 @@
     letter-spacing: 1.5px;;
   }
 
-  // .gitlab, .share {
-  //   width: 2rem;
-  //   height: 2rem;
-  // }
-
   button {
     background: none !important;
     color: white !important;
@@ -30,13 +26,12 @@
     padding-right: 2.5rem !important;
     border: none !important;
     box-shadow: none !important;
-    // display: flex;
-    // flex-direction: row;
+    font-size: .75rem !important;
     img {
       height: 2rem;
       position: absolute;
       right: 0;
-      top: 0;
+      top: -.125rem;
     }
   }
 

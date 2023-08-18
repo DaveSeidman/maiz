@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import isMobile from 'is-mobile';
 import cornImage from '../../assets/images/maiz-logo.png';
 import { messages } from '../../assets/content.json';
-
 import './index.scss';
 
 function Instructions(props) {
@@ -16,7 +16,8 @@ function Instructions(props) {
     continueGame,
     page,
   } = props;
-  // console.log(setDifficulty);
+
+  const mobile = isMobile();
 
   const positions = [
     '',
@@ -29,7 +30,7 @@ function Instructions(props) {
     <div className={`instructions modal ${instructions ? '' : 'hidden'}`}>
       <div className={`instructions-content modal-content  ${positions[page] || ''}`}>
         <h1 className="instructions-content-title">- MAIZ -</h1>
-        <p>{messages.instructions[page]}</p>
+        <p>{messages.instructions[mobile ? 'mobile' : 'desktop'][page]}</p>
         {page === 0 && (
           <div className="difficulty">
             <h2>Difficulty:</h2>

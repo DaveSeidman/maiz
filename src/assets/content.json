@@ -5,13 +5,22 @@
    "title": "🌽 MAIZ 🌽"
   },
   "messages": {
-    "instructions": [
-      "Conquer the Cob!!",
-      "Start from this kernal,",
-      "Make your way to the end of the maze!",
-      "Good luck!",
-      "Keep Going!"
-    ],
+    "instructions": {
+      "mobile": [
+       "Conquer the Cob!!",
+        "Start from this kernal,",
+        "Tap or use the joystick to navigate to the end of the maze!",
+        "Good luck!",
+        "Keep Going!"
+      ],
+      "desktop": [
+        "Conquer the Cob!!",
+        "Start from this kernal,",
+        "Click or use the arrow keys to navigate to the end of the maze!",
+        "Good luck!",
+        "Keep Going!"
+      ]
+    },
     "welcome": [
       "Welcome to Maiz!"
     ],

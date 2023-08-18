@@ -8,8 +8,8 @@ function Score(props) {
 
   return (
     <div className="score">
-      <p className="score-time">time: {timer}</p>
-      <p className="score-kernals">kernals: {popCount}</p>
+      <p className="score-time">time: <span className="numbers">{timer}</span></p>
+      <p className="score-kernals">kernals: <span className="numbers">{popCount}</span></p>
       <div className="progress">
         <span
           className="progress-bar"
@@ -23,7 +23,7 @@ function Score(props) {
 export default Score;
 
 Score.propTypes = {
-  popCount: 0,
+  popCount: PropTypes.number,
   kernals: PropTypes.arrayOf(PropTypes.shape),
   timer: PropTypes.number,
 };

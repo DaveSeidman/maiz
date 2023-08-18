@@ -1,7 +1,5 @@
 import React from 'react';
 import { RWebShare } from 'react-web-share';
-// import gitlabLogo from '../../assets/images/gitlab-logo-700.svg';
-import sourceCodeLogo from '../../assets/images/code.svg';
 import shareIcon from '../../assets/images/share.svg';
 import { metadata } from '../../assets/content.json';
 import './index.scss';
@@ -37,22 +35,7 @@ function Footer() {
             />
           </button>
         </RWebShare>
-        <a
-          href="https://gitlab.com/daveseidman/maiz"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {/* <button type="button">
-            Source
-            <img
-              className="gitlab"
-              alt="source code logo"
-              src={sourceCodeLogo}
-            />
-          </button> */}
-        </a>
       </div>
-
     </div>
   );
 }
