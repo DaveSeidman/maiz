@@ -288,6 +288,7 @@ function App() {
           onClick={() => {
             // TODO: maybe just set playing to false here
             setInstructions(true);
+            setPlaying(false);
             // clearInterval(interval);
           }}
         >

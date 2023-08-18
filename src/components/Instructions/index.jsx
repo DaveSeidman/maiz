@@ -47,14 +47,17 @@ function Instructions(props) {
             </div>
           </div>
         )}
-        <button
-          type="button"
-          onClick={() => {
-            if (!playing) startGame();
-            else continueGame();
-          }}
-        >{playing ? 'Continue' : 'Start!'}
-        </button>
+        {(page === 0 || page === 4) && (
+          <button
+            type="button"
+            onClick={() => {
+              if (page === 0) startGame();
+              else continueGame();
+            }}
+          >
+            {page === 4 ? 'Continue' : 'Start!'}
+          </button>
+        )}
         <img className="graphic" src={cornImage} alt="corn" />
       </div>
     </div>
