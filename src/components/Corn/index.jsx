@@ -112,7 +112,6 @@ function Corn(props) {
 
       if (kernal.end) {
         setEndKernalIndex(index);
-        console.log(kernalsOnGrid.position);
         endKernalRef.current.position.copy(kernalsOnGrid.position);
         endKernalRef.current.rotation.copy(kernalsOnGrid.rotation);
       }
@@ -250,22 +249,10 @@ function Corn(props) {
   }, [explode]);
 
   useFrame((e, timeDiff) => {
-    // console.log(endKernalIndex);
-    // if (!tabActive) return;
-    // elapsedTime += timeDiff;
-
-    // rainbowColor.offsetHSL(timeDiff * 100, 0, 0);
-    rainbowColor.setHSL((timeDiff * 100) % 1, 1, 0.5);
-    // console.log(rainbowColor);
-    rainbowMaterial.needsUpdate = true;
-    // endKernalRef.current.material.needsUpdate = true;
-    // console.log(timeDiff, rainbowMaterial.color);
-    // console.log(rainbowColor);
-
     if (!(playing || animating) && tabActive) {
       // TODO: this should be fixed to be more robust
       if (timeDiff < 1) {
-        // targetRotation += timeDiff / 4;
+        rainbowMaterial.color.offsetHSL(e.clock.elapsedTime, 0, 0);
         setTargetRotation(targetRotation + (timeDiff / 4));
       }
     }

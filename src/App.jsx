@@ -1,3 +1,9 @@
+// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
+// 🟨🟫🟨🟨🟨🟫🟨🟨🟨🟫🟨🟨🟨🟫🟨🟫🟫🟫🟫🟫🟨
+// 🟨🟫🟫🟫🟫🟫🟨🟨🟫🟨🟫🟨🟨🟫🟨🟨🟨🟨🟫🟨🟨
+// 🟨🟫🟨🟫🟨🟫🟨🟫🟫🟫🟫🟫🟨🟫🟨🟨🟫🟨🟨🟨🟨
+// 🟨🟫🟨🟨🟨🟫🟨🟫🟨🟨🟨🟫🟨🟫🟨🟫🟫🟫🟫🟫🟨
+// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
 // TODO: remove all !important's in CSS
 // TODO: better color on close / open instructions buttons
 // TODO: use some textures and normal maps
@@ -111,11 +117,11 @@ function App() {
     setTimeout(() => {
       setPage(2);
       setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
-    }, 500);
+    }, 2000);
     setTimeout(() => {
       setPage(3);
       setFocusKernal({});
-    }, 1000);
+    }, 4000);
     setTimeout(() => {
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
       setMove({ x: 0, y: 0 });
@@ -123,10 +129,10 @@ function App() {
       setInstructions(false);
       setPlaying(true);
       analytics.track('start', { difficulty });
-    }, 1500);
+    }, 6000);
     setTimeout(() => {
       setPage(4);
-    }, 3500);
+    }, 8000);
   };
 
   const continueGame = () => {

@@ -1,9 +1,11 @@
 $yellow1: rgb(206, 206, 16);
 $yellow2: rgb(179, 169, 27);
+$yellow3: rgb(255, 218, 0);
 $blue: rgb(14, 176, 179);
 $dark-orange: #f56425;
 $gray: rgb(180, 180, 180);
 $black: rgb(10, 10, 10);
+$teal: rgb(8 136 25 / 25%);
 
 
 @font-face {
@@ -38,7 +40,6 @@ html, body {
   h1, h2, h3, p { 
     margin: 0;
     padding: 1rem;
-    // line-height: 1.5rem;
   }
 
   h1 {
@@ -68,14 +69,14 @@ html, body {
   button {
     cursor: pointer;
     padding: .5rem 1rem;
-    background: #ffda00;
+    background: $yellow3;
     border-radius: .5rem;
     font-family: 'Corn';
     font-size: 1rem;
     border: 2px solid orange;
     color: $dark-orange;
     // text-shadow: 1px 0 $dark-orange;
-    box-shadow: 0 0 5px 5px rgb(8 136 25 / 25%);
+    box-shadow: 0 0 5px 5px $teal;
     margin: 1rem;
     white-space: nowrap;
 
