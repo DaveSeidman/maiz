@@ -5,8 +5,8 @@
 // TODO: implenent: https://github.com/pmndrs/drei#performancemonitor
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, CameraShake, OrbitControls } from '@react-three/drei';
-import { PCFSoftShadowMap, BasicShadowMap, Color } from 'three';
+import { Environment, CameraShake } from '@react-three/drei';
+import { PCFSoftShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
 // import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
@@ -281,20 +281,17 @@ function App() {
         popCount={popCount}
         kernals={kernals}
       />
-      {!(instructions || results.won) && (
-        <button
-          className="instructionsToggle"
-          type="button"
-          onClick={() => {
-            // TODO: maybe just set playing to false here
-            setInstructions(true);
-            setPlaying(false);
-            // clearInterval(interval);
-          }}
-        >
-          ?
-        </button>
-      )}
+      <button
+        className={`instructionsToggle ${(instructions || results.won !== undefined) ? 'hidden' : ''}`}
+        type="button"
+        onClick={() => {
+          // TODO: maybe just set playing to false here
+          setInstructions(true);
+          setPlaying(false);
+        }}
+      >
+        ?
+      </button>
       <Footer />
       <Instructions
         instructions={instructions}

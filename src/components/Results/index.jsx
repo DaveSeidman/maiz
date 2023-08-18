@@ -1,14 +1,18 @@
 // TODO: rerendering with timer
 import React from 'react';
+import { RWebShare } from 'react-web-share';
 import cornImage from '../../assets/images/maiz-logo.png';
 
 import './index.scss';
-import { messages } from '../../assets/content.json';
+import { messages, metadata } from '../../assets/content.json';
 import { gameDuration } from '../../config';
+
 import PropTypes from 'prop-types';
 
 function Results(props) {
   const { results, playAgain, timer, popCount, kernals } = props;
+  const { title, text, url } = metadata;
+
   const index = Math.floor(Math.random() * messages.won.length);
   const message = messages[results.won ? 'won' : 'lost'][index];
 
@@ -25,7 +29,15 @@ function Results(props) {
         <h2>{message}</h2>
         <p>{wonLostMessage}</p>
         <button type="button" onClick={playAgain}>Play Again!</button>
-        <button type="button" onClick={playAgain}>Share!</button>
+        <RWebShare
+          data={{ text, url, title }}
+          sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
+          onClick={() => console.log('shared successfully!')}
+        >
+          <button type="button">
+            Share
+          </button>
+        </RWebShare>
 
         <img className="graphic" src={cornImage} alt="corn" />
       </div>

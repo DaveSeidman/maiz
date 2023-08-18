@@ -7,15 +7,13 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Object3D, Vector3, Matrix4, TextureLoader, MeshPhysicalMaterial, Color, MeshNormalMaterial } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial, Color, MeshNormalMaterial, SphereGeometry } from 'three';
 import { degToRad, lerp } from 'three/src/math/MathUtils';
 import { colors, randomColor } from '../../config';
 import kernalModel from '../../assets/models/models.glb';
-import grayImage from '../../assets/images/gray.jpg';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let spin = 0;
-// let targetRotation = 0;
 let targetPosition = 0;
 let lerpAmount = 1;
 
@@ -62,17 +60,9 @@ function Corn(props) {
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.1, color: 0xf4e8a3 });
   const playerMaterial = new MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.2, ior: 1.0, color: 0xdd44dd, reflectivity: 0.8, transmission: 0.9, thickness: 0.5, opacity: 0, envMapIntensity: 2 });
   const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
+  const rainbowColor = new Color('hsl(200, 80%, 80%)');
 
-  const highlightColor1 = colors.yellows[0];
-  // const highlightColor2 = new Color('rgb(255, 255, 255)');
-  const highlightColor2 = new Color('hsl(100, 100%, 70%)');
-  const highlightColor = highlightColor1.clone();
-
-  const loader = new TextureLoader();
-  loader.load(grayImage, (_texture) => {
-    setTexture(_texture);
-    kernalMatRef.needsUpdate = true;
-  });
+  const rainbowMaterial = new MeshPhysicalMaterial({ color: rainbowColor, roughness: 0.05, metalness: 0.0, ior: 1.0, reflectivity: 0.8, transmission: 0.9, thickness: 0.25, opacity: 0, envMapIntensity: 2 });
 
   const kernalIndex = (kernal) => (kernal.y * (width + 1)) + kernal.x;
 
@@ -123,8 +113,8 @@ function Corn(props) {
       if (kernal.end) {
         setEndKernalIndex(index);
         console.log(kernalsOnGrid.position);
-        // endKernalRef.position.copy(kernalsOnGrid.position);
-        // endKernalRef.rotation.copy(kernalsOnGrid.rotation);
+        endKernalRef.current.position.copy(kernalsOnGrid.position);
+        endKernalRef.current.rotation.copy(kernalsOnGrid.rotation);
       }
     });
     kernalsRef.current.instanceMatrix.needsUpdate = true;
@@ -264,6 +254,14 @@ function Corn(props) {
     // if (!tabActive) return;
     // elapsedTime += timeDiff;
 
+    // rainbowColor.offsetHSL(timeDiff * 100, 0, 0);
+    rainbowColor.setHSL((timeDiff * 100) % 1, 1, 0.5);
+    // console.log(rainbowColor);
+    rainbowMaterial.needsUpdate = true;
+    // endKernalRef.current.material.needsUpdate = true;
+    // console.log(timeDiff, rainbowMaterial.color);
+    // console.log(rainbowColor);
+
     if (!(playing || animating) && tabActive) {
       // TODO: this should be fixed to be more robust
       if (timeDiff < 1) {
@@ -358,6 +356,9 @@ function Corn(props) {
       const clickX = 1.666 * ((e.clientX / window.innerWidth) - 0.5);
       const clickY = -1.25 * ((e.clientY / window.innerHeight) - 0.5);
 
+      // TODO: might be worth getting the distance between the click and the currentKernal
+      // if it's too large that might mean the player is just looking around at the right side of the
+      // cob and not intending to move
       const kernalScreenPosition = new Vector3();
       kernalScreenPosition.setFromMatrixPosition(playerRef.current.matrixWorld);
       kernalScreenPosition.project(camera);
@@ -428,7 +429,7 @@ function Corn(props) {
         <mesh
           ref={endKernalRef}
           geometry={kernalMesh.geometry.clone()}
-          material={new MeshNormalMaterial()}
+          material={rainbowMaterial}
         />
         <group ref={playerRefTarget}>
           <mesh
