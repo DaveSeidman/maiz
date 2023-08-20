@@ -4,7 +4,7 @@
   &-content {
 
     .difficulty {
-      h2 {
+      h3 {
         text-align: center;
       }
       &-options {
@@ -27,13 +27,3 @@
     border-radius: 50%;
   }
 }
-
-// @media screen and (max-width: 600px) {
-//   .instructions {
-//     &-content {
-//       &-title {
-//         margin-top: 3rem !important;
-//       }
-//     }
-//   }
-// }

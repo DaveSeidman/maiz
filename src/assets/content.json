@@ -43,6 +43,12 @@
       ],
       "hashtags": [
         "webgl", "reactthreefiber", "r3f"
+      ],
+      "win": [
+        "I conquered the cob in # kernals!"
+      ],
+      "loss": [
+        "I popped # out of # kernals!"
       ]
     }
   }

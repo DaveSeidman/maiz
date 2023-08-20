@@ -1,14 +1,16 @@
-// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
-// 🟨🟫🟨🟨🟨🟫🟨🟨🟨🟫🟨🟨🟨🟫🟨🟫🟫🟫🟫🟫🟨
-// 🟨🟫🟫🟫🟫🟫🟨🟨🟫🟨🟫🟨🟨🟫🟨🟨🟨🟨🟫🟨🟨
-// 🟨🟫🟨🟫🟨🟫🟨🟫🟫🟫🟫🟫🟨🟫🟨🟨🟫🟨🟨🟨🟨
-// 🟨🟫🟨🟨🟨🟫🟨🟫🟨🟨🟨🟫🟨🟫🟨🟫🟫🟫🟫🟫🟨
-// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
+// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
+// 🟨🟫🟫🟫🟨🟫🟫🟫🟨🟤🟨🟫🟫🟫🟨
+// 🟨🟫🟤🟫🟨🟫🟡🟫🟨🟫🟨🟨🟤🟨🟨
+// 🟨🟫🟨🟫🟨🟫🟨🟫🟨🟫🟨🟫🟫🟫🟨
+// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
+
 // TODO: remove all !important's in CSS
-// TODO: better color on close / open instructions buttons
-// TODO: use some textures and normal maps
-// TODO: should sharing from results include data?
+// TODO: check performance / movement on android
+// TODO: better color on buttons
+// TODO: try some textures and normal maps
+// TODO: include results in share
 // TODO: implenent: https://github.com/pmndrs/drei#performancemonitor
+// TODO: add audio
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, CameraShake } from '@react-three/drei';
@@ -31,6 +33,7 @@ import { camshakeConfig, levels, randomColor, gameDuration } from './config';
 import './index.scss';
 
 const mobile = Mobile();
+const local = location.hostname === 'localhost';
 
 const analytics = Analytics({
   app: 'website data',
@@ -67,17 +70,16 @@ function App() {
   const [popCount, setPopCount] = useState(0);
 
   const handleKeydown = ({ key }) => {
+    const keys = {
+      ArrowLeft: { x: -1, y: 0 },
+      ArrowRight: { x: 1, y: 0 },
+      ArrowUp: { x: 0, y: -1 },
+      ArrowDown: { x: 0, y: 1 },
+    };
+
     if (!playing) return;
-    let x = 0;
-    let y = 0;
-    switch (key) {
-      case 'ArrowLeft': x = -1; break;
-      case 'ArrowRight': x = 1; break;
-      case 'ArrowUp': y = -1; break;
-      case 'ArrowDown': y = 1; break;
-      default: break;
-    }
-    setMove({ x, y });
+    const nextMove = keys[key];
+    if (nextMove) setMove(nextMove);
     if (key === 'Escape') setInstructions(!instructions);
   };
 
@@ -117,11 +119,11 @@ function App() {
     setTimeout(() => {
       setPage(2);
       setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
-    }, 2000);
+    }, local ? 20 : 2000);
     setTimeout(() => {
       setPage(3);
       setFocusKernal({});
-    }, 4000);
+    }, local ? 40 : 4000);
     setTimeout(() => {
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
       setMove({ x: 0, y: 0 });
@@ -129,10 +131,10 @@ function App() {
       setInstructions(false);
       setPlaying(true);
       analytics.track('start', { difficulty });
-    }, 6000);
+    }, local ? 60 : 6000);
     setTimeout(() => {
       setPage(4);
-    }, 8000);
+    }, local ? 80 : 8000);
   };
 
   const continueGame = () => {

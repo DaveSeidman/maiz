@@ -33,7 +33,7 @@ function Instructions(props) {
         <p>{messages.instructions[mobile ? 'mobile' : 'desktop'][page]}</p>
         {page === 0 && (
           <div className="difficulty">
-            <h2>Difficulty:</h2>
+            <h3>Difficulty:</h3>
             <div className="difficulty-options">
               <button type="button" className={difficulty === 'easy' ? 'selected' : ''} onClick={() => { setDifficulty('easy'); }}>
                 Easy
@@ -50,6 +50,7 @@ function Instructions(props) {
         {(page === 0 || page === 4) && (
           <button
             type="button"
+            className="pulse"
             onClick={() => {
               if (page === 0) startGame();
               else continueGame();

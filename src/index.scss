@@ -1,10 +1,14 @@
+// TODO: clean up css in general
+
 $yellow1: rgb(206, 206, 16);
 $yellow2: rgb(179, 169, 27);
 $yellow3: rgb(255, 218, 0);
 $blue: rgb(14, 176, 179);
 $dark-orange: #f56425;
+$light-orange: rgb(255 84 53);
 $gray: rgb(180, 180, 180);
 $black: rgb(10, 10, 10);
+$white: rgb(228, 255, 235);
 $teal: rgb(8 136 25 / 25%);
 
 
@@ -17,11 +21,18 @@ $teal: rgb(8 136 25 / 25%);
   src: url('./assets/fonts/CornDemo-Regular.ttf');
 }
 
-@keyframes border-pulse {
-  0%   { border: rgba(0, 255, 255, 1) !important; }
-  50%  { border: rgba(0, 255, 255, 0) !important; }
-  100% { border: rgba(0, 255, 255, 1) !important; }
+@keyframes pulse {
+  0%   { 
+    border: 2px solid $light-orange;
+  }
+  50%  { 
+    border: 2px solid lighten($light-orange, 30%);
+  }
+  100% { 
+    border: 2px solid $light-orange;
+  }
 }
+
 
 html, body {
   width: 100%;
@@ -50,6 +61,10 @@ html, body {
   .hidden {
     visibility: hidden;
     opacity: 0;
+  }
+
+  .pulse {
+    animation: pulse 1s infinite;
   }
 
   .instructionsToggle {
@@ -85,8 +100,7 @@ html, body {
     }
 
     &.selected {
-      // animation: border-pulse 2s infinite;
-      border: 2px solid red;
+      border: 2px solid $light-orange;
     }
   }
 

@@ -1,6 +1,5 @@
 // TODO: increase and decrease rotations with dragging as well
-// TODO: changing heights doesn't have effect here
-// TODO: Dracoloader needs to be, reproduce by testing site offline
+// TODO: Dracoloader needs to be imported, reproduce by testing site offline
 // TODO: figure out why endkernal is being scaled to 0 even if we remove the .popped in App.jsx
 import React, { useRef, useEffect, useState } from 'react';
 import { useGLTF } from '@react-three/drei';
@@ -8,8 +7,8 @@ import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
 import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial, Color, MeshNormalMaterial, SphereGeometry } from 'three';
-import { degToRad, lerp } from 'three/src/math/MathUtils';
-import { colors, randomColor } from '../../config';
+import { degToRad, lerp, radToDeg } from 'three/src/math/MathUtils';
+import { randomColor } from '../../config';
 import kernalModel from '../../assets/models/models.glb';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
@@ -19,6 +18,8 @@ let lerpAmount = 1;
 
 let prevKernal = {}; // TODO: may be a better way to handle this with state.previous?
 let prevFocusKernal = {};
+let prevCursorRotation;
+let prevRotation = 0;
 
 const kernalWidth = 1;
 const pointer = { x: null, y: null, down: false, startX: 0, startY: 0 };
@@ -34,22 +35,18 @@ function Corn(props) {
   const [targetRotation, setTargetRotation] = useState(0);
   const [useSpin, setUseSpin] = useState(false);
   const [rotations, setRotations] = useState(0);
-  const [texture, setTexture] = useState();
-  const [endKernalIndex, setEndKernalIndex] = useState(-1);
+  const [spins, setSpins] = useState(0);
 
   const groupRef = useRef();
   const cobRef = useRef();
   const kernalsRef = useRef();
   const basesRef = useRef();
-  const kernalMatRef = useRef();
 
   const endKernalRef = useRef();
-  const playerRef = useRef();
-  const playerRefTarget = useRef();
-  const playerTargetChildRef = useRef();
-  const playerChildRef = useRef();
-  const elapsedTime = 0;
-  // let endKernalIndex;
+  const cursorContainerSmoothed = useRef();
+  const cursorContainer = useRef();
+  const cursor = useRef();
+  const cursorSmoothed = useRef();
 
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
@@ -111,7 +108,6 @@ function Corn(props) {
       basesRef.current.setMatrixAt(index, basesOnCylindar.matrix);
 
       if (kernal.end) {
-        setEndKernalIndex(index);
         endKernalRef.current.position.copy(kernalsOnGrid.position);
         endKernalRef.current.rotation.copy(kernalsOnGrid.rotation);
       }
@@ -150,7 +146,7 @@ function Corn(props) {
       life: 0,
       velocity,
       gravity: 0,
-      rotation: new Vector3(Math.random() * Math.PI / 2, Math.random() * Math.PI / 2, Math.random() * Math.PI / 2),
+      rotation: new Vector3(Math.random() * (Math.PI / 2), Math.random() * (Math.PI / 2), Math.random() * (Math.PI / 2)),
     });
   };
 
@@ -162,13 +158,11 @@ function Corn(props) {
   useEffect(() => {
     // adjust cob position / rotation
     targetPosition = -currentKernal.x;
-    // targetRotation = (currentKernal.y / height) * Math.PI * -2;
     setTargetRotation((currentKernal.y / height) * Math.PI * -2);
     const object = new Object3D();
 
     if (display === 'normal') {
       positionToCylindar(object, currentKernal, 'kernal');
-      // positionToCylindar2(objectTemp, currentKernal);
     }
     if (display === 'grid') {
       positionToGrid(object, currentKernal);
@@ -180,34 +174,25 @@ function Corn(props) {
     if (currentKernal.y === 0 && prevKernal.y === height - 1) setRotations(rotations + 1);
 
     // set cursor position
-    playerRefTarget.current.position.copy(object.position);
+    cursorContainer.current.position.copy(object.position);
 
     const kernal = kernals.find((k) => k.x === currentKernal.x && k.y === currentKernal.y);
-    playerRefTarget.current.rotation.copy(object.rotation);
-    playerRef.current.rotation.copy(object.rotation);
+    cursorContainer.current.rotation.copy(object.rotation);
+    cursorContainerSmoothed.current.rotation.copy(object.rotation);
     if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
       // console.log('bump the player so they know they hit a wall');
     }
 
-    const angles = {
-      up: 90,
-      down: 270,
-      left: 180,
-      right: 0,
-    };
+    const angles = { up: 90, down: 270, left: 180, right: 0 };
 
     if (kernal.start) {
       // if (currentKernal.x === prevKernal.x && currentKernal.y === prevKernal.y) {
-      playerTargetChildRef.current.rotation.y = degToRad(0);
+      cursor.current.rotation.y = degToRad(angles.right);
     } else {
-      // TODO: this occasionally flips if we're at the cylindar's wrapping point
-      // console.log(currentKernal.y, prevKernal.y, height);
-      console.log(prevKernal.direction, currentKernal.direction);
-      playerTargetChildRef.current.rotation.y = degToRad(angles[currentKernal.direction]);
-      if (prevKernal.direction === 'right' && currentKernal.direction === 'down') {
-        // playerTargetChildRef.current.rotation.y -= degToRad(360);
-        // TODO: use a spinCount here similar to rotationCount
-      }
+      cursor.current.rotation.y = degToRad(angles[currentKernal.direction]);
+      if (cursor.current.rotation.y - cursorSmoothed.current.rotation.y < -Math.PI) { cursor.current.rotation.y += (Math.PI * 2); }
+
+      if (cursor.current.rotation.y - cursorSmoothed.current.rotation.y > Math.PI) { cursor.current.rotation.y -= (Math.PI * 2); }
     }
 
     if (currentKernal.justPopped) {
@@ -221,7 +206,6 @@ function Corn(props) {
   useEffect(() => {
     if (focusKernal.x !== undefined && focusKernal.y !== undefined) {
       targetPosition = -focusKernal.x + focusKernal.offset;
-      // targetRotation = (focusKernal.y / height) * Math.PI * -2;
       // TODO: incorporate rotations here so that we don't overspin back to this:
       setTargetRotation((focusKernal.y / height) * Math.PI * -2);
     } else {
@@ -257,12 +241,14 @@ function Corn(props) {
       }
     }
 
-    if (playerRef.current && playerRefTarget.current) {
-      playerRef.current.position.x += (playerRefTarget.current.position.x - playerRef.current.position.x) / 10;
-      playerRef.current.position.y += (playerRefTarget.current.position.y - playerRef.current.position.y) / 10;
-      playerRef.current.position.z += (playerRefTarget.current.position.z - playerRef.current.position.z) / 10;
-      // console.log(playerTargetChildRef.current.rotation.y);
-      playerChildRef.current.rotation.y += (playerTargetChildRef.current.rotation.y - playerChildRef.current.rotation.y) / 10;
+    // TODO: make a "positionCursor" method
+    if (cursorContainerSmoothed.current && cursorContainer.current) {
+      cursorContainerSmoothed.current.position.x += (cursorContainer.current.position.x - cursorContainerSmoothed.current.position.x) / 10;
+      cursorContainerSmoothed.current.position.y += (cursorContainer.current.position.y - cursorContainerSmoothed.current.position.y) / 10;
+      cursorContainerSmoothed.current.position.z += (cursorContainer.current.position.z - cursorContainerSmoothed.current.position.z) / 10;
+      // const targetAngle = cursor.current.rotation.y > Math.PI ? cursor.current.rotation.y - (Math.PI * 2) : cursor.current.rotation.y;
+      // const targetAngle = cursor.current.rotation.y;
+      cursorSmoothed.current.rotation.y += (cursor.current.rotation.y - cursorSmoothed.current.rotation.y) / 10;
     }
 
     spin *= 0.9;
@@ -284,6 +270,9 @@ function Corn(props) {
       cobRef.current.rotation.x = Math.PI;
       cobRef.current.position.x = -width / 2;
     }
+
+    // console.log(cobRef.current.rotation.x - prevRotation);
+    prevRotation = cobRef.current.rotation.x;
 
     poppedKernals.forEach((kernal, index) => {
       kernal.life += (timeDiff * 100);
@@ -347,7 +336,7 @@ function Corn(props) {
       // if it's too large that might mean the player is just looking around at the right side of the
       // cob and not intending to move
       const kernalScreenPosition = new Vector3();
-      kernalScreenPosition.setFromMatrixPosition(playerRef.current.matrixWorld);
+      kernalScreenPosition.setFromMatrixPosition(cursorContainerSmoothed.current.matrixWorld);
       kernalScreenPosition.project(camera);
       const moveX = clickX - kernalScreenPosition.x;
       const moveY = clickY - kernalScreenPosition.y;
@@ -418,17 +407,17 @@ function Corn(props) {
           geometry={kernalMesh.geometry.clone()}
           material={rainbowMaterial}
         />
-        <group ref={playerRefTarget}>
+        <group ref={cursorContainer}>
           <mesh
-            ref={playerTargetChildRef}
+            ref={cursor}
             geometry={playerMesh.clone().geometry}
             position={[0, 2, 0]}
             visible={false}
           />
         </group>
-        <group ref={playerRef}>
+        <group ref={cursorContainerSmoothed}>
           <mesh
-            ref={playerChildRef}
+            ref={cursorSmoothed}
             geometry={playerMesh.clone().geometry}
             material={playerMaterial}
             position={[0, 2, 0]}
