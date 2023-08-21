@@ -29,8 +29,16 @@ import Score from './components/Score';
 import envMap from './assets/images/spaichingen_hill_2k.hdr';
 import Maze from './components/Maze';
 import { camshakeConfig, levels, randomColor, gameDuration } from './config';
-
+import pop1 from './assets/audio/pop1.mp3';
+import pop2 from './assets/audio/pop2.mp3';
+import pop3 from './assets/audio/pop3.mp3';
+import pop4 from './assets/audio/pop4.mp3';
+import pop5 from './assets/audio/pop5.mp3';
+import pop6 from './assets/audio/pop6.mp3';
+import pop7 from './assets/audio/pop7.mp3';
 import './index.scss';
+
+const soundEffects = [pop1, pop2, pop3, pop4, pop5, pop6, pop7];
 
 const mobile = Mobile();
 const local = location.hostname === 'localhost';
@@ -46,6 +54,7 @@ const analytics = Analytics({
 
 function App() {
   const canvasRef = useRef();
+  const soundEffectRef = useRef();
 
   const [width, setWidth] = useState(levels.medium.width);
   const [height, setHeight] = useState(levels.medium.height);
@@ -188,8 +197,9 @@ function App() {
         justPopped = true;
         kernal.popped = true;
         setPopCount(popCount + 1);
+        soundEffectRef.current.src = soundEffects[Math.floor(Math.random() * soundEffects.length)];
+        soundEffectRef.current.play();
       }
-      // setKernals(kernals);
     }
     setCurrentKernal({ x, y, justPopped, direction });
   }, [move]);
@@ -234,6 +244,7 @@ function App() {
 
   return (
     <div className="app">
+      <audio ref={soundEffectRef} />
       <Canvas
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
