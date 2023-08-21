@@ -45,10 +45,12 @@
         "webgl", "reactthreefiber", "r3f"
       ],
       "win": [
-        "I conquered the cob in # kernals!"
+        "I conquered the cob in popCount kernals!",
+        "It might sound corny, but I beat my cob in only popCount kernals!"
       ],
       "loss": [
-        "I popped # out of # kernals!"
+        "I popped <popCount> out of kernalTotal kernals!",
+        "Aw Shucks I only popped popCount kernsls!"
       ]
     }
   }

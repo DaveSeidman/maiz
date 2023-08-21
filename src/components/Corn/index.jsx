@@ -151,6 +151,10 @@ function Corn(props) {
   };
 
   useEffect(() => {
+    console.log({ rotations });
+  }, [rotations]);
+
+  useEffect(() => {
     positionKernals();
   }, [kernals, curvature, display]);
 
@@ -271,9 +275,6 @@ function Corn(props) {
       cobRef.current.position.x = -width / 2;
     }
 
-    // console.log(cobRef.current.rotation.x - prevRotation);
-    prevRotation = cobRef.current.rotation.x;
-
     poppedKernals.forEach((kernal, index) => {
       kernal.life += (timeDiff * 100);
       kernal.velocity.multiplyScalar(0.975);
@@ -286,6 +287,17 @@ function Corn(props) {
         poppedKernals.splice(index, 1);
       }
     });
+
+    if (prevRotation % (Math.PI * 2) > 0 && cobRef.current.rotation.x % (Math.PI * 2) < 0) {
+      console.log('spun forward');
+      // setRotations(rotations - 1);
+    }
+    if (prevRotation % (Math.PI * 2) < 0 && cobRef.current.rotation.x % (Math.PI * 2) > 0) {
+      console.log('spun backward');
+      // setRotations(rotations + 1);
+    }
+
+    prevRotation = cobRef.current.rotation.x;
   }, []);
 
   const moveCob = ({ deltaX, deltaY }) => {

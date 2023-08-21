@@ -15,6 +15,7 @@ function Results(props) {
 
   const index = Math.floor(Math.random() * messages.won.length);
   const message = messages[results.won ? 'won' : 'lost'][index];
+  let shareMessage;
 
   const percentPopped = Math.round((popCount / kernals.length) * 100);
   const time = gameDuration - timer;
@@ -23,6 +24,13 @@ function Results(props) {
     ? `You escaped the maze in ${time} seconds and only popped ${percentPopped}% of the kernals!`
     : `You failed to escape the maze but at least you popped ${percentPopped}% of the kernals!`;
 
+  if (results.won !== undefined) {
+    const shareMessages = messages.share[results.won ? 'win' : 'loss'];
+    shareMessage = shareMessages[Math.floor(Math.random() * shareMessages.length)];
+    shareMessage = shareMessage.replace('popCount', popCount);
+    shareMessage = shareMessage.replace('<kernalTotal>', kernals.total);
+    console.log(shareMessage);
+  }
   return (
     <div className={`results modal ${results.won !== undefined ? '' : 'hidden'}`}>
       <div className="results-content modal-content">
@@ -30,7 +38,7 @@ function Results(props) {
         <p>{wonLostMessage}</p>
         <button type="button" onClick={playAgain}>Play Again!</button>
         <RWebShare
-          data={{ text, url, title }}
+          data={{ text: shareMessage, url, title }}
           sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
           onClick={() => console.log('shared successfully!')}
         >
