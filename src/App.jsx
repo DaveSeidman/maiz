@@ -10,7 +10,17 @@
 // TODO: try some textures and normal maps
 // TODO: include results in share
 // TODO: implenent: https://github.com/pmndrs/drei#performancemonitor
-// TODO: add audio
+// TODO: add more popped kernals in blender
+// TODO: directional light shadows not working
+// TODO: use texture for popped kernals
+// TODO: add husk
+// TODO: on mobile if you click fast enough you can go "through" kernals without popping them and then they are stuck
+// TODO: EffectComposer crases iphone
+// TODO: move / rotation speed on android 10x too slow
+// TODO: score to 100% width on mobile
+// TODO: Intstructions offscreen on mobile
+// TODO: add husk
+// TODO: add sound effect for rotating, sliding
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, CameraShake } from '@react-three/drei';
@@ -253,7 +263,7 @@ function App() {
       >
         {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
         {/* <OrbitControls /> */}
-        {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
+        <CameraShake {...camshakeConfig} />
         <EffectComposer>
           <Corn
             tabActive={tabActive}
@@ -272,19 +282,17 @@ function App() {
           />
           <directionalLight
             intensity={3}
-            position={[-10, 10, 0]}
+            position={[-10, 4, 0]}
             target-position={[0, 0, 0]}
             castShadow
-            shadow-mapSize={512}
-            shadow-bias={0.00001}
+            shadow-mapSize={256}
+            shadow-bias={0.001}
           />
           <Environment
             files={envMap}
             background
             blur={0.4}
           />
-
-          {/* <Bloom luminanceThreshold={0.999} luminanceSmoothing={0.1} height={200} /> */}
 
           {/* <ToneMapping
             blendFunction={BlendFunction.NORMAL} // blend mode
@@ -295,8 +303,10 @@ function App() {
             averageLuminance={2.0} // average luminance
             adaptationRate={1.0} // luminance adaptation rate
           /> */}
-          <ChromaticAberration offset={[0.004, 0.004]} />
-          <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={1024} />
+
+          <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
+          <ChromaticAberration offset={[mobile ? 0.015 : 0.004, 0.0]} />
+          <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.02} intensity={0.2} />
 
         </EffectComposer>
 

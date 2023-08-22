@@ -51,7 +51,8 @@ function Corn(props) {
 
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
-  // const cursorMesh = gltf.scene.children.find((child) => child.name === 'Cursor');
+  const huskMesh = gltf.scene.children.find((child) => child.name === 'Husk');
+  // console.log(huskMesh);
   const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
   const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
   const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.4 });
@@ -400,10 +401,19 @@ function Corn(props) {
       ref={groupRef}
       position={display === 'normal' ? [0, 0, 0] : [0, 0, -width / 2]}
     >
+
       <group
         ref={cobRef}
         position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
       >
+        {/* <mesh
+          position={[width / 2, 0, 0]}
+          scale={[7, 15, 7]}
+          rotation={[0, 0, degToRad(90)]}
+          geometry={huskMesh.geometry.clone()}
+          material={new MeshStandardMaterial({ map: huskMesh.material.map, color: 0x444444 })}
+        /> */}
+
         <instancedMesh
           key="bases"
           ref={basesRef}
