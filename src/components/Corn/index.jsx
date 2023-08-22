@@ -6,7 +6,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import PropTypes from 'prop-types';
 
-import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial, Color, MeshNormalMaterial, SphereGeometry } from 'three';
+import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial, Color, MeshBasicMaterial, MeshNormalMaterial, SphereGeometry } from 'three';
 import { degToRad, lerp, radToDeg } from 'three/src/math/MathUtils';
 import { randomColor } from '../../config';
 import kernalModel from '../../assets/models/models.glb';
@@ -47,6 +47,7 @@ function Corn(props) {
   const cursorContainer = useRef();
   const cursor = useRef();
   const cursorSmoothed = useRef();
+  const highlightPointRef = useRef();
 
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
@@ -57,9 +58,11 @@ function Corn(props) {
   const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.1, color: 0xf4e8a3 });
   const playerMaterial = new MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.2, ior: 1.0, color: 0xdd44dd, reflectivity: 0.8, transmission: 0.9, thickness: 0.5, opacity: 0, envMapIntensity: 2 });
   const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
-  const rainbowColor = new Color('hsl(200, 80%, 80%)');
+  const normalColor = new Color('hsl(50, 90%, 50%)');
+  const highlightColor = new Color('hsl(0, 90%, 60%)');
 
-  const rainbowMaterial = new MeshPhysicalMaterial({ color: rainbowColor, roughness: 0.05, metalness: 0.0, ior: 1.0, reflectivity: 0.8, transmission: 0.9, thickness: 0.25, opacity: 0, envMapIntensity: 2 });
+  const highlightMaterial = new MeshStandardMaterial({ color: normalColor, roughness: 0.2, metalness: 0.4 });
+  // const highlightMaterial = new MeshBasicMaterial({ color: normalColor });
 
   const kernalIndex = (kernal) => (kernal.y * (width + 1)) + kernal.x;
 
@@ -240,10 +243,15 @@ function Corn(props) {
     if (!(playing || animating) && tabActive) {
       // TODO: this should be fixed to be more robust
       if (timeDiff < 1) {
-        rainbowMaterial.color.offsetHSL(e.clock.elapsedTime, 0, 0);
+        // highlightMaterial.color.offsetHSL(e.clock.elapsedTime, 0, 0);
+        // highlightMaterial.needsUpdate = true;
         setTargetRotation(targetRotation + (timeDiff / 4));
       }
     }
+
+    const oscillate = (Math.sin(e.clock.elapsedTime * 3) + 1) / 2;
+    highlightMaterial.color.lerpColors(normalColor, highlightColor, oscillate);
+    highlightPointRef.current.intensity = oscillate * 100;
 
     // TODO: make a "positionCursor" method
     if (cursorContainerSmoothed.current && cursorContainer.current) {
@@ -366,9 +374,9 @@ function Corn(props) {
     if (canvasRef.current) {
       canvasRef.current.addEventListener('mousewheel', moveCob, { passive: true });
       canvasRef.current.addEventListener('touchstart', dragStart, { passive: true });
+      canvasRef.current.addEventListener('touchmove', drag, { passive: true });
       canvasRef.current.addEventListener('pointerdown', dragStart, { passive: true });
       canvasRef.current.addEventListener('pointermove', drag, { passive: true });
-      canvasRef.current.addEventListener('touchmove', drag, { passive: true });
       canvasRef.current.addEventListener('pointerup', dragEnd, { passive: true });
       canvasRef.current.addEventListener('pointerleave', dragEnd, { passive: true });
       canvasRef.current.addEventListener('click', clickToMove, { passive: true });
@@ -378,8 +386,8 @@ function Corn(props) {
         canvasRef.current.removeEventListener('mousewheel', moveCob);
         canvasRef.current.removeEventListener('touchstart', dragStart);
         canvasRef.current.removeEventListener('touchmove', drag);
-        canvasRef.current.removeEventListener('pointermove', drag);
         canvasRef.current.removeEventListener('pointerdown', dragStart);
+        canvasRef.current.removeEventListener('pointermove', drag);
         canvasRef.current.removeEventListener('pointerup', dragEnd);
         canvasRef.current.removeEventListener('pointerleave', dragEnd);
         canvasRef.current.removeEventListener('click', clickToMove);
@@ -417,8 +425,19 @@ function Corn(props) {
         <mesh
           ref={endKernalRef}
           geometry={kernalMesh.geometry.clone()}
-          material={rainbowMaterial}
-        />
+          material={highlightMaterial}
+        >
+          <pointLight
+            ref={highlightPointRef}
+            color={new Color('rgb(255, 0, 0)')}
+            intensity={100}
+            castShadow
+            position={[0, 4, 0]}
+            distace={1}
+          />
+
+        </mesh>
+
         <group ref={cursorContainer}>
           <mesh
             ref={cursor}

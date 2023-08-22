@@ -17,8 +17,8 @@ import { Environment, CameraShake } from '@react-three/drei';
 import { PCFSoftShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
-// import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
-// import { BlendFunction } from 'postprocessing';
+import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
 import { Joystick } from 'react-joystick-component';
 import Mobile from 'is-mobile';
 import Footer from './components/Footer';
@@ -251,48 +251,54 @@ function App() {
         camera={{ fov: 60, far: 30 }}
         dpr={0.5}
       >
-        <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} />
+        {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
         {/* <OrbitControls /> */}
         {/* {display === 'normal' && (<CameraShake {...camshakeConfig} />)} */}
-        <Corn
-          tabActive={tabActive}
-          playing={playing}
-          animating={animating}
-          explode={explode}
-          canvasRef={canvasRef}
-          kernals={kernals}
-          currentKernal={currentKernal}
-          focusKernal={focusKernal}
-          setMove={setMove}
-          width={width}
-          height={height}
-          curvature={curvature}
-          display={display}
-        />
-        <directionalLight
-          intensity={3}
-          position={[-10, 10, 0]}
-          target-position={[0, 0, 0]}
-          castShadow
-          shadow-mapSize={512}
-          shadow-bias={0.00001}
-        />
-        <Environment
-          files={envMap}
-          background
-          blur={0.4}
-        />
-        {/* <EffectComposer>
-          <ToneMapping
-            blendFunction={BlendFunction.NORMAL} // blend mode
-            adaptive={true} // toggle adaptive luminance map usage
-            resolution={256} // texture resolution of the luminance map
-            middleGrey={0.6} // middle grey factor
-            maxLuminance={16.0} // maximum luminance
-            averageLuminance={1.0} // average luminance
-            adaptationRate={1.0} // luminance adaptation rate
+        <EffectComposer>
+          <Corn
+            tabActive={tabActive}
+            playing={playing}
+            animating={animating}
+            explode={explode}
+            canvasRef={canvasRef}
+            kernals={kernals}
+            currentKernal={currentKernal}
+            focusKernal={focusKernal}
+            setMove={setMove}
+            width={width}
+            height={height}
+            curvature={curvature}
+            display={display}
           />
-        </EffectComposer> */}
+          <directionalLight
+            intensity={3}
+            position={[-10, 10, 0]}
+            target-position={[0, 0, 0]}
+            castShadow
+            shadow-mapSize={512}
+            shadow-bias={0.00001}
+          />
+          <Environment
+            files={envMap}
+            background
+            blur={0.4}
+          />
+
+          {/* <Bloom luminanceThreshold={0.999} luminanceSmoothing={0.1} height={200} /> */}
+
+          {/* <ToneMapping
+            blendFunction={BlendFunction.NORMAL} // blend mode
+            adaptive // toggle adaptive luminance map usage
+            resolution={256} // texture resolution of the luminance map
+            middleGrey={0.9} // middle grey factor
+            maxLuminance={32.0} // maximum luminance
+            averageLuminance={2.0} // average luminance
+            adaptationRate={1.0} // luminance adaptation rate
+          /> */}
+          <ChromaticAberration offset={[0.004, 0.004]} />
+          <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={1024} />
+
+        </EffectComposer>
 
       </Canvas>
       <Score

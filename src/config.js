@@ -22,12 +22,14 @@ export const levels = {
 export const colors = {
   yellows: [
     new Color('hsl(45, 100%, 60%)'),
-    new Color('hsl(55, 100%, 60%)'),
+    new Color('hsl(50, 100%, 60%)'),
+    new Color('hsl(55, 100%, 70%)'),
   ],
   browns: [
     new Color('hsl(40, 20%, 20%)'),
     new Color('hsl(50, 20%, 20%)'),
     new Color('hsl(25, 20%, 30%)'),
+    new Color('hsl(25, 10%, 40%)'),
   ],
 };
 
