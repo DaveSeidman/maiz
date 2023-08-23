@@ -1,7 +1,7 @@
 // TODO: clean up css in general
 
-$yellow1: rgb(206, 206, 16);
-$yellow2: rgb(179, 169, 27);
+// $yellow1: rgb(206, 206, 16);
+// $yellow2: rgb(179, 169, 27);
 $yellow3: rgb(255, 218, 0);
 $blue: rgb(14, 176, 179);
 $dark-orange: #f56425;
@@ -10,6 +10,7 @@ $gray: rgb(180, 180, 180);
 $black: rgb(10, 10, 10);
 $white: rgb(228, 255, 235);
 $teal: rgb(8 136 25 / 25%);
+$purple1: rgb(105, 14, 60);
 
 
 @font-face {
@@ -22,15 +23,9 @@ $teal: rgb(8 136 25 / 25%);
 }
 
 @keyframes pulse {
-  0%   { 
-    border: 2px solid $light-orange;
-  }
-  50%  { 
-    border: 2px solid lighten($light-orange, 30%);
-  }
-  100% { 
-    border: 2px solid $light-orange;
-  }
+  0%   {   border: 2px solid $purple1; }
+  50%  {   border: 2px solid lighten($purple1, 30%); }
+  100% {   border: 2px solid $purple1;  }
 }
 
 
@@ -56,6 +51,10 @@ html, body {
   h1 {
     letter-spacing: .5rem;
     text-shadow: 1px 0px white;
+  }
+
+  p {
+    line-height: 1.75rem;
   }
 
   .hidden {
@@ -88,8 +87,8 @@ html, body {
     border-radius: .5rem;
     font-family: 'Corn';
     font-size: 1rem;
-    border: 2px solid orange;
-    color: $dark-orange;
+    border: 2px solid $yellow3;
+    color: $purple1;
     // text-shadow: 1px 0 $dark-orange;
     box-shadow: 0 0 5px 5px $teal;
     margin: 1rem;
@@ -100,7 +99,7 @@ html, body {
     }
 
     &.selected {
-      border: 2px solid $light-orange;
+      border: 2px solid lighten($purple1, 40);
     }
   }
 
@@ -126,8 +125,8 @@ html, body {
       align-items: center;
 
       color: white;
-      background: rgba(105, 23, 14, 0.75);
-      border: .5rem solid rgba(88, 13, 38, .7);
+      background: transparentize($purple1, 0.25);
+      border: .5rem solid $purple1;
       border-radius: 1rem;
       padding: .5rem 1rem;
       box-shadow: 0 .5rem .25rem rgba(45, 12, 4, 0.5);
@@ -160,23 +159,23 @@ html, body {
 
   div[data-testid="joystick-base"] {
     position: absolute;
-    bottom: 2rem;
+    bottom: 4rem;
     left: 50%;
     transform: translateX(-50%);
-    background: $yellow1 !important;
+    background: darken($yellow3, 20) !important;
 
     button {
       // transition: transform .1s ease-in;
-      background: $yellow2 !important;
+      background: $yellow3 !important;
       box-shadow: none;
     }
   }
 }
 
-.debug {
-  position: absolute;
-  top: 2rem;
-  left: 0;
-  display: flex;
-  flex-direction: column;
+@media screen and (max-width: 600px) {
+  .app {
+    .instructionsToggle {
+      top: 4rem;
+    }
+  }
 }

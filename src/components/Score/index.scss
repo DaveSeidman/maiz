@@ -1,8 +1,10 @@
+@import '../../index';
+
 .score {
   position: absolute;
   top: 0;
   left: 0;
-  background: purple;
+  background: transparentize($purple1, 0.25);
   color: white;
   display: flex;
   flex-direction: row;
@@ -15,5 +17,11 @@
     user-select: none;
     font-size: 1.5rem;
     // font-family: 'Rajdhani';
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .score {
+    width: 100%;
   }
 }

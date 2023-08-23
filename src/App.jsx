@@ -51,7 +51,7 @@ import './index.scss';
 const soundEffects = [pop1, pop2, pop3, pop4, pop5, pop6, pop7];
 
 const mobile = Mobile();
-const local = location.hostname === 'localhost';
+const local = false; // location.hostname === 'localhost';
 
 const analytics = Analytics({
   app: 'website data',
@@ -293,23 +293,10 @@ function App() {
             background
             blur={0.4}
           />
-
-          {/* <ToneMapping
-            blendFunction={BlendFunction.NORMAL} // blend mode
-            adaptive // toggle adaptive luminance map usage
-            resolution={256} // texture resolution of the luminance map
-            middleGrey={0.9} // middle grey factor
-            maxLuminance={32.0} // maximum luminance
-            averageLuminance={2.0} // average luminance
-            adaptationRate={1.0} // luminance adaptation rate
-          /> */}
-
           <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
-          <ChromaticAberration offset={[mobile ? 0.015 : 0.004, 0.0]} />
+          <ChromaticAberration offset={[mobile ? 0.006 : 0.004, 0.0]} />
           <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.02} intensity={0.2} />
-
         </EffectComposer>
-
       </Canvas>
       <Score
         timer={timer}

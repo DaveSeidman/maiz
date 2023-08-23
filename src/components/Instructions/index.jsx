@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import isMobile from 'is-mobile';
 import cornImage from '../../assets/images/maiz-logo.png';
+import arrowKeys from '../../assets/images/arrow-keys.svg';
 import { messages } from '../../assets/content.json';
 import './index.scss';
 
@@ -46,6 +47,13 @@ function Instructions(props) {
               </button>
             </div>
           </div>
+        )}
+        {page === 2 && (
+          <img
+            src={arrowKeys}
+            alt="arrow keys"
+            className="arrows"
+          />
         )}
         {(page === 0 || page === 4) && (
           <button

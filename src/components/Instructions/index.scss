@@ -1,3 +1,5 @@
+@import '../../index';
+
 .instructions {
   transition: visibility .5s, opacity .5s;
 
@@ -14,6 +16,11 @@
         }
       }
     }
+
+    .arrows {
+      width: 15rem;
+      height: 12rem;
+    }
   }
 
   .close {
@@ -25,5 +32,16 @@
     height: 3rem;
     background: rgba(240, 240, 150, .5);
     border-radius: 50%;
+  }
+}
+@media screen and (max-width: 600px) {
+  .instructions {
+    &-content {
+      &.left, &.right {
+        width: 100%;
+        left: 50% !important;
+        top: 25% !important;
+      }
+    }
   }
 }
