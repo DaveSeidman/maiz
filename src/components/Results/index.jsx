@@ -1,5 +1,5 @@
 // TODO: rerendering with timer
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RWebShare } from 'react-web-share';
 import cornImage from '../../assets/images/maiz-logo.png';
 
@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 function Results(props) {
   const { results, playAgain, timer, popCount, kernals } = props;
   const { title, text, url } = metadata;
+  const [wonLostMessage, setWonLostMessage] = useState('');
 
   const index = Math.floor(Math.random() * messages.won.length);
   const message = messages[results.won ? 'won' : 'lost'][index];
@@ -20,17 +21,19 @@ function Results(props) {
   const percentPopped = Math.round((popCount / kernals.length) * 100);
   const time = gameDuration - timer;
 
-  const wonLostMessage = results.won
-    ? `You escaped the maze in ${time} seconds and only popped ${percentPopped}% of the kernals!`
-    : `You failed to escape the maze but at least you popped ${percentPopped}% of the kernals!`;
-
   if (results.won !== undefined) {
     const shareMessages = messages.share[results.won ? 'win' : 'loss'];
     shareMessage = shareMessages[Math.floor(Math.random() * shareMessages.length)];
     shareMessage = shareMessage.replace('popCount', popCount);
     shareMessage = shareMessage.replace('<kernalTotal>', kernals.total);
-    console.log(shareMessage);
   }
+
+  useEffect(() => {
+    setWonLostMessage(results.won
+      ? `You escaped the maze in ${time} seconds and only popped ${percentPopped}% of the kernals!`
+      : `You failed to escape the maze but at least you popped ${percentPopped}% of the kernals!`);
+  }, [results]);
+
   return (
     <div className={`results modal ${results.won !== undefined ? '' : 'hidden'}`}>
       <div className="results-content modal-content">

@@ -8,17 +8,14 @@
 // TODO: check performance / movement on android
 // TODO: better color on buttons
 // TODO: try some textures and normal maps
-// TODO: include results in share
-// TODO: implenent: https://github.com/pmndrs/drei#performancemonitor
 // TODO: add more popped kernals in blender
+// TODO: make sound effects on explode
 // TODO: directional light shadows not working
 // TODO: use texture for popped kernals
 // TODO: add husk
 // TODO: on mobile if you click fast enough you can go "through" kernals without popping them and then they are stuck
-// TODO: EffectComposer crases iphone
+// TODO: EffectComposer crashes on mobile occasionally
 // TODO: move / rotation speed on android 10x too slow
-// TODO: score to 100% width on mobile
-// TODO: Intstructions offscreen on mobile
 // TODO: add husk
 // TODO: add sound effect for rotating, sliding
 // TODO: increase shake with timer
@@ -39,7 +36,7 @@ import Results from './components/Results';
 import Score from './components/Score';
 import envMap from './assets/images/spaichingen_hill_2k.hdr';
 import Maze from './components/Maze';
-import { camshakeConfig, levels, randomColor, gameDuration } from './config';
+import { levels, randomColor, gameDuration } from './config';
 import pop1 from './assets/audio/pop1.mp3';
 import pop2 from './assets/audio/pop2.mp3';
 import pop3 from './assets/audio/pop3.mp3';
@@ -49,10 +46,17 @@ import pop6 from './assets/audio/pop6.mp3';
 import pop7 from './assets/audio/pop7.mp3';
 import './index.scss';
 
-const soundEffects = [pop1, pop2, pop3, pop4, pop5, pop6, pop7];
+const soundEffectFiles = [pop1, pop2, pop3, pop4, pop5, pop6, pop7];
+const soundEffectPlayers = soundEffectFiles.map((file) => {
+  const player = document.createElement('audio');
+  player.src = file;
+  return player;
+});
+
+// console.log(soundEffectPlayers);
 
 const mobile = Mobile();
-const local = false; // location.hostname === 'localhost';
+const local = location.hostname === 'localhost'; // false
 
 const analytics = Analytics({
   app: 'website data',
@@ -81,6 +85,7 @@ function App() {
   const [popCount, setPopCount] = useState(0);
   const [tabActive, setTabActive] = useState(true);
   const [explode, setExplode] = useState(false);
+  const [shakeFrequency, setShakeFrequency] = useState(0.5);
 
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
@@ -125,7 +130,6 @@ function App() {
       });
     });
     setKernals(() => nextKernals);
-    // console.log();
     setCurrentKernal({ x: 0, y: startCell });
   };
 
@@ -133,6 +137,7 @@ function App() {
     setAnimating(true);
     const startKernal = kernals.find((kernal) => kernal.start);
     const endKernal = kernals.find((kernal) => kernal.end);
+    // setShakeFrequency(0.5);
     setTimer(gameDuration);
     setPopCount(0);
     setFocusKernal({ x: startKernal.x, y: startKernal.y, offset: -2 });
@@ -209,12 +214,7 @@ function App() {
         justPopped = true;
         kernal.popped = true;
         setPopCount(popCount + 1);
-        const player = document.createElement('audio');
-        player.src = soundEffects[Math.floor(Math.random() * soundEffects.length)];
-        player.addEventListener('load', (e) => {
-          console.log(e);
-          player.play();
-        });
+        soundEffectPlayers[Math.floor(Math.random() * soundEffectPlayers.length)].play();
         // soundEffectRef.current.src = soundEffects[Math.floor(Math.random() * soundEffects.length)];
         // soundEffectRef.current.play();
       }
@@ -260,20 +260,31 @@ function App() {
     };
   }, [playing, timer]);
 
+  useEffect(() => {
+    const percentComplete = (gameDuration - timer) / gameDuration;
+    // setShakeFrequency(0.5 + percentComplete);
+  }, [timer]);
+
   return (
     <div className="app">
       {/* <audio ref={soundEffectRef} /> */}
       <Canvas
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
-        camera={{ fov: 60, far: 30 }}
+        camera={{ fov: 60, far: 28 }}
         dpr={dpr}
       >
         <PerformanceMonitor onIncline={() => setDpr(1)} onDecline={() => setDpr(0.5)}>
 
           {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
-          {/* <OrbitControls /> */}
-          <CameraShake {...camshakeConfig} />
+          <CameraShake
+            maxYaw={0.005}
+            maxPitch={0.005}
+            maxRoll={0.005}
+            yawFrequency={shakeFrequency}
+            pitchFrequency={shakeFrequency}
+            rollFrequency={shakeFrequency}
+          />
           <EffectComposer>
             <Corn
               tabActive={tabActive}
@@ -291,17 +302,18 @@ function App() {
               display={display}
             />
             <directionalLight
-              intensity={3}
-              position={[-10, 4, 0]}
-              target-position={[0, 0, 0]}
+              intensity={1}
+              position={[10, 4, 3]}
+              target-position={[5, 0, 0]}
               castShadow
               shadow-mapSize={256}
-              shadow-bias={0.001}
+              shadow-bias={0.0001}
             />
+            <ambientLight intensity={-0.5} />
             <Environment
               files={envMap}
               background
-              blur={0.4}
+              blur={0.3}
             />
             <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
             {/* <ChromaticAberration offset={[mobile ? 0.006 : 0.004, 0.0]} /> */}

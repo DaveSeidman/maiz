@@ -52,15 +52,15 @@ function Corn(props) {
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
   const huskMesh = gltf.scene.children.find((child) => child.name === 'Husk');
-  const huskMesh1 = gltf.scene.children.find((child) => child.name === 'Husk1');
+  const huskMesh1 = gltf.scene.children.find((child) => child.name === 'Husk3');
 
   // console.log(huskMesh);
   const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
   const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
-  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.2, metalness: 0.4 });
-  const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.1, color: 0xf4e8a3 });
+  const kernalMaterial = new MeshStandardMaterial({ roughness: 0.15, metalness: 0.4, envMapIntensity: 1.5 });
+  const baseMaterial = new MeshStandardMaterial({ roughness: 0.9, metalness: 0.01, color: 0xdacd85 });
   const playerMaterial = new MeshPhysicalMaterial({ roughness: 0.05, metalness: 0.2, ior: 1.0, color: 0xdd44dd, reflectivity: 0.8, transmission: 0.9, thickness: 0.5, opacity: 0, envMapIntensity: 2 });
-  const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
+  // const poppedMaterial = new MeshStandardMaterial({ roughness: 0.8, metalness: 0.1, color: 0xfefefe });
   const normalColor = new Color('hsl(50, 90%, 50%)');
   const highlightColor = new Color('hsl(0, 90%, 60%)');
 
@@ -133,7 +133,7 @@ function Corn(props) {
     kernalsRef.current.instanceMatrix.needsUpdate = true;
 
     const poppedKernal = poppedMeshes[Math.floor(Math.random() * poppedMeshes.length)].clone();
-    poppedKernal.material = poppedMaterial;
+    // poppedKernal.material = poppedMaterial;
     positionToCylindar(poppedKernal, kernal, 'kernal');
     // poppedKernal.position.y -= 2;
     // add it to the cob
@@ -300,11 +300,11 @@ function Corn(props) {
     });
 
     if (prevRotation % (Math.PI * 2) > 0 && cobRef.current.rotation.x % (Math.PI * 2) < 0) {
-      console.log('spun forward');
+      // console.log('spun forward');
       // setRotations(rotations - 1);
     }
     if (prevRotation % (Math.PI * 2) < 0 && cobRef.current.rotation.x % (Math.PI * 2) > 0) {
-      console.log('spun backward');
+      // console.log('spun backward');
       // setRotations(rotations + 1);
     }
 
@@ -408,13 +408,14 @@ function Corn(props) {
         ref={cobRef}
         position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
       >
-        {/* <mesh
+        <mesh
           scale={[1, 1, 1]}
           position={[width / 2, 0, 0]}
           geometry={huskMesh1.geometry.clone()}
           material={huskMesh1.material.clone()}
-        /> */}
+        />
         <instancedMesh
+          frustumCulled={false}
           key="bases"
           ref={basesRef}
           geometry={baseMesh.geometry}
@@ -424,6 +425,7 @@ function Corn(props) {
           visible={display === 'normal'}
         />
         <instancedMesh
+          frustumCulled={false}
           key="kernals"
           ref={kernalsRef}
           castShadow
@@ -434,6 +436,7 @@ function Corn(props) {
         />
         <mesh
           ref={endKernalRef}
+          frustumCulled={false}
           geometry={kernalMesh.geometry.clone()}
           material={highlightMaterial}
         >
@@ -456,6 +459,7 @@ function Corn(props) {
         </group>
         <group ref={cursorContainerSmoothed}>
           <mesh
+            frustumCulled={false}
             ref={cursorSmoothed}
             geometry={playerMesh.clone().geometry}
             material={playerMaterial}
