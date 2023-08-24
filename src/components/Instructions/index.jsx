@@ -48,11 +48,10 @@ function Instructions(props) {
             </div>
           </div>
         )}
-        {page === 2 && (
+        {(page === 2 && !mobile) && (
           <img
             src={arrowKeys}
             alt="arrow keys"
-            className="arrows"
           />
         )}
         {(page === 0 || page === 4) && (

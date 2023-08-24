@@ -26,9 +26,10 @@ import { PCFSoftShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
 import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
+import { BlendFunction, RenderPass } from 'postprocessing';
 import { Joystick } from 'react-joystick-component';
 import Mobile from 'is-mobile';
+import { RWebShare } from 'react-web-share';
 import Footer from './components/Footer';
 import Corn from './components/Corn';
 import Instructions from './components/Instructions';
@@ -70,6 +71,7 @@ const analytics = Analytics({
 function App() {
   const canvasRef = useRef();
   // const soundEffectRef = useRef();
+  const fakeShareButton = useRef();
 
   const [width, setWidth] = useState(levels.medium.width);
   const [height, setHeight] = useState(levels.medium.height);
@@ -86,6 +88,7 @@ function App() {
   const [tabActive, setTabActive] = useState(true);
   const [explode, setExplode] = useState(false);
   const [shakeFrequency, setShakeFrequency] = useState(0.5);
+  const [share, setShare] = useState(false);
 
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
@@ -93,7 +96,14 @@ function App() {
   const [display, setDisplay] = useState('normal');
   const [move, setMove] = useState({ x: 0, y: 0 });
 
-  const [dpr, setDpr] = useState(0.75);
+  const [performance, setPerformance] = useState('normal');
+
+  const dprs = {
+    low: 0.25,
+    normal: 0.75,
+    high: 1,
+  };
+  // const [dpr, setDpr] = useState(0.75);
 
   const handleKeydown = ({ key }) => {
     const keys = {
@@ -265,6 +275,11 @@ function App() {
     // setShakeFrequency(0.5 + percentComplete);
   }, [timer]);
 
+  useEffect(() => {
+    console.log(share, fakeShareButton.current);
+    if (share && fakeShareButton.current) fakeShareButton.current.click();
+  }, [share]);
+
   return (
     <div className="app">
       {/* <audio ref={soundEffectRef} /> */}
@@ -272,9 +287,18 @@ function App() {
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 60, far: 28 }}
-        dpr={dpr}
+        dpr={dprs[performance]}
       >
-        <PerformanceMonitor onIncline={() => setDpr(1)} onDecline={() => setDpr(0.5)}>
+        <PerformanceMonitor
+          onIncline={() => {
+            // setDpr(1);
+            setPerformance('high');
+          }}
+          onDecline={() => {
+            // setDpr(0.5);
+            setPerformance('low');
+          }}
+        >
 
           {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
           <CameraShake
@@ -285,7 +309,9 @@ function App() {
             pitchFrequency={shakeFrequency}
             rollFrequency={shakeFrequency}
           />
-          <EffectComposer>
+          <EffectComposer
+            enabled={performance === 'normal' || performance === 'high'}
+          >
             <Corn
               tabActive={tabActive}
               playing={playing}
@@ -315,7 +341,7 @@ function App() {
               background
               blur={0.3}
             />
-            <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
+            <DepthOfField enabled={false} focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
             {/* <ChromaticAberration offset={[mobile ? 0.006 : 0.004, 0.0]} /> */}
             {/* <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.02} intensity={0.2} /> */}
           </EffectComposer>
@@ -337,7 +363,7 @@ function App() {
       >
         ?
       </button>
-      <Footer />
+      <Footer setShare={setShare} />
       <Instructions
         instructions={instructions}
         setInstructions={setInstructions}
@@ -357,6 +383,7 @@ function App() {
         popCount={popCount}
         timer={timer}
         kernals={kernals}
+        setShare={setShare}
       />
       {/* {false && (
         <div className="debug">
@@ -410,6 +437,21 @@ function App() {
           stop={() => { }}
         />
       </div>
+      {share && (
+        <RWebShare
+          data={{ text: 'test', url: 'https://maiz.uno', title: 'best corn game' }}
+          sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
+          onClick={() => {
+            setShare(false);
+            console.log('here');
+          }}
+          onClose={() => {
+            setShare(false);
+          }}
+        >
+          <button ref={fakeShareButton} />
+        </RWebShare>
+      )}
     </div>
   );
 }

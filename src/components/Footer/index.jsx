@@ -1,11 +1,11 @@
 import React from 'react';
-import { RWebShare } from 'react-web-share';
 import shareIcon from '../../assets/images/share.svg';
 import { metadata } from '../../assets/content.json';
 import './index.scss';
 
-function Footer() {
+function Footer(props) {
   const { title, text, url } = metadata;
+  const { setShare } = props;
 
   return (
     <div className="footer">
@@ -21,20 +21,17 @@ function Footer() {
         </p>
       </div>
       <div className="right">
-        <RWebShare
-          data={{ text, url, title }}
-          sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
-          onClick={() => console.log('shared successfully!')}
+        <button
+          type="button"
+          onClick={() => { setShare(true); }}
         >
-          <button type="button">
-            Share
-            <img
-              className="share"
-              alt="share icon"
-              src={shareIcon}
-            />
-          </button>
-        </RWebShare>
+          Share
+          <img
+            className="share"
+            alt="share icon"
+            src={shareIcon}
+          />
+        </button>
       </div>
     </div>
   );

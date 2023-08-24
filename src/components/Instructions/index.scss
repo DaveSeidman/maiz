@@ -40,6 +40,11 @@
       &.left, &.right {
         width: 100%;
         left: 50% !important;
+      }
+      &.left {
+        top: 75% !important;
+      }
+      &.right {
         top: 25% !important;
       }
     }

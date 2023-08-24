@@ -10,7 +10,7 @@ import { gameDuration } from '../../config';
 import PropTypes from 'prop-types';
 
 function Results(props) {
-  const { results, playAgain, timer, popCount, kernals } = props;
+  const { results, playAgain, timer, popCount, kernals, setShare } = props;
   const { title, text, url } = metadata;
   const [wonLostMessage, setWonLostMessage] = useState('');
 
@@ -40,16 +40,19 @@ function Results(props) {
         <h2>{message}</h2>
         <p>{wonLostMessage}</p>
         <button type="button" onClick={playAgain}>Play Again!</button>
-        <RWebShare
+        {/* <RWebShare
           data={{ text: shareMessage, url, title }}
           sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
           onClick={() => console.log('shared successfully!')}
         >
-          <button type="button">
-            Share
-          </button>
-        </RWebShare>
 
+        </RWebShare> */}
+        <button
+          type="button"
+          onClick={() => { setShare(true); }}
+        >
+          Share
+        </button>
         <img className="graphic" src={cornImage} alt="corn" />
       </div>
     </div>

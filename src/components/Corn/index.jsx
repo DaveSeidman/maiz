@@ -381,7 +381,7 @@ function Corn(props) {
       canvasRef.current.addEventListener('pointerdown', dragStart, { passive: true });
       canvasRef.current.addEventListener('pointermove', drag, { passive: true });
       canvasRef.current.addEventListener('pointerup', dragEnd, { passive: true });
-      canvasRef.current.addEventListener('pointerleave', dragEnd, { passive: true });
+      // canvasRef.current.addEventListener('pointerleave', dragEnd, { passive: true });
       canvasRef.current.addEventListener('click', clickToMove, { passive: true });
     }
     return () => {
@@ -392,7 +392,7 @@ function Corn(props) {
         canvasRef.current.removeEventListener('pointerdown', dragStart);
         canvasRef.current.removeEventListener('pointermove', drag);
         canvasRef.current.removeEventListener('pointerup', dragEnd);
-        canvasRef.current.removeEventListener('pointerleave', dragEnd);
+        // canvasRef.current.removeEventListener('pointerleave', dragEnd);
         canvasRef.current.removeEventListener('click', clickToMove);
       }
     };
