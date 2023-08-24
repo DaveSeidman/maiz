@@ -21,9 +21,10 @@
 // TODO: Intstructions offscreen on mobile
 // TODO: add husk
 // TODO: add sound effect for rotating, sliding
+// TODO: increase shake with timer
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, CameraShake } from '@react-three/drei';
+import { Environment, CameraShake, PerformanceMonitor } from '@react-three/drei';
 import { PCFSoftShadowMap, Color } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
@@ -64,7 +65,7 @@ const analytics = Analytics({
 
 function App() {
   const canvasRef = useRef();
-  const soundEffectRef = useRef();
+  // const soundEffectRef = useRef();
 
   const [width, setWidth] = useState(levels.medium.width);
   const [height, setHeight] = useState(levels.medium.height);
@@ -77,6 +78,7 @@ function App() {
   const [page, setPage] = useState(0);
   const [results, setResults] = useState({});
   const [timer, setTimer] = useState(gameDuration);
+  const [popCount, setPopCount] = useState(0);
   const [tabActive, setTabActive] = useState(true);
   const [explode, setExplode] = useState(false);
 
@@ -86,7 +88,7 @@ function App() {
   const [display, setDisplay] = useState('normal');
   const [move, setMove] = useState({ x: 0, y: 0 });
 
-  const [popCount, setPopCount] = useState(0);
+  const [dpr, setDpr] = useState(0.75);
 
   const handleKeydown = ({ key }) => {
     const keys = {
@@ -207,8 +209,14 @@ function App() {
         justPopped = true;
         kernal.popped = true;
         setPopCount(popCount + 1);
-        soundEffectRef.current.src = soundEffects[Math.floor(Math.random() * soundEffects.length)];
-        soundEffectRef.current.play();
+        const player = document.createElement('audio');
+        player.src = soundEffects[Math.floor(Math.random() * soundEffects.length)];
+        player.addEventListener('load', (e) => {
+          console.log(e);
+          player.play();
+        });
+        // soundEffectRef.current.src = soundEffects[Math.floor(Math.random() * soundEffects.length)];
+        // soundEffectRef.current.play();
       }
     }
     setCurrentKernal({ x, y, justPopped, direction });
@@ -254,49 +262,52 @@ function App() {
 
   return (
     <div className="app">
-      <audio ref={soundEffectRef} />
+      {/* <audio ref={soundEffectRef} /> */}
       <Canvas
         ref={canvasRef}
         shadows={{ type: PCFSoftShadowMap }}
         camera={{ fov: 60, far: 30 }}
-        dpr={0.5}
+        dpr={dpr}
       >
-        {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
-        {/* <OrbitControls /> */}
-        <CameraShake {...camshakeConfig} />
-        <EffectComposer>
-          <Corn
-            tabActive={tabActive}
-            playing={playing}
-            animating={animating}
-            explode={explode}
-            canvasRef={canvasRef}
-            kernals={kernals}
-            currentKernal={currentKernal}
-            focusKernal={focusKernal}
-            setMove={setMove}
-            width={width}
-            height={height}
-            curvature={curvature}
-            display={display}
-          />
-          <directionalLight
-            intensity={3}
-            position={[-10, 4, 0]}
-            target-position={[0, 0, 0]}
-            castShadow
-            shadow-mapSize={256}
-            shadow-bias={0.001}
-          />
-          <Environment
-            files={envMap}
-            background
-            blur={0.4}
-          />
-          <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
-          <ChromaticAberration offset={[mobile ? 0.006 : 0.004, 0.0]} />
-          <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.02} intensity={0.2} />
-        </EffectComposer>
+        <PerformanceMonitor onIncline={() => setDpr(1)} onDecline={() => setDpr(0.5)}>
+
+          {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
+          {/* <OrbitControls /> */}
+          <CameraShake {...camshakeConfig} />
+          <EffectComposer>
+            <Corn
+              tabActive={tabActive}
+              playing={playing}
+              animating={animating}
+              explode={explode}
+              canvasRef={canvasRef}
+              kernals={kernals}
+              currentKernal={currentKernal}
+              focusKernal={focusKernal}
+              setMove={setMove}
+              width={width}
+              height={height}
+              curvature={curvature}
+              display={display}
+            />
+            <directionalLight
+              intensity={3}
+              position={[-10, 4, 0]}
+              target-position={[0, 0, 0]}
+              castShadow
+              shadow-mapSize={256}
+              shadow-bias={0.001}
+            />
+            <Environment
+              files={envMap}
+              background
+              blur={0.4}
+            />
+            <DepthOfField focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
+            {/* <ChromaticAberration offset={[mobile ? 0.006 : 0.004, 0.0]} /> */}
+            {/* <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.02} intensity={0.2} /> */}
+          </EffectComposer>
+        </PerformanceMonitor>
       </Canvas>
       <Score
         timer={timer}

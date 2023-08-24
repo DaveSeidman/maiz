@@ -99,7 +99,8 @@ html, body {
     }
 
     &.selected {
-      border: 2px solid lighten($purple1, 40);
+      background: lighten($yellow3, 20);
+      border: 2px solid lighten($purple1, 20);
     }
   }
 

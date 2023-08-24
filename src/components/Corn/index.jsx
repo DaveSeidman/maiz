@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { MeshStandardMaterial, Object3D, Vector3, Matrix4, MeshPhysicalMaterial, Color, MeshBasicMaterial, MeshNormalMaterial, SphereGeometry } from 'three';
 import { degToRad, lerp, radToDeg } from 'three/src/math/MathUtils';
 import { randomColor } from '../../config';
-import kernalModel from '../../assets/models/models.glb';
+import kernalModel from '../../assets/models/models-alt.glb';
 
 const scaleZero = new Matrix4().makeScale(0, 0, 0);
 let spin = 0;
@@ -52,6 +52,8 @@ function Corn(props) {
   const kernalMesh = gltf.scene.children.find((child) => child.name === 'Kernal');
   const baseMesh = gltf.scene.children.find((child) => child.name === 'Base');
   const huskMesh = gltf.scene.children.find((child) => child.name === 'Husk');
+  const huskMesh1 = gltf.scene.children.find((child) => child.name === 'Husk1');
+
   // console.log(huskMesh);
   const playerMesh = gltf.scene.children.find((child) => child.name === 'Arrow');
   const poppedMeshes = gltf.scene.children.filter((child) => child.name.indexOf('Popped') >= 0);
@@ -407,13 +409,11 @@ function Corn(props) {
         position={[(-width / 2) - (kernalWidth / 2), 0, -10]}
       >
         {/* <mesh
+          scale={[1, 1, 1]}
           position={[width / 2, 0, 0]}
-          scale={[7, 15, 7]}
-          rotation={[0, 0, degToRad(90)]}
-          geometry={huskMesh.geometry.clone()}
-          material={new MeshStandardMaterial({ map: huskMesh.material.map, color: 0x444444 })}
+          geometry={huskMesh1.geometry.clone()}
+          material={huskMesh1.material.clone()}
         /> */}
-
         <instancedMesh
           key="bases"
           ref={basesRef}
@@ -445,9 +445,7 @@ function Corn(props) {
             position={[0, 4, 0]}
             distace={1}
           />
-
         </mesh>
-
         <group ref={cursorContainer}>
           <mesh
             ref={cursor}
