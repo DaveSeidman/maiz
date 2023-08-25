@@ -53,7 +53,7 @@ const soundEffectPlayers = soundEffectFiles.map((file) => {
 });
 
 const mobile = Mobile();
-const local = location.hostname === 'localhost'; // false
+const local = false;
 
 const analytics = Analytics({
   app: 'website data',
@@ -154,11 +154,11 @@ function App() {
     setTimeout(() => {
       setPage(2);
       setFocusKernal({ x: endKernal.x, y: endKernal.y, offset: 2 });
-    }, local ? 20 : 2000);
+    }, local ? 20 : 3000);
     setTimeout(() => {
       setPage(3);
       setFocusKernal({});
-    }, local ? 40 : 4000);
+    }, local ? 40 : 6000);
     setTimeout(() => {
       setCurrentKernal({ x: startKernal.x, y: startKernal.y });
       setMove({ x: 0, y: 0 });
@@ -166,10 +166,10 @@ function App() {
       setInstructions(false);
       setPlaying(true);
       analytics.track('start', { difficulty });
-    }, local ? 60 : 6000);
+    }, local ? 60 : 9000);
     setTimeout(() => {
       setPage(4);
-    }, local ? 80 : 8000);
+    }, local ? 80 : 10000);
   };
 
   const continueGame = () => {
