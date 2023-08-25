@@ -5,15 +5,14 @@
 // 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
 
 // TODO: remove all !important's in CSS
-// TODO: check performance / movement on android
-// TODO: better color on buttons
 // TODO: try some textures and normal maps
 // TODO: make sound effects on explode
-// TODO: use texture for popped kernals
 // TODO: on mobile if you click fast enough you can go "through" kernals without popping them and then they are stuck
 // TODO: add husk
 // TODO: add sound effect for rotating, sliding
 // TODO: increase shake with timer
+// TODO: button cursors in general not pointers for some reason, overlay?
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, CameraShake, PerformanceMonitor } from '@react-three/drei';
