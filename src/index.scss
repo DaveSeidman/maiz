@@ -6,7 +6,9 @@ $yellow3: rgb(255, 218, 0);
 $blue: rgb(14, 176, 179);
 $dark-orange: #f56425;
 $light-orange: rgb(255 84 53);
-$gray: rgb(180, 180, 180);
+$gray: rgb(242, 242, 242);
+$gray2: rgb(228, 228, 228);
+$gray3: rgb(127, 127, 127);
 $black: rgb(10, 10, 10);
 $white: rgb(228, 255, 235);
 $teal: rgb(8 136 25 / 25%);
@@ -37,6 +39,7 @@ html, body {
   font-family: 'Corn';
   font-size: 12px;
   overscroll-behavior-x: none;
+  background: darken($purple1, 20);
 }
 
 .app {
@@ -46,10 +49,11 @@ html, body {
   h1, h2, h3, p { 
     margin: 0;
     padding: 1rem;
+    // letter-spacing: .25rem;
   }
 
   h1 {
-    letter-spacing: .5rem;
+    letter-spacing: 1rem;
     text-shadow: 1px 0px white;
   }
 
@@ -89,7 +93,6 @@ html, body {
     font-size: 1rem;
     border: 2px solid $yellow3;
     color: $purple1;
-    // text-shadow: 1px 0 $dark-orange;
     box-shadow: 0 0 5px 5px $teal;
     margin: 1rem;
     white-space: nowrap;

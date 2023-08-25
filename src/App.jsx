@@ -22,21 +22,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Environment, CameraShake, PerformanceMonitor } from '@react-three/drei';
-import { PCFSoftShadowMap, Color } from 'three';
+import { PCFSoftShadowMap } from 'three';
 import Analytics from 'analytics';
 import googleAnalytics from '@analytics/google-analytics';
-import { EffectComposer, DepthOfField, Bloom, Vignette, ChromaticAberration, Noise, SSAO, ToneMapping } from '@react-three/postprocessing';
-import { BlendFunction, RenderPass } from 'postprocessing';
+import { EffectComposer, DepthOfField, ChromaticAberration } from '@react-three/postprocessing';
 import { Joystick } from 'react-joystick-component';
 import Mobile from 'is-mobile';
-import { RWebShare } from 'react-web-share';
-import Footer from './components/Footer';
+
+import Maze from './components/Maze';
 import Corn from './components/Corn';
+
 import Instructions from './components/Instructions';
 import Results from './components/Results';
 import Score from './components/Score';
+import Share from './components/Share';
+import Footer from './components/Footer';
+
 import envMap from './assets/images/spaichingen_hill_2k.hdr';
-import Maze from './components/Maze';
 import { levels, randomColor, gameDuration } from './config';
 import pop1 from './assets/audio/pop1.mp3';
 import pop2 from './assets/audio/pop2.mp3';
@@ -54,8 +56,6 @@ const soundEffectPlayers = soundEffectFiles.map((file) => {
   return player;
 });
 
-// console.log(soundEffectPlayers);
-
 const mobile = Mobile();
 const local = location.hostname === 'localhost'; // false
 
@@ -70,8 +70,6 @@ const analytics = Analytics({
 
 function App() {
   const canvasRef = useRef();
-  // const soundEffectRef = useRef();
-  const fakeShareButton = useRef();
 
   const [width, setWidth] = useState(levels.medium.width);
   const [height, setHeight] = useState(levels.medium.height);
@@ -181,9 +179,9 @@ function App() {
   const endGame = (won) => {
     setExplode(true);
     setPlaying(false);
-    setTimeout(() => {
-      setFocusKernal({ x: width / 2, y: currentKernal.y, offset: 0 });
-    }, 1000);
+    // setTimeout(() => {
+    setFocusKernal({ x: width / 2, y: currentKernal.y, offset: 0 });
+    // }, 1000);
     setResults({ won });
     analytics.track('end', { won, difficulty: 'medium' });
   };
@@ -275,11 +273,6 @@ function App() {
     // setShakeFrequency(0.5 + percentComplete);
   }, [timer]);
 
-  useEffect(() => {
-    console.log(share, fakeShareButton.current);
-    if (share && fakeShareButton.current) fakeShareButton.current.click();
-  }, [share]);
-
   return (
     <div className="app">
       {/* <audio ref={soundEffectRef} /> */}
@@ -291,16 +284,12 @@ function App() {
       >
         <PerformanceMonitor
           onIncline={() => {
-            // setDpr(1);
             setPerformance('high');
           }}
           onDecline={() => {
-            // setDpr(0.5);
             setPerformance('low');
           }}
         >
-
-          {/* <fog attach="fog" color={new Color('rgb(128, 155, 175)')} near={10} far={display === 'normal' ? 15 : 100} /> */}
           <CameraShake
             maxYaw={0.005}
             maxPitch={0.005}
@@ -309,9 +298,7 @@ function App() {
             pitchFrequency={shakeFrequency}
             rollFrequency={shakeFrequency}
           />
-          <EffectComposer
-            enabled={performance === 'normal' || performance === 'high'}
-          >
+          <EffectComposer enabled={performance === 'normal' || performance === 'high'}>
             <Corn
               tabActive={tabActive}
               playing={playing}
@@ -342,7 +329,7 @@ function App() {
               blur={0.3}
             />
             <DepthOfField enabled={false} focusDistance={0.3} focalLength={0.25} bokehScale={4} height={256} />
-            {/* <ChromaticAberration offset={[mobile ? 0.006 : 0.004, 0.0]} /> */}
+            <ChromaticAberration offset={[0.004, 0.004]} />
             {/* <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.02} intensity={0.2} /> */}
           </EffectComposer>
         </PerformanceMonitor>
@@ -385,44 +372,10 @@ function App() {
         kernals={kernals}
         setShare={setShare}
       />
-      {/* {false && (
-        <div className="debug">
-          <button
-            type="button"
-            onClick={() => { setDisplay(display === 'normal' ? 'grid' : 'normal'); }}
-          >Display
-          </button>
-          <input
-            type="range"
-            min="6"
-            max="60"
-            step="2"
-            value={width}
-            onChange={({ target }) => { setWidth(parseInt(target.value, 10)); }}
-          />
-          <input
-            type="range"
-            min="6"
-            max="60"
-            step="2"
-            value={height}
-            onChange={
-              ({ target }) => { setHeight(parseInt(target.value, 10)); }
-            }
-          />
-          <input
-            type="range"
-            min="0"
-            max="10"
-            value={curvature}
-            onChange={
-              ({ target }) => {
-                setCurvature(target.value);
-              }
-            }
-          />
-        </div>
-      )} */}
+      <Share
+        share={share}
+        setShare={setShare}
+      />
       <div className={`joystick ${((playing || animating) && !instructions && mobile) ? '' : 'hidden'}`}>
         <Joystick
           size={100}
@@ -437,21 +390,6 @@ function App() {
           stop={() => { }}
         />
       </div>
-      {share && (
-        <RWebShare
-          data={{ text: 'test', url: 'https://maiz.uno', title: 'best corn game' }}
-          sites={['twitter', 'facebook', 'linkedin', 'reddit', 'mail', 'copy']}
-          onClick={() => {
-            setShare(false);
-            console.log('here');
-          }}
-          onClose={() => {
-            setShare(false);
-          }}
-        >
-          <button ref={fakeShareButton} />
-        </RWebShare>
-      )}
     </div>
   );
 }

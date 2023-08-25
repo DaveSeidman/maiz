@@ -1,8 +1,10 @@
 {
-  "metadata":{
-   "text":  "Hands Down the Best 🌽 3D Corn Maze 🌽 on the Internet.",
-   "url": "https://maiz.uno",
-   "title": "MAIZ 🌽"
+  "metadata": {
+    "url": "https://maiz.uno",
+    "title": "The Number One 3D Corn Maze on the Internet 🌽",
+    "body": "Hey, checkout this awesome corn game I found on the internets: https://maiz.uno 🌽",
+    "hashtags": ["threejs", "ReactJS", "webdev"],
+    "related": ["@threejs"]
   },
   "messages": {
     "instructions": {

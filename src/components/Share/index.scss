@@ -1,0 +1,136 @@
+@import '../../index';
+
+.app {
+  .share {
+    transition: background .5s;
+    background: rgba(0, 0, 0, .5);
+    pointer-events: all !important;
+    
+    &.hidden {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: none !important;
+
+      background: rgba(0, 0, 0, 0);
+
+      .share-content {
+        transform: translate(-50%, 100%) !important;
+      }
+    }
+
+    &-content {
+      transition: transform .5s !important;
+      &.modal-content {
+        width: 21rem;
+        top: unset;
+        bottom: 0;
+        margin: 0;
+        transform: translate(-50%, 0%);
+        background: $gray;
+        border: none;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        font-family: 'Helvetica', sans-serif;
+      }
+      &-title {
+        width: calc(100% + 2rem);
+        border-bottom: 1px solid rgb(0, 0, 0, .1);
+        margin-left: -1rem;
+        display: flex;
+
+        a { cursor: pointer;}
+
+        img {
+          width: 5rem;
+          height: 5rem;
+          margin: 1rem 1rem 1rem 1.5rem;
+          background: white;
+          border-radius: .5rem;
+          box-shadow: 0 0 2rem rgba(0, 0, 0, .05);
+        }
+        h2, h3 {
+          font-weight: normal;
+          color: black;
+          font-size: 1.25rem;
+          font-weight: bold;
+          letter-spacing: 0 !important;
+          text-align: left;
+          padding: 0;
+        }
+        h2 {
+          margin: 2rem 0 .5rem 0;
+        }
+        h3 {
+          font-size: 1rem;
+        }
+      }
+
+      &-platforms {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: -1rem;
+
+        &-platform {
+          & > * { cursor: pointer !important; }
+
+          button {
+            box-shadow: none;
+            background: none;
+            border: none;
+            position: relative;
+
+            svg {
+              border-radius: .5rem;
+            }
+            img {
+              width: calc(64px - 1rem);
+              height: calc(64px - 1rem);
+              background: white;
+              margin: 0;
+              top: 0;
+              left: 0;
+              border-radius: .5rem;
+              padding: .5rem;
+            }
+          }
+        }
+      }
+
+      &-clipboard {
+        position: absolute;
+        top: -4rem;
+        padding: 1rem;
+        width: 21rem;
+        border-radius: .5rem;
+        text-align: center !important;
+        background: $gray;
+        transition: visibility .5s, opacity .5s;
+        color: black;
+      }
+
+      & > * {
+        letter-spacing: 0;
+        text-align: left;
+      }
+
+      &-close {
+        cursor: pointer !important;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2rem;
+        height: 2rem;
+        box-shadow: none;
+        background: $gray2;
+        border: none;
+        color: $gray3;
+        padding: 0;
+        text-align: center;
+        font-size: 1.5rem;
+        padding-top: 0;
+        // font-weight: bold;
+        border-radius: 50%;
+      }
+    }
+  }
+}
