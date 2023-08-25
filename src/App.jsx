@@ -8,14 +8,9 @@
 // TODO: check performance / movement on android
 // TODO: better color on buttons
 // TODO: try some textures and normal maps
-// TODO: add more popped kernals in blender
 // TODO: make sound effects on explode
-// TODO: directional light shadows not working
 // TODO: use texture for popped kernals
-// TODO: add husk
 // TODO: on mobile if you click fast enough you can go "through" kernals without popping them and then they are stuck
-// TODO: EffectComposer crashes on mobile occasionally
-// TODO: move / rotation speed on android 10x too slow
 // TODO: add husk
 // TODO: add sound effect for rotating, sliding
 // TODO: increase shake with timer
@@ -28,6 +23,8 @@ import googleAnalytics from '@analytics/google-analytics';
 import { EffectComposer, DepthOfField, ChromaticAberration } from '@react-three/postprocessing';
 import { Joystick } from 'react-joystick-component';
 import Mobile from 'is-mobile';
+
+import { metadata } from './assets/content.json';
 
 import Maze from './components/Maze';
 import Corn from './components/Corn';
@@ -87,6 +84,11 @@ function App() {
   const [explode, setExplode] = useState(false);
   const [shakeFrequency, setShakeFrequency] = useState(0.5);
   const [share, setShare] = useState(false);
+
+  const setShareHandler = (value) => {
+    if (mobile) navigator.share({ url: metadata.url, text: metadata.text, title: metadata.title });
+    else setShare(value);
+  };
 
   const [kernals, setKernals] = useState([]);
   const [currentKernal, setCurrentKernal] = useState({ x: 0, y: 0, justPopped: false });
@@ -256,7 +258,8 @@ function App() {
     let interval;
     if (playing && timer > 0) {
       interval = setInterval(() => {
-        setTimer((prevTime) => prevTime - 1);
+        console.log(share);
+        if (!share) setTimer((prevTime) => prevTime - 1);
       }, 1000);
     } else if (timer === 0) {
       clearInterval(interval);
@@ -266,7 +269,7 @@ function App() {
     return () => {
       clearInterval(interval);
     };
-  }, [playing, timer]);
+  }, [playing, timer, share]);
 
   useEffect(() => {
     const percentComplete = (gameDuration - timer) / gameDuration;
@@ -350,7 +353,7 @@ function App() {
       >
         ?
       </button>
-      <Footer setShare={setShare} />
+      <Footer setShareHandler={setShareHandler} />
       <Instructions
         instructions={instructions}
         setInstructions={setInstructions}
@@ -370,11 +373,11 @@ function App() {
         popCount={popCount}
         timer={timer}
         kernals={kernals}
-        setShare={setShare}
+        setShareHandler={setShareHandler}
       />
       <Share
         share={share}
-        setShare={setShare}
+        setShareHandler={setShareHandler}
       />
       <div className={`joystick ${((playing || animating) && !instructions && mobile) ? '' : 'hidden'}`}>
         <Joystick

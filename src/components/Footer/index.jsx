@@ -1,11 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import shareIcon from '../../assets/images/share.svg';
-import { metadata } from '../../assets/content.json';
 import './index.scss';
 
 function Footer(props) {
-  const { title, text, url } = metadata;
-  const { setShare } = props;
+  const { setShareHandler } = props;
 
   return (
     <div className="footer">
@@ -23,7 +22,7 @@ function Footer(props) {
       <div className="right">
         <button
           type="button"
-          onClick={() => { setShare(true); }}
+          onClick={() => { setShareHandler(true); }}
         >
           Share
           <img
@@ -38,3 +37,11 @@ function Footer(props) {
 }
 
 export default Footer;
+
+Footer.propTypes = {
+  setShareHandler: PropTypes.func,
+};
+
+Footer.defaultProps = {
+  setShareHandler: () => { },
+};

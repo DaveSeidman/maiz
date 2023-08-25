@@ -1,50 +1,44 @@
 @import '../../index';
 
-.footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: baseline;
+.app {
+  .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
 
-  p, a {
-    font-size: .75rem;
-    color: white;
-    text-decoration: none;
-    padding: 1rem;
-  }
+    p, a {
+      font-size: .75rem;
+      color: white;
+      text-decoration: none;
+      padding: 1rem;
+    }
 
-  a {
-    text-shadow: .75px 0 white;
-    letter-spacing: 1.5px;;
-    white-space: nowrap;
-    padding-left: 0.5rem;
-  }
+    a {
+      text-shadow: .75px 0 white;
+      letter-spacing: 1.5px;;
+      white-space: nowrap;
+      padding-left: 0.5rem;
+    }
 
-  button {
-    background: none !important;
-    color: white !important;
-    position: relative;
-    padding-right: 2.5rem !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-size: .75rem !important;
-    img {
-      height: 2rem;
-      position: absolute;
-      right: 0;
-      top: -.125rem;
+    button {
+      background: none;
+      color: white;
+      position: relative;
+      padding-right: 2.5rem;
+      border: none;
+      box-shadow: none;
+      font-size: .75rem;
+      img {
+        height: 2rem;
+        position: absolute;
+        right: 0;
+        top: -.125rem;
+        background: none;
+      }
     }
   }
-}
-
-.rws-container {
-  width: 360px;
-
-  .rws-icons {
-    grid-template-columns:repeat(3,1fr)
-  }
-
 }

@@ -14,7 +14,7 @@ import { metadata } from '../../assets/content.json';
 import './index.scss';
 
 function Share(props) {
-  const { share, setShare } = props;
+  const { share, setShareHandler } = props;
   const clipboardMessage = useRef();
 
   const copyToClipboard = () => {
@@ -59,7 +59,7 @@ function Share(props) {
     <div
       className={`share modal ${share ? '' : 'hidden'}`}
       onClick={({ target }) => {
-        if (target.classList.contains('share')) setShare(false);
+        if (target.classList.contains('share')) setShareHandler(false);
       }}
     >
       <div className="share-content modal-content">
@@ -89,7 +89,7 @@ function Share(props) {
         <button
           className="share-content-close"
           type="button"
-          onClick={() => { setShare(false); }}
+          onClick={() => { setShareHandler(false); }}
         >
           ×
         </button>
@@ -102,10 +102,10 @@ export default Share;
 
 Share.propTypes = {
   share: PropTypes.bool,
-  setShare: PropTypes.func,
+  setShareHandler: PropTypes.func,
 };
 
 Share.defaultProps = {
   share: false,
-  setShare: () => { },
+  setShareHandler: () => { },
 };
