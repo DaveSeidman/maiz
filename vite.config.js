@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  base: '/maiz/',
   plugins: [react()],
   assetsInclude: ['**/*.jpg', '**/*.png', '**/*.glb', '**/*.gltf', '**/*.hdr'],
   server: {

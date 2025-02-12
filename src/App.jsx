@@ -1,9 +1,3 @@
-// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
-// 🟨🟫🟫🟫🟨🟫🟫🟫🟨🟤🟨🟫🟫🟫🟨
-// 🟨🟫🟤🟫🟨🟫🟡🟫🟨🟫🟨🟨🟤🟨🟨
-// 🟨🟫🟨🟫🟨🟫🟨🟫🟨🟫🟨🟫🟫🟫🟨
-// 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
-
 // TODO: remove all !important's in CSS
 // TODO: try some textures and normal maps
 // TODO: make sound effects on explode
